@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mastr-export"
+version = "0.0.1"
+authors = [{ name = "Leonhard Markert" }]
+description = "Convert the Marktstammdatenregister export to a collection of DataFrames"
+license = { file = "LICENSE" }
+readme = "README.md"
+# TODO: Add classifiers
+# classifiers = []
+requires-python = ">=3.8"
+
+[project.urls]
+Homepage = "https://github.com/marktstammdatenregister-dev/mastr-export"
+Issues = "https://github.com/marktstammdatenregister-dev/mastr-export/issues"
