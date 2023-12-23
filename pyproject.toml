@@ -12,6 +12,7 @@ readme = "README.md"
 # TODO: Add classifiers
 # classifiers = []
 requires-python = ">=3.8"
+dependencies = ["polars", "PyYAML", "tqdm"]
 
 [project.urls]
 Homepage = "https://github.com/marktstammdatenregister-dev/mastr-export"
