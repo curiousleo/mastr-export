@@ -1,0 +1,28 @@
+root: AnlagenEegGeothermieGrubengasDruckentspannung
+element: AnlageEegGeothermieGrubengasDruckentspannung # docs say AnlagenEegGeothermieGrubengasDruckentspannung
+primary: EegMaStRNummer
+without_rowid: true
+fields:
+  - name: Registrierungsdatum
+    #index: true
+    xsd: date
+  - name: DatumLetzteAktualisierung
+    xsd: dateTime
+  - name: EegInbetriebnahmedatum
+    #index: true
+    xsd: date
+  - name: EegMaStRNummer
+  - name: AnlagenschluesselEeg
+  - name: AnlagenkennzifferAnlagenregister
+  - name: AnlagenkennzifferAnlagenregister_nv
+    xsd: boolean
+  - name: InstallierteLeistung
+    #index: true
+    xsd: decimal
+  - name: AnlageBetriebsstatus
+    #index: true
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: VerknuepfteEinheitenMaStRNummern

@@ -1,0 +1,55 @@
+root: AnlagenEegBiomasse
+element: AnlageEegBiomasse
+primary: EegMaStRNummer
+fields:
+  - name: Registrierungsdatum
+    index: true
+    xsd: date
+  - name: DatumLetzteAktualisierung
+    xsd: dateTime
+  - name: EegInbetriebnahmedatum
+    index: true
+    xsd: date
+  - name: EegMaStRNummer
+  - name: AnlagenschluesselEeg
+  - name: AnlagenkennzifferAnlagenregister
+  - name: AnlagenkennzifferAnlagenregister_nv
+    xsd: boolean
+  - name: InstallierteLeistung
+    index: true
+    xsd: decimal
+  - name: AusschliesslicheVerwendungBiomasse
+    xsd: boolean
+  - name: AusschreibungZuschlag
+    xsd: boolean
+  - name: ZugeordneteGebotsmenge
+    xsd: decimal
+  - name: Zuschlagsnummer
+  - name: BiogasInanspruchnahmeFlexiPraemie
+    xsd: boolean
+  - name: BiogasDatumInanspruchnahmeFlexiPraemie
+    xsd: date
+  - name: BiogasLeistungserhoehung
+    xsd: boolean
+  - name: BiogasDatumLeistungserhoehung
+    xsd: date
+  - name: BiogasUmfangLeistungserhoehung
+    xsd: decimal
+  - name: BiogasGaserzeugungskapazitaet
+    xsd: decimal
+  - name: BiogasGaserzeugungskapazitaet_nv
+    xsd: boolean
+  - name: BiogasHoechstbemessungsleistung
+    xsd: decimal
+  - name: BiomethanErstmaligerEinsatz
+    xsd: date
+  - name: BiomethanErstmaligerEinsatz_nv
+    xsd: boolean
+  - name: AnlageBetriebsstatus
+    index: true
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: VerknuepfteEinheitenMaStRNummern
+  - name: Zuschlagsnummer

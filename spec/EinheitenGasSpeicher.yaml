@@ -1,0 +1,98 @@
+root: EinheitenGasSpeicher # docs say Eineiten
+element: EinheitGasSpeicher # docs say Eineit
+primary: EinheitMastrNummer
+fields:
+  - name: EinheitMastrNummer
+  - name: DatumLetzteAktualisierung
+    xsd: dateTime
+  - name: LokationMaStRNummer
+    references:
+      table: Lokation
+      column: MastrNummer
+  - name: NetzbetreiberpruefungStatus
+    xsd: nonNegativeInteger
+  - name: NetzbetreiberpruefungDatum
+    xsd: date
+  - name: AnlagenbetreiberMastrNummer
+    references:
+      table: Marktakteur
+      column: MastrNummer
+  - name: Land
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: Bundesland
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: Landkreis
+  - name: Gemeinde
+  - name: Gemeindeschluessel
+  - name: Postleitzahl
+  - name: Gemarkung
+  - name: FlurFlurstuecknummern
+  - name: Strasse
+  - name: StrasseNichtGefunden
+    xsd: boolean
+  - name: Hausnummer
+  - name: Hausnummer_nv
+    xsd: boolean
+  - name: HausnummerNichtGefunden
+    xsd: boolean
+  - name: Adresszusatz
+  - name: Ort
+  - name: Laengengrad
+    xsd: decimal
+  - name: Breitengrad
+    xsd: decimal
+  - name: Registrierungsdatum
+  - name: GeplantesInbetriebnahmedatum
+  - name: Inbetriebnahmedatum
+  - name: DatumEndgueltigeStilllegung
+  - name: DatumBeginnVoruebergehendeStilllegung
+  - name: DatumWiederaufnahmeBetrieb
+  - name: EinheitSystemstatus
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: EinheitBetriebsstatus
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: BestandsanlageMastrNummer
+  - name: NichtVorhandenInMigriertenEinheiten
+    xsd: boolean
+  - name: AltAnlagenbentreiberMastrNummer
+  - name: DatumDesBetreiberwechsels
+    xsd: date
+  - name: DatumRegistrierungDesBetreiberwechsels
+    xsd: date
+  - name: NameGasspeicher
+  - name: Speicherart
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: MaximalNutzbaresArbeitsgasvolumen
+    xsd: decimal
+  - name: MaximaleEinspeicherleistung
+    xsd: decimal
+  - name: MaximaleAusspeicherleistung
+    xsd: decimal
+  - name: DurchschnittlicherBrennwert
+    xsd: decimal
+  - name: Weic
+  - name: Weic_Na # docs say Weic
+    xsd: boolean
+  - name: GenMastrNummer
+    references:
+      table: EinheitGenehmigung
+      column: GenMastrNummer
+  - name: SpeicherMaStRNummer
+    references:
+      table: AnlageGasSpeicher
+      column: MaStRNummer

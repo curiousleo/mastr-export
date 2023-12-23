@@ -1,0 +1,12 @@
+root: Lokationen
+element: Lokation
+primary: MastrNummer
+without_rowid: true
+fields:
+  - name: DatumLetzteAktualisierung
+    xsd: dateTime
+  - name: MastrNummer
+  - name: NameDerTechnischenLokation
+  - name: Lokationtyp
+  - name: VerknuepfteEinheitenMaStRNummern
+  - name: NetzanschlusspunkteMaStRNummern

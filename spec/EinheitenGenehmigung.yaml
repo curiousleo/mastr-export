@@ -1,0 +1,29 @@
+root: EinheitenGenehmigung # docs say Eineiten
+element: EinheitGenehmigung # docs say Eineit
+primary: GenMastrNummer
+fields:
+  - name: GenMastrNummer
+  - name: DatumLetzteAktualisierung
+    xsd: dateTime
+  - name: Art
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: Datum
+    index: true
+    xsd: date
+  - name: Behoerde
+  - name: Aktenzeichen
+  - name: Frist
+    xsd: date
+  - name: Frist_nv
+    xsd: boolean
+  - name: WasserrechtsNummer
+  - name: WasserrechtAblaufdatum
+    xsd: date
+  - name: WasserrechtAblaufdatum_nv
+    xsd: boolean
+  - name: Registrierungsdatum
+    xsd: date
+  - name: VerknuepfteEinheitenMaStRNummern

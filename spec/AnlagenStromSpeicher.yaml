@@ -1,0 +1,20 @@
+root: AnlagenStromSpeicher
+element: AnlageStromSpeicher
+primary: MaStRNummer
+fields:
+  - name: MaStRNummer
+  - name: DatumLetzteAktualisierung
+    xsd: dateTime
+  - name: Registrierungsdatum
+    index: true
+    xsd: date
+  - name: NutzbareSpeicherkapazitaet
+    index: true
+    xsd: decimal
+  - name: VerknuepfteEinheitenMaStRNummern
+  - name: AnlageBetriebsstatus
+    index: true
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id

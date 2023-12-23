@@ -1,0 +1,46 @@
+root: AnlagenEegSolar
+element: AnlageEegSolar
+primary: EegMaStRNummer
+fields:
+  - name: Registrierungsdatum
+    index: true
+    xsd: date
+  - name: DatumLetzteAktualisierung
+    xsd: dateTime
+  - name: EegInbetriebnahmedatum
+    index: true
+    xsd: date
+  - name: EegMaStRNummer
+  - name: InanspruchnahmeZahlungNachEeg
+    xsd: boolean
+  - name: AnlagenschluesselEeg
+  - name: AnlagenkennzifferAnlagenregister
+  - name: AnlagenkennzifferAnlagenregister_nv
+    xsd: boolean
+  - name: InstallierteLeistung
+    index: true
+    xsd: decimal
+  - name: RegistrierungsnummerPvMeldeportal
+  - name: RegistrierungsnummerPvMeldeportal_nv
+    xsd: boolean
+  - name: MieterstromZugeordnet
+    xsd: boolean
+  - name: MieterstromRegistrierungsdatum
+    xsd: date
+  - name: MieterstromMeldedatum # Not mentioned in the documentation
+    xsd: date
+  - name: MieterstromErsteZuordnungZuschlag
+    xsd: date
+  - name: AusschreibungZuschlag
+    xsd: boolean
+  - name: ZugeordneteGebotsmenge
+    xsd: decimal
+  - name: Zuschlagsnummer
+  - name: AnlageBetriebsstatus
+    index: true
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: VerknuepfteEinheitenMaStRNummern
+  - name: Zuschlagsnummer

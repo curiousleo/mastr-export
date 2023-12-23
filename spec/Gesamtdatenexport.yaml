@@ -1,0 +1,37 @@
+# The order is significant! Later items may reference earlier items.
+- Katalogkategorien.yaml
+- Katalogwerte.yaml
+- Bilanzierungsgebiete.yaml
+- Ertuechtigungen.yaml
+- GeloeschteUndDeaktivierteEinheiten.yaml
+- Lokationen.yaml
+- Marktakteure.yaml
+- Marktrollen.yaml
+- Netzanschlusspunkte.yaml
+- Netze.yaml
+
+- AnlagenStromSpeicher.yaml
+- AnlagenGasSpeicher.yaml
+- AnlagenEegWind.yaml
+- AnlagenEegSolar.yaml
+- AnlagenEegBiomasse.yaml
+- AnlagenEegWasser.yaml
+- AnlagenEegSpeicher.yaml
+- AnlagenEegGeothermieGrubengasDruckentspannung.yaml
+- AnlagenKwk.yaml
+
+- Einheitentypen.yaml
+
+- EinheitenGenehmigung.yaml
+- EinheitenWind.yaml
+- EinheitenSolar.yaml
+- EinheitenBiomasse.yaml
+- EinheitenWasser.yaml
+- EinheitenGeothermieGrubengasDruckentspannung.yaml
+- EinheitenVerbrennung.yaml
+- EinheitenKernkraft.yaml
+- EinheitenStromSpeicher.yaml
+- EinheitenStromVerbraucher.yaml
+- EinheitenGasErzeuger.yaml
+- EinheitenGasSpeicher.yaml
+- EinheitenGasverbraucher.yaml

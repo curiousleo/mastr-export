@@ -1,0 +1,168 @@
+root: EinheitenStromSpeicher
+element: EinheitStromSpeicher
+primary: EinheitMastrNummer
+fields:
+  - name: EinheitMastrNummer
+  - name: DatumLetzteAktualisierung
+    xsd: dateTime
+  - name: LokationMaStRNummer
+    references:
+      table: Lokation
+      column: MastrNummer
+  - name: NetzbetreiberpruefungStatus
+    xsd: nonNegativeInteger
+  - name: NetzbetreiberpruefungDatum
+    xsd: date
+  - name: AnlagenbetreiberMastrNummer
+    references:
+      table: Marktakteur
+      column: MastrNummer
+  - name: Land
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: Bundesland
+    index: true
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: Landkreis
+  - name: Gemeinde
+  - name: Gemeindeschluessel
+  - name: Postleitzahl
+    index: true
+  - name: Gemarkung
+  - name: FlurFlurstuecknummern
+  - name: Strasse
+  - name: StrasseNichtGefunden
+    xsd: boolean
+  - name: Hausnummer
+  - name: Hausnummer_nv
+    xsd: boolean
+  - name: HausnummerNichtGefunden
+    xsd: boolean
+  - name: Adresszusatz
+  - name: Ort
+    index: true
+  - name: Laengengrad
+    xsd: decimal
+  - name: Breitengrad
+    xsd: decimal
+  - name: Registrierungsdatum
+  - name: GeplantesInbetriebnahmedatum
+  - name: Inbetriebnahmedatum
+    index: true
+  - name: DatumEndgueltigeStilllegung
+  - name: DatumBeginnVoruebergehendeStilllegung
+  - name: DatumWiederaufnahmeBetrieb
+  - name: EinheitSystemstatus
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: EinheitBetriebsstatus
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: BestandsanlageMastrNummer
+  - name: NichtVorhandenInMigriertenEinheiten
+    xsd: boolean
+  - name: AltAnlagenbentreiberMastrNummer
+  - name: DatumDesBetreiberwechsels
+    xsd: date
+  - name: DatumRegistrierungDesBetreiberwechsels
+    xsd: date
+  - name: NameStromerzeugungseinheit
+  - name: Weic
+  - name: Weic_nv
+    xsd: boolean
+  - name: WeicDisplayName
+  - name: Kraftwerksnummer
+  - name: Kraftwerksnummer_nv
+    xsd: boolean
+  - name: Energietraeger
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: Bruttoleistung
+    index: true
+    xsd: decimal
+  - name: Nettonennleistung
+    #index: true
+    xsd: decimal
+  - name: AnschlussAnHoechstOderHochSpannung
+    xsd: boolean
+  - name: Schwarzstartfaehigkeit
+    xsd: boolean
+  - name: Inselbetriebsfaehigkeit
+    xsd: boolean
+  - name: Einsatzverantwortlicher
+  - name: FernsteuerbarkeitNb
+    xsd: boolean
+  - name: FernsteuerbarkeitDv
+    xsd: boolean
+  - name: FernsteuerbarkeitDr
+    xsd: boolean
+  - name: Einspeisungsart
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: PraequalifiziertFuerRegelenergie
+    xsd: boolean
+  - name: GenMastrNummer
+    references:
+      table: EinheitGenehmigung
+      column: GenMastrNummer
+  - name: Einsatzort
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: AcDcKoppelung
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: Batterietechnologie
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: PumpbetriebLeistungsaufnahme
+    xsd: decimal
+  - name: PumpbetriebKontinuierlichRegelbar
+    xsd: boolean
+  - name: Pumpspeichertechnologie
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: Notstromaggregat
+    xsd: boolean
+  - name: BestandteilGrenzkraftwerk
+    xsd: boolean
+  - name: NettonennleistungDeutschland
+    xsd: decimal
+  - name: ZugeordnenteWirkleistungWechselrichter
+    xsd: decimal
+  - name: SpeMastrNummer
+    index: true
+    references:
+      table: AnlageStromSpeicher
+      column: MaStRNummer
+  - name: EegMaStRNummer
+  - name: EegAnlagentyp
+    xsd: nonNegativeInteger
+    references:
+      table: Einheitentyp
+      column: Id
+  - name: Technologie
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
