@@ -19,7 +19,6 @@ passed:
 ```
 $ python -m mastr-export extract \
     --export Gesamtdatenexport.zip \
-    --spec spec/Gesamtdatenexport.yaml \
     --parquet-dir out/parquet \
     --csv-dir out/csv
 ```
