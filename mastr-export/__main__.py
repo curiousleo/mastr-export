@@ -2,7 +2,10 @@ from .download import get_latest_url
 from .spec import Specs
 from .parser import Parser
 
+from . import spec_data
+
 import argparse
+import importlib.resources
 import os.path
 import polars as pl
 from tqdm.auto import tqdm
@@ -20,8 +23,9 @@ def cli():
     extract = subparsers.add_parser("extract")
     extract.add_argument(
         "--spec",
-        required=True,
+        required=False,
         help="path to the YAML file containing the list of specs",
+        default=(importlib.resources.files(spec_data) / "Gesamtdatenexport.yaml")
     )
     extract.add_argument(
         "--export",
