@@ -1,3 +1,4 @@
+from .download import get_latest_url
 from .spec import Specs
 from .parser import Parser
 
@@ -11,42 +12,52 @@ import zipfile
 
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
+    subparsers = parser.add_subparsers(required=True)
+
+    get_export_url = subparsers.add_parser("get-export-url")
+    get_export_url.set_defaults(func=lambda _args: print(get_latest_url()))
+
+    extract = subparsers.add_parser("extract")
+    extract.add_argument(
         "--spec",
         required=True,
         help="Path to the YAML file containing the list of specs",
     )
-    parser.add_argument(
+    extract.add_argument(
         "--export",
         required=True,
         help="Path to the Marktstammdatenregister export ZIP file",
     )
-    parser.add_argument(
+    extract.add_argument(
         "--parquet-dir",
         help="Where to write Parquet files (and DuckDB SQL file to load them)",
     )
-    parser.add_argument(
+    extract.add_argument(
         "--csv-dir", help="Where to write CSV files (and SQLite file to load them)"
     )
-    parser.add_argument(
+    extract.add_argument(
         "--show-per-file-progress",
         default=False,
         action="store_true",
         help="Show a progress bar for each individual file?",
     )
-    args = parser.parse_args()
-    if args.parquet_dir is None and args.csv_dir is None:
-        raise Exception("You must pass at least one of --parquet-dir or --csv-dir")
-    run(
-        args.spec,
-        args.export,
-        args.parquet_dir,
-        args.csv_dir,
-        args.show_per_file_progress,
+    extract.set_defaults(
+        func=lambda args: run(
+            args.spec,
+            args.export,
+            args.parquet_dir,
+            args.csv_dir,
+            args.show_per_file_progress,
+        )
     )
+
+    args = parser.parse_args()
+    args.func(args)
 
 
 def run(spec, export, parquet_dir, csv_dir, show_per_file_progress):
+    if parquet_dir is None and csv_dir is None:
+        raise Exception("You must pass at least one of --parquet-dir or --csv-dir")
     for dir in [dir for dir in [parquet_dir, csv_dir] if dir is not None]:
         os.makedirs(dir, exist_ok=True)
 

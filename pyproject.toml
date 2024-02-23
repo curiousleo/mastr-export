@@ -12,8 +12,11 @@ readme = "README.md"
 # TODO: Add classifiers
 # classifiers = []
 requires-python = ">=3.8"
-dependencies = ["polars", "PyYAML", "tqdm"]
+dependencies = ["certifi", "polars", "PyYAML", "tqdm"]
 
 [project.urls]
 Homepage = "https://github.com/marktstammdatenregister-dev/mastr-export"
 Issues = "https://github.com/marktstammdatenregister-dev/mastr-export/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mastr-export/"]
