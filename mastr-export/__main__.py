@@ -17,19 +17,13 @@ def cli():
     parser = argparse.ArgumentParser(prog="mastr-export")
     subparsers = parser.add_subparsers(required=True)
 
-    get_export_url = subparsers.add_parser("get-export-url")
+    get_export_url = subparsers.add_parser("print-export-url")
     get_export_url.set_defaults(func=lambda _args: print(get_latest_url()))
 
     extract = subparsers.add_parser("extract")
     extract.add_argument(
-        "--spec",
-        required=False,
-        help="path to the YAML file containing the list of specs",
-        default=(importlib.resources.files(spec_data) / "Gesamtdatenexport.yaml")
-    )
-    extract.add_argument(
-        "--export",
-        required=True,
+        "export_file",
+        nargs=1,
         help="path to the Marktstammdatenregister export ZIP file",
     )
     extract.add_argument(
@@ -40,18 +34,30 @@ def cli():
         "--csv-dir", help="where to write CSV files (and SQLite file to load them)"
     )
     extract.add_argument(
+        "--spec",
+        default=(importlib.resources.files(spec_data) / "Gesamtdatenexport.yaml"),
+        help="path to the YAML file containing the list of specs",
+    )
+    extract.add_argument(
         "--show-per-file-progress",
         default=False,
         action="store_true",
         help="show a progress bar for each individual file?",
     )
+    extract.add_argument(
+        "--sqlite-create-indices",
+        default=False,
+        action="store_true",
+        help="include 'create index' commands in the SQLite import script",
+    )
     extract.set_defaults(
         func=lambda args: run(
             args.spec,
-            args.export,
+            args.export_file[0],
             args.parquet_dir,
             args.csv_dir,
             args.show_per_file_progress,
+            args.sqlite_create_indices
         )
     )
 
@@ -59,7 +65,7 @@ def cli():
     args.func(args)
 
 
-def run(spec, export, parquet_dir, csv_dir, show_per_file_progress):
+def run(spec, export, parquet_dir, csv_dir, show_per_file_progress, sqlite_create_indices):
     if parquet_dir is None and csv_dir is None:
         raise Exception("You must pass at least one of --parquet-dir or --csv-dir")
     for dir in [dir for dir in [parquet_dir, csv_dir] if dir is not None]:
@@ -113,10 +119,14 @@ def run(spec, export, parquet_dir, csv_dir, show_per_file_progress):
                 df.write_csv(os.path.join(csv_dir, i.filename.replace(".xml", ".csv")))
 
     # Output SQL to import Parquet and CSV
-    sqlite_load_name = os.path.join(csv_dir, "sqlite.sql")
-    sqlite_load = open(sqlite_load_name, "w") if csv_dir is not None else None
-    duckdb_load_name = os.path.join(parquet_dir, "duckdb.sql")
-    duckdb_load = open(duckdb_load_name, "w") if parquet_dir is not None else None
+    sqlite_load_name, sqlite_load, duckdb_load_name, duckdb_load = None, None, None, None
+    if csv_dir is not None:
+        sqlite_load_name = os.path.join(csv_dir, "sqlite.sql")
+        sqlite_load = open(sqlite_load_name, "w")
+
+    if parquet_dir is not None:
+        duckdb_load_name = os.path.join(parquet_dir, "duckdb.sql")
+        duckdb_load = open(duckdb_load_name, "w")
 
     if sqlite_load is not None:
         sqlite_load.write(
@@ -148,6 +158,8 @@ pragma page_size=16384;
             sqlite_load.writelines(
                 f""".import "{f}" "{d.element}" --csv --skip 1\n""" for f in csv_files
             )
+            if sqlite_create_indices:
+                sqlite_load.write(d.sqlite_indices())
             sqlite_load.write("\n\n")
 
     if duckdb_load is not None:

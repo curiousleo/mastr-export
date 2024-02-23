@@ -10,7 +10,7 @@ First, download the latest export file. Using a download accelerator like
 `curl` or `wget` instead of `axel` will work too:
 
 ```
-$ axel --output=Gesamtdatenexport.zip "$(python -m mastr-export get-download-url)"
+$ axel --output=Gesamtdatenexport.zip "$(python -m mastr-export print-export-url)"
 ```
 
 Then, extract the export. At least one of `--parquet-dir` or `csv-dir` must be

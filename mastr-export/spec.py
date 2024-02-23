@@ -76,6 +76,9 @@ class Field:
         )
         return f""""{self.name}" {XSD_TO_SQLITE[self.xsd]}{references}"""
 
+    def sqlite_index(self, element):
+        return f"""create index if not exists idx_{element}_{self.name} on "{element}"("{self.name}");"""
+
     def duckdb_schema(self):
         return f""""{self.name}" {XSD_TO_DUCKDB[self.xsd]}"""
 
@@ -104,6 +107,13 @@ class Spec:
     primary key ("{self.primary}")
 ) {" without rowid" if self.without_rowid else ""};
 """
+
+    def sqlite_indices(self):
+        return "\n".join(
+            field.sqlite_index(self.element)
+            for field in self.fields.values()
+            if field.index
+        )
 
     def duckdb_schema(self):
         columns = ",\n    ".join(
