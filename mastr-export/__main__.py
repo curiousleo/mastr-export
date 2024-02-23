@@ -57,7 +57,7 @@ def cli():
             args.parquet_dir,
             args.csv_dir,
             args.show_per_file_progress,
-            args.sqlite_create_indices
+            args.sqlite_create_indices,
         )
     )
 
@@ -65,7 +65,9 @@ def cli():
     args.func(args)
 
 
-def run(spec, export, parquet_dir, csv_dir, show_per_file_progress, sqlite_create_indices):
+def run(
+    spec, export, parquet_dir, csv_dir, show_per_file_progress, sqlite_create_indices
+):
     if parquet_dir is None and csv_dir is None:
         raise Exception("You must pass at least one of --parquet-dir or --csv-dir")
     for dir in [dir for dir in [parquet_dir, csv_dir] if dir is not None]:
@@ -119,7 +121,12 @@ def run(spec, export, parquet_dir, csv_dir, show_per_file_progress, sqlite_creat
                 df.write_csv(os.path.join(csv_dir, i.filename.replace(".xml", ".csv")))
 
     # Output SQL to import Parquet and CSV
-    sqlite_load_name, sqlite_load, duckdb_load_name, duckdb_load = None, None, None, None
+    sqlite_load_name, sqlite_load, duckdb_load_name, duckdb_load = (
+        None,
+        None,
+        None,
+        None,
+    )
     if csv_dir is not None:
         sqlite_load_name = os.path.join(csv_dir, "sqlite.sql")
         sqlite_load = open(sqlite_load_name, "w")
@@ -171,22 +178,20 @@ pragma page_size=16384;
 
     if duckdb_load is not None:
         print(
-            f"""
-Parquet export finished. You can import the Parquet files into a DuckDB file
+            f"""Parquet export finished. You can import the Parquet files into a DuckDB file
 called 'bnetza.duckdb' with the following command:
 
 $ cd '{parquet_dir}'; duckdb 'bnetza.duckdb' -init '{duckdb_load_name}' -bail -batch -echo -no-stdin
-""".strip()
+"""
         )
 
     if sqlite_load is not None:
         print(
-            f"""
-CSV export finished. You can import the CSV files into a SQLite file called
+            f"""CSV export finished. You can import the CSV files into a SQLite file called
 'bnetza.sqlite3' with the following command:
 
 $ cd '{csv_dir}'; sqlite3 -init '{sqlite_load_name}' -echo 'bnetza.sqlite3'
-""".strip()
+"""
         )
 
 
