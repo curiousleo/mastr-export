@@ -11,7 +11,7 @@ import zipfile
 
 
 def cli():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog="mastr-export")
     subparsers = parser.add_subparsers(required=True)
 
     get_export_url = subparsers.add_parser("get-export-url")
@@ -21,25 +21,25 @@ def cli():
     extract.add_argument(
         "--spec",
         required=True,
-        help="Path to the YAML file containing the list of specs",
+        help="path to the YAML file containing the list of specs",
     )
     extract.add_argument(
         "--export",
         required=True,
-        help="Path to the Marktstammdatenregister export ZIP file",
+        help="path to the Marktstammdatenregister export ZIP file",
     )
     extract.add_argument(
         "--parquet-dir",
-        help="Where to write Parquet files (and DuckDB SQL file to load them)",
+        help="where to write Parquet files (and DuckDB SQL file to load them)",
     )
     extract.add_argument(
-        "--csv-dir", help="Where to write CSV files (and SQLite file to load them)"
+        "--csv-dir", help="where to write CSV files (and SQLite file to load them)"
     )
     extract.add_argument(
         "--show-per-file-progress",
         default=False,
         action="store_true",
-        help="Show a progress bar for each individual file?",
+        help="show a progress bar for each individual file?",
     )
     extract.set_defaults(
         func=lambda args: run(
@@ -155,20 +155,22 @@ pragma page_size=16384;
 
     if duckdb_load is not None:
         print(
-            f"""Parquet export finished. You can import the Parquet files into a DuckDB file
+            f"""
+Parquet export finished. You can import the Parquet files into a DuckDB file
 called 'bnetza.duckdb' with the following command:
 
-$ cd '{csv_dir}'; duckdb 'bnetza.duckdb' -init '{duckdb_load_name}' -bail -batch -echo -no-stdin
-"""
+$ cd '{parquet_dir}'; duckdb 'bnetza.duckdb' -init '{duckdb_load_name}' -bail -batch -echo -no-stdin
+""".strip()
         )
 
     if sqlite_load is not None:
         print(
-            f"""CSV export finished. You can import the CSV files into a SQLite file
-called 'bnetza.sqlite3' with the following command:
+            f"""
+CSV export finished. You can import the CSV files into a SQLite file called
+'bnetza.sqlite3' with the following command:
 
-$ cd '{parquet_dir}'; sqlite3 -init '{duckdb_load_name}' -echo 'bnetza.sqlite3'
-"""
+$ cd '{csv_dir}'; sqlite3 -init '{sqlite_load_name}' -echo 'bnetza.sqlite3'
+""".strip()
         )
 
 
