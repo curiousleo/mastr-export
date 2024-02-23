@@ -28,15 +28,19 @@ Optionally, you can now package the data up in databases: the Parquet files can
 be assembled into a DuckDB database file, and the CSV files into a SQLite
 database file.
 
-The `extract` command will output the appropriate instructions, which in this
-case would be:
+The `extract` command will output the appropriate instructions. If you passed
+`--parquet-dir`, you'll get:
 
 ```
 Parquet export finished. You can import the Parquet files into a DuckDB file
 called 'bnetza.duckdb' with the following command:
 
 $ cd 'out/parquet'; duckdb 'bnetza.duckdb' -init 'duckdb.sql' -bail -batch -echo -no-stdin
+```
 
+... and if you passed `--csv-dir`, it will print:
+
+```
 CSV export finished. You can import the CSV files into a SQLite file
 called 'bnetza.sqlite3' with the following command:
 
