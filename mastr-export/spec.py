@@ -71,7 +71,8 @@ class Field:
         try:
             return self.python_type(s) if s is not None else None
         except Exception as e:
-            print(self)
+            print(self.name)
+            print(self.xsd)
             raise e
 
 
