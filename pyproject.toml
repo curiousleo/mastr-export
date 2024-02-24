@@ -11,7 +11,7 @@ license = { file = "LICENSE" }
 readme = "README.md"
 # TODO: Add classifiers
 # classifiers = []
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 dependencies = ["certifi", "polars", "PyYAML", "tqdm"]
 
 [project.urls]
