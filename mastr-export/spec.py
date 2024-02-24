@@ -68,7 +68,12 @@ class Field:
         self.python_type = XSD_TO_PYTHON[self.xsd]
 
     def convert(self, s):
-        return self.python_type(s) if s is not None else None
+        try:
+            return self.python_type(s) if s is not None else None
+        except Exception as e:
+            print(self)
+            raise e
+
 
     def sqlite_schema(self):
         references = (
