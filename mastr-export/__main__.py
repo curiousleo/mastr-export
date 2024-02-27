@@ -44,12 +44,6 @@ def cli():
         action="store_true",
         help="show a progress bar for each individual file?",
     )
-    extract.add_argument(
-        "--sqlite-create-indices",
-        default=False,
-        action="store_true",
-        help="include 'create index' commands in the SQLite import script",
-    )
     extract.set_defaults(
         func=lambda args: run(
             args.spec,
@@ -57,7 +51,6 @@ def cli():
             args.parquet_dir,
             args.csv_dir,
             args.show_per_file_progress,
-            args.sqlite_create_indices,
         )
     )
 
@@ -65,15 +58,24 @@ def cli():
     args.func(args)
 
 
-def run(
-    spec, export, parquet_dir, csv_dir, show_per_file_progress, sqlite_create_indices
-):
+def run(spec, export, parquet_dir, csv_dir, show_per_file_progress):
     if parquet_dir is None and csv_dir is None:
         raise Exception("You must pass at least one of --parquet-dir or --csv-dir")
     for dir in [dir for dir in [parquet_dir, csv_dir] if dir is not None]:
         os.makedirs(dir, exist_ok=True)
 
     specs = Specs.load(spec)
+    spec_to_xml_files = extract(
+        export, specs, parquet_dir, csv_dir, show_per_file_progress
+    )
+
+    if csv_dir is not None:
+        write_sqlite_load_commands(specs, spec_to_xml_files, csv_dir)
+    if parquet_dir is not None:
+        write_duckdb_load_commands(specs, spec_to_xml_files, parquet_dir)
+
+
+def extract(export, specs, parquet_dir, csv_dir, show_per_file_progress):
     with zipfile.ZipFile(export) as z:
         # Sanity check: do we know how to handle all the files in the export?
         spec_to_xml_files = {}
@@ -119,80 +121,80 @@ def run(
                 )
             if csv_dir is not None:
                 df.write_csv(os.path.join(csv_dir, i.filename.replace(".xml", ".csv")))
+    return spec_to_xml_files
 
-    # Output SQL to import Parquet and CSV
-    sqlite_load_name, sqlite_load, duckdb_load_name, duckdb_load = (
-        None,
-        None,
-        None,
-        None,
-    )
-    if csv_dir is not None:
-        sqlite_load_name = os.path.join(csv_dir, "sqlite.sql")
-        sqlite_load = open(sqlite_load_name, "w")
 
-    if parquet_dir is not None:
-        duckdb_load_name = os.path.join(parquet_dir, "duckdb.sql")
-        duckdb_load = open(duckdb_load_name, "w")
+def write_sqlite_load_commands(specs, spec_to_xml_files, csv_dir):
+    # Output SQL to CSV
+    sqlite_load_name = os.path.normpath(os.path.join(csv_dir, "sqlite.sql"))
+    sqlite_load = open(sqlite_load_name, "w")
+    sqlite_index_name = os.path.normpath(os.path.join(csv_dir, "index.sql"))
+    sqlite_index = open(sqlite_index_name, "w")
 
-    if sqlite_load is not None:
-        sqlite_load.write(
-            """-- Make SQLite go brrrr
+    sqlite_load.write(
+        """-- Make SQLite go brrrr
 pragma journal_mode=off;
 pragma synchronous=off;
 pragma page_size=16384;
 
 """
-        )
+    )
 
     for d in specs:
-        if duckdb_load is not None:
-            parquet_files = [
-                i.filename.replace(".xml", ".parquet")
-                for i in spec_to_xml_files[d.element]
-            ]
-            duckdb_load.write(d.duckdb_schema())
-            duckdb_load.writelines(
-                f"""insert into {d.element} select * from read_parquet('{f}');\n"""
-                for f in parquet_files
-            )
-
-        if sqlite_load is not None:
-            csv_files = [
-                i.filename.replace(".xml", ".csv") for i in spec_to_xml_files[d.element]
-            ]
-            sqlite_load.write(d.sqlite_schema())
-            sqlite_load.writelines(
-                f""".import "{f}" "{d.element}" --csv --skip 1\n""" for f in csv_files
-            )
-            if sqlite_create_indices:
-                sqlite_load.write(d.sqlite_indices())
-            sqlite_load.write("\n\n")
-
-    if duckdb_load is not None:
-        duckdb_load.close()
-
-    if sqlite_load is not None:
-        sqlite_load.write("vacuum;\n")
-        sqlite_load.close()
-
-    if duckdb_load is not None:
-        print(
-            f"""Parquet export finished. You can import the Parquet files into a DuckDB file
-called 'bnetza.duckdb' with the following command:
-
-$ cd '{parquet_dir}'; duckdb 'bnetza.duckdb' -init '{duckdb_load_name}' -bail -batch -echo -no-stdin
-"""
+        csv_files = [
+            i.filename.replace(".xml", ".csv") for i in spec_to_xml_files[d.element]
+        ]
+        sqlite_load.write(d.sqlite_schema())
+        sqlite_load.writelines(
+            f""".import "{f}" "{d.element}" --csv --skip 1\n""" for f in csv_files
         )
+        sqlite_load.write("\n\n")
 
-    if sqlite_load is not None:
-        print(
-            f"""CSV export finished. You can import the CSV files into a SQLite file called
+        indices = d.sqlite_indices()
+        if len(indices) > 0:
+            sqlite_index.writelines(indices)
+            sqlite_index.write("\n\n")
+
+    sqlite_load.write("vacuum;\n")
+    sqlite_load.close()
+
+    print(
+        f"""CSV export finished. You can import the CSV files into a SQLite file called
 'bnetza.sqlite3' with the following command:
 
-$ cd '{csv_dir}'; sqlite3 -init '{sqlite_load_name}' -echo 'bnetza.sqlite3'
+$ sqlite3 -bail 'bnetza.sqlite3' <'{sqlite_load_name}'
+
+You can optionally add common indices with this command:
+
+$ sqlite3 -bail 'bnetza.sqlite3' <'{sqlite_index_name}'
 """
+    )
+
+
+def write_duckdb_load_commands(specs, spec_to_xml_files, parquet_dir):
+    # Output SQL to import Parquet
+    duckdb_load_name = os.path.normpath(os.path.join(parquet_dir, "duckdb.sql"))
+    duckdb_load = open(duckdb_load_name, "w")
+
+    for d in specs:
+        parquet_files = [
+            i.filename.replace(".xml", ".parquet") for i in spec_to_xml_files[d.element]
+        ]
+        duckdb_load.write(d.duckdb_schema())
+        duckdb_load.writelines(
+            f"""insert into {d.element} select * from read_parquet('{f}');\n"""
+            for f in parquet_files
         )
+
+    duckdb_load.close()
+
+    print(
+        f"""Parquet export finished. You can import the Parquet files into a DuckDB file
+called 'bnetza.duckdb' with the following command:
+
+$ duckdb 'bnetza.duckdb' -init '{duckdb_load_name}' -bail -batch -echo -no-stdin
+"""
+    )
 
 
 cli()
