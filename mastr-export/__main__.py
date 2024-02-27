@@ -126,9 +126,9 @@ def extract(export, specs, parquet_dir, csv_dir, show_per_file_progress):
 
 def write_sqlite_load_commands(specs, spec_to_xml_files, csv_dir):
     # Output SQL to CSV
-    sqlite_load_name = os.path.normpath(os.path.join(csv_dir, "sqlite.sql"))
+    sqlite_load_name = os.path.normpath(os.path.join(csv_dir, "import-sqlite.sql"))
     sqlite_load = open(sqlite_load_name, "w")
-    sqlite_index_name = os.path.normpath(os.path.join(csv_dir, "index.sql"))
+    sqlite_index_name = os.path.normpath(os.path.join(csv_dir, "index-sqlite.sql"))
     sqlite_index = open(sqlite_index_name, "w")
 
     sqlite_load.write(
@@ -173,7 +173,7 @@ $ sqlite3 -bail 'bnetza.sqlite3' <'{sqlite_index_name}'
 
 def write_duckdb_load_commands(specs, spec_to_xml_files, parquet_dir):
     # Output SQL to import Parquet
-    duckdb_load_name = os.path.normpath(os.path.join(parquet_dir, "duckdb.sql"))
+    duckdb_load_name = os.path.normpath(os.path.join(parquet_dir, "import-duckdb.sql"))
     duckdb_load = open(duckdb_load_name, "w")
 
     for d in specs:
