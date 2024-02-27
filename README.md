@@ -18,7 +18,7 @@ passed:
 
 ```
 $ python -m mastr-export extract \
-    --export Gesamtdatenexport.zip \
+    Gesamtdatenexport.zip \
     --parquet-dir out/parquet \
     --csv-dir out/csv
 ```
@@ -34,7 +34,7 @@ The `extract` command will output the appropriate instructions. If you passed
 Parquet export finished. You can import the Parquet files into a DuckDB file
 called 'bnetza.duckdb' with the following command:
 
-$ cd 'out/parquet'; duckdb 'bnetza.duckdb' -init 'duckdb.sql' -bail -batch -echo -no-stdin
+$ duckdb 'bnetza.duckdb' -init 'out/parquet/import-duckdb.sql' -bail -batch -echo -no-stdin
 ```
 
 ... and if you passed `--csv-dir`, it will print:
@@ -43,5 +43,9 @@ $ cd 'out/parquet'; duckdb 'bnetza.duckdb' -init 'duckdb.sql' -bail -batch -echo
 CSV export finished. You can import the CSV files into a SQLite file
 called 'bnetza.sqlite3' with the following command:
 
-$ cd 'out/csv'; sqlite3 -init 'sqlite.sql' -echo 'bnetza.sqlite3'
+$ sqlite3 -bail 'bnetza.sqlite3' <'out/csv/import-sqlite.sql' 
+
+You can optionally add common indices with this command:
+
+$ sqlite3 -bail 'bnetza.sqlite3' <'out/csv/index-sqlite.sql'
 ```
