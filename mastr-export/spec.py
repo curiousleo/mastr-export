@@ -109,7 +109,7 @@ class Spec:
 """
 
     def sqlite_indices(self):
-        [
+        return [
             field.sqlite_index(self.element)
             for field in self.fields.values()
             if field.index
