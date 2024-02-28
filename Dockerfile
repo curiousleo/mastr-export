@@ -27,8 +27,6 @@ ENV PATH="${PATH}:/opt/duckdb/bin"
 WORKDIR /app
 COPY . .
 
-RUN set -eux; \
-    pip install --no-cache-dir .; \
-    ;
+RUN pip install --no-cache-dir .
 
 CMD ["bash", "export-all-formats.sh"]
