@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Optional
 import polars as pl
 import os.path
 import yaml
@@ -86,25 +87,32 @@ class Field:
 class Spec:
     root: str
     element: str
-    primary: str
     without_rowid: bool
+    primary: Optional[str]
     fields: dict[str, Field]
 
-    def __init__(self, root, element, primary, fields, without_rowid=False):
+    def __init__(self, root, element, fields, primary=None, without_rowid=False):
         self.root = root
         self.element = element
-        self.primary = primary
-        self.without_rowid = without_rowid
+
         fields = [Field(**field) for field in fields]
         self.fields = dict((field.name, field) for field in fields)
+
+        self.primary = primary
+        self.without_rowid = without_rowid
 
     def sqlite_schema(self):
         columns = ",\n    ".join(
             field.sqlite_schema() for field in self.fields.values()
         )
+        primary = (
+            f""",
+    primary key ("{self.primary}")"""
+            if self.primary is not None
+            else ""
+        )
         return f"""create table if not exists "{self.element}" (
-    {columns},
-    primary key ("{self.primary}")
+    {columns}{primary}
 ) strict{", without rowid" if self.without_rowid else ""};
 """
 
@@ -119,9 +127,14 @@ class Spec:
         columns = ",\n    ".join(
             field.duckdb_schema() for field in self.fields.values()
         )
+        primary = (
+            f""",
+    primary key ("{self.primary}")"""
+            if self.primary is not None
+            else ""
+        )
         return f"""create table if not exists "{self.element}" (
-    {columns},
-    primary key ("{self.primary}")
+    {columns}{primary}
 );
 """
 

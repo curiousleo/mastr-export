@@ -1,5 +1,5 @@
 root: EinheitenGeothermieGrubengasDruckentspannung
-element: EinheitGeothermieGrubengasDruckentspannung # docs say EinheitenGeothermieGrubengasDruckentspannung
+element: EinheitGeothermieGrubengasDruckentspannung
 primary: EinheitMastrNummer
 fields:
   - name: EinheitMastrNummer
@@ -117,6 +117,13 @@ fields:
     references:
       table: Katalogwert
       column: Id
+  - name: ReserveartNachDemEnWG
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: DatumDerUeberfuerungInReserve
+    xsd: date
   - name: EegMaStRNummer
     references:
       table: AnlageEegGeothermieGrubengasDruckentspannung

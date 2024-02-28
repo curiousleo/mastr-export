@@ -6,6 +6,7 @@
 - GeloeschteUndDeaktivierteEinheiten.yaml
 - Lokationen.yaml
 - Marktakteure.yaml
+- GeloeschteUndDeaktivierteMarktakteure.yaml
 - Marktrollen.yaml
 - Netzanschlusspunkte.yaml
 - Netze.yaml
@@ -35,3 +36,5 @@
 - EinheitenGasErzeuger.yaml
 - EinheitenGasSpeicher.yaml
 - EinheitenGasverbraucher.yaml
+
+- EinheitenAenderungNetzbetreiberzuordnungen.yaml

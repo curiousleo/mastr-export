@@ -133,6 +133,13 @@ fields:
     references:
       table: Katalogwert
       column: Id
+  - name: ReserveartNachDemEnWG
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: DatumDerUeberfuerungInReserve
+    xsd: date
   - name: EegMaStRNummer
     references:
       table: AnlageEegBiomasse

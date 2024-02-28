@@ -20,4 +20,4 @@ Issues = "https://github.com/marktstammdatenregister-dev/mastr-export/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["mastr-export/"]
-artifacts = ["spec/*.yaml"]
+artifacts = ["mastr-export/spec_data/*.yaml"]
