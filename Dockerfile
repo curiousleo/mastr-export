@@ -13,6 +13,9 @@ WORKDIR /tmp
 
 ARG TARGETARCH
 RUN set -eux; \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+    export TARGETARCH=aarch64; \
+    fi; \
     axel --quiet --output=duckdb.zip https://github.com/duckdb/duckdb/releases/download/v0.10.0/duckdb_cli-linux-${TARGETARCH}.zip ; \
     unzip duckdb.zip; \
     mkdir -p /opt/duckdb/bin; \
