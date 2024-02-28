@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm
+FROM docker.io/library/python:3.11-slim-bookworm
 
 RUN set -eux; \
 	apt-get update; \
