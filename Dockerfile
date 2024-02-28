@@ -11,8 +11,9 @@ RUN set -eux; \
 
 WORKDIR /tmp
 
+ARG TARGETARCH
 RUN set -eux; \
-    axel --quiet --output=duckdb.zip https://github.com/duckdb/duckdb/releases/download/v0.10.0/duckdb_cli-linux-amd64.zip ; \
+    axel --quiet --output=duckdb.zip https://github.com/duckdb/duckdb/releases/download/v0.10.0/duckdb_cli-linux-${TARGETARCH}.zip ; \
     unzip duckdb.zip; \
     mkdir -p /opt/duckdb/bin; \
     mv duckdb /opt/duckdb/bin/; \
@@ -23,6 +24,8 @@ ENV PATH="${PATH}:/opt/duckdb/bin"
 WORKDIR /app
 COPY . .
 
-RUN pip install .
+RUN set -eux; \
+    pip install --no-cache-dir .; \
+    ;
 
 CMD ["bash", "export-all-formats.sh"]
