@@ -72,11 +72,13 @@ def cli():
     args.func(args)
 
 
-def measure_runtime(action, argument):
+def print_runtime(message, action, arg):
+    print(message, end=" ", flush=True)
     start_ns = time.perf_counter_ns()
-    action(argument)
+    action(arg)
     delta_ns = time.perf_counter_ns() - start_ns
-    return datetime.timedelta(microseconds=delta_ns // 1_000)
+    delta = datetime.timedelta(microseconds=delta_ns // 1_000)
+    print(f"took {str(delta)}")
 
 
 def run(
@@ -87,30 +89,29 @@ def run(
         extract(export, specs, duckdb_con, show_per_file_progress)
 
         if csv_dir is not None:
-            print(f"Exporting CSV files to {csv_dir} ...", end=" ", flush=True)
-            delta = measure_runtime(
-                duckdb_con.sql, f"""export database '{csv_dir}' (format csv)"""
+            print_runtime(
+                f"Exporting CSV files to {csv_dir} ...",
+                action=duckdb_con.sql,
+                arg=f"""export database '{csv_dir}' (format csv)""",
             )
-            print(f"took {str(delta)}")
 
         if parquet_dir is not None:
-            print(f"Exporting Parquet files to {parquet_dir} ...", end=" ", flush=True)
-            delta = measure_runtime(
-                duckdb_con.sql, f"""export database '{parquet_dir}' (format parquet)"""
+            print_runtime(
+                f"Exporting Parquet files to {parquet_dir} ...",
+                action=duckdb_con.sql,
+                arg=f"""export database '{parquet_dir}' (format parquet)""",
             )
-            print(f"took {str(delta)}")
 
     if sqlite_file is not None:
-        print(f"Exporting SQLite database to {sqlite_file} ...", end=" ", flush=True)
-        delta = measure_runtime(
-            duckdb.sql,
-            f"""
+        print_runtime(
+            f"Exporting SQLite database to {sqlite_file} ...",
+            action=duckdb.sql,
+            arg=f"""
 attach '{duckdb_file}' as source (read_only);
 attach '{sqlite_file}' as target (type sqlite);
 copy from database source to target;
 """,
         )
-        print(f"took {str(delta)}")
 
 
 def extract(
