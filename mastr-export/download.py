@@ -4,7 +4,7 @@ import ssl
 import urllib.request
 
 
-def get_latest_url():
+def print_export_url():
     context = ssl.create_default_context(
         ssl.Purpose.SERVER_AUTH, cafile=certifi.where()
     )
@@ -20,4 +20,4 @@ def get_latest_url():
 
 
 if __name__ == "__main__":
-    print(get_latest_url())
+    print(print_export_url())

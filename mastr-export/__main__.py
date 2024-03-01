@@ -1,13 +1,15 @@
-from .download import get_latest_url
 from .spec import Specs
 from .parser import Parser
 
+from . import download
 from . import spec_data
 
 import argparse
+import datetime
+import duckdb
 import importlib.resources
-import os.path
 import polars as pl
+import time
 from tqdm.auto import tqdm
 from tqdm.utils import CallbackIOWrapper
 import zipfile
@@ -17,8 +19,8 @@ def cli():
     parser = argparse.ArgumentParser(prog="mastr-export")
     subparsers = parser.add_subparsers(required=True)
 
-    get_export_url = subparsers.add_parser("print-export-url")
-    get_export_url.set_defaults(func=lambda _args: print(get_latest_url()))
+    print_export_url = subparsers.add_parser("print-export-url")
+    print_export_url.set_defaults(func=lambda _args: print(download.print_export_url()))
 
     extract = subparsers.add_parser("extract")
     extract.add_argument(
@@ -27,16 +29,26 @@ def cli():
         help="path to the Marktstammdatenregister export ZIP file",
     )
     extract.add_argument(
-        "--parquet-dir",
-        help="where to write Parquet files (and DuckDB SQL file to load them)",
-    )
-    extract.add_argument(
-        "--csv-dir", help="where to write CSV files (and SQLite file to load them)"
-    )
-    extract.add_argument(
         "--spec",
         default=(importlib.resources.files(spec_data) / "Gesamtdatenexport.yaml"),
         help="path to the YAML file containing the list of specs",
+    )
+    extract.add_argument(
+        "--duckdb",
+        required=True,
+        help="DuckDB database file path",
+    )
+    extract.add_argument(
+        "--sqlite",
+        help="SQLite database file path",
+    )
+    extract.add_argument(
+        "--csv-dir",
+        help="CSV directory",
+    )
+    extract.add_argument(
+        "--parquet-dir",
+        help="Parquet directory",
     )
     extract.add_argument(
         "--show-per-file-progress",
@@ -48,8 +60,10 @@ def cli():
         func=lambda args: run(
             args.spec,
             args.export_file[0],
-            args.parquet_dir,
+            args.duckdb,
+            args.sqlite,
             args.csv_dir,
+            args.parquet_dir,
             args.show_per_file_progress,
         )
     )
@@ -58,24 +72,56 @@ def cli():
     args.func(args)
 
 
-def run(spec, export, parquet_dir, csv_dir, show_per_file_progress):
-    if parquet_dir is None and csv_dir is None:
-        raise Exception("You must pass at least one of --parquet-dir or --csv-dir")
-    for dir in [dir for dir in [parquet_dir, csv_dir] if dir is not None]:
-        os.makedirs(dir, exist_ok=True)
-
-    specs = Specs.load(spec)
-    spec_to_xml_files = extract(
-        export, specs, parquet_dir, csv_dir, show_per_file_progress
-    )
-
-    if csv_dir is not None:
-        write_sqlite_load_commands(specs, spec_to_xml_files, csv_dir)
-    if parquet_dir is not None:
-        write_duckdb_load_commands(specs, spec_to_xml_files, parquet_dir)
+def measure_runtime(action, argument):
+    start_ns = time.perf_counter_ns()
+    action(argument)
+    delta_ns = time.perf_counter_ns() - start_ns
+    return datetime.timedelta(microseconds=delta_ns // 1_000)
 
 
-def extract(export, specs, parquet_dir, csv_dir, show_per_file_progress):
+def run(
+    spec, export, duckdb_file, sqlite_file, csv_dir, parquet_dir, show_per_file_progress
+):
+    with duckdb.connect(duckdb_file) as duckdb_con:
+        specs = Specs.load(spec)
+        extract(export, specs, duckdb_con, show_per_file_progress)
+
+        if csv_dir is not None:
+            print(f"Exporting CSV files to {csv_dir} ...", end=" ", flush=True)
+            delta = measure_runtime(
+                duckdb_con.sql, f"""export database '{csv_dir}' (format csv)"""
+            )
+            print(f"took {str(delta)}")
+
+        if parquet_dir is not None:
+            print(f"Exporting Parquet files to {parquet_dir} ...", end=" ", flush=True)
+            delta = measure_runtime(
+                duckdb_con.sql, f"""export database '{parquet_dir}' (format parquet)"""
+            )
+            print(f"took {str(delta)}")
+
+    if sqlite_file is not None:
+        print(f"Exporting SQLite database to {sqlite_file} ...", end=" ", flush=True)
+        delta = measure_runtime(
+            duckdb.sql,
+            f"""
+attach '{duckdb_file}' as source (read_only);
+attach '{sqlite_file}' as target (type sqlite);
+copy from database source to target;
+""",
+        )
+        print(f"took {str(delta)}")
+
+
+def extract(
+    export,
+    specs: Specs,
+    duckdb_con: duckdb.DuckDBPyConnection,
+    show_per_file_progress,
+):
+    for spec in specs.specs:
+        duckdb_con.sql(spec.duckdb_schema())
+
     with zipfile.ZipFile(export) as z:
         # Sanity check: do we know how to handle all the files in the export?
         spec_to_xml_files = {}
@@ -115,86 +161,10 @@ def extract(export, specs, parquet_dir, csv_dir, show_per_file_progress):
                     (name, field.polars_type) for name, field in d.fields.items()
                 ),
             )
-            if parquet_dir is not None:
-                df.write_parquet(
-                    os.path.join(parquet_dir, i.filename.replace(".xml", ".parquet"))
-                )
-            if csv_dir is not None:
-                df.write_csv(os.path.join(csv_dir, i.filename.replace(".xml", ".csv")))
+            duckdb_con.sql(f"""INSERT INTO "{d.element}" SELECT * FROM df""")
+
+    duckdb_con.sql("vacuum analyze")
     return spec_to_xml_files
-
-
-def write_sqlite_load_commands(specs, spec_to_xml_files, csv_dir):
-    # Output SQL to CSV
-    sqlite_load_name = os.path.normpath(os.path.join(csv_dir, "import-sqlite.sql"))
-    sqlite_load = open(sqlite_load_name, "w")
-    sqlite_index_name = os.path.normpath(os.path.join(csv_dir, "index-sqlite.sql"))
-    sqlite_index = open(sqlite_index_name, "w")
-
-    sqlite_load.write(
-        """-- Make SQLite go brrrr
-pragma journal_mode=off;
-pragma synchronous=off;
-pragma page_size=16384;
-
-"""
-    )
-
-    for d in specs:
-        csv_files = [
-            i.filename.replace(".xml", ".csv") for i in spec_to_xml_files[d.element]
-        ]
-        sqlite_load.write(d.sqlite_schema())
-        sqlite_load.writelines(
-            f""".import "{f}" "{d.element}" --csv --skip 1\n""" for f in csv_files
-        )
-        sqlite_load.write("\n\n")
-
-        indices = d.sqlite_indices()
-        if len(indices) > 0:
-            sqlite_index.writelines(indices)
-            sqlite_index.write("\n\n")
-
-    sqlite_load.write("vacuum;\n")
-    sqlite_load.close()
-
-    print(
-        f"""CSV export finished. You can import the CSV files into a SQLite file called
-'bnetza.sqlite3' with the following command:
-
-$ sqlite3 -bail 'bnetza.sqlite3' <'{sqlite_load_name}'
-
-You can optionally add common indices with this command:
-
-$ sqlite3 -bail 'bnetza.sqlite3' <'{sqlite_index_name}'
-"""
-    )
-
-
-def write_duckdb_load_commands(specs, spec_to_xml_files, parquet_dir):
-    # Output SQL to import Parquet
-    duckdb_load_name = os.path.normpath(os.path.join(parquet_dir, "import-duckdb.sql"))
-    duckdb_load = open(duckdb_load_name, "w")
-
-    for d in specs:
-        parquet_files = [
-            i.filename.replace(".xml", ".parquet") for i in spec_to_xml_files[d.element]
-        ]
-        duckdb_load.write(d.duckdb_schema())
-        duckdb_load.writelines(
-            f"""insert into {d.element} select * from read_parquet('{f}');\n"""
-            for f in parquet_files
-        )
-
-    duckdb_load.close()
-
-    print(
-        f"""Parquet export finished. You can import the Parquet files into a DuckDB file
-called 'bnetza.duckdb' with the following command:
-
-$ duckdb 'bnetza.duckdb' -init '{duckdb_load_name}' -bail -batch -echo -no-stdin
-"""
-    )
 
 
 cli()
