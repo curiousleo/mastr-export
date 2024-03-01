@@ -12,7 +12,7 @@ readme = "README.md"
 # TODO: Add classifiers
 # classifiers = []
 requires-python = ">=3.11"
-dependencies = ["certifi", "polars", "PyYAML", "tqdm"]
+dependencies = ["certifi", "duckdb", "polars[pyarrow]", "PyYAML", "tqdm"]
 
 [project.urls]
 Homepage = "https://github.com/marktstammdatenregister-dev/mastr-export"

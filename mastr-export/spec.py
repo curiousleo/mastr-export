@@ -105,7 +105,7 @@ class Spec:
         return f"""create table if not exists "{self.element}" (
     {columns},
     primary key ("{self.primary}")
-) {" without rowid" if self.without_rowid else ""};
+) strict{", without rowid" if self.without_rowid else ""};
 """
 
     def sqlite_indices(self):
