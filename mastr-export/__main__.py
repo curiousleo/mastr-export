@@ -84,10 +84,10 @@ def print_runtime(message, action, arg):
 def run(
     spec, export, duckdb_file, sqlite_file, csv_dir, parquet_dir, show_per_file_progress
 ):
-    with duckdb.connect(duckdb_file) as duckdb_con:
-        specs = Specs.load(spec)
-        extract(export, specs, duckdb_con, show_per_file_progress)
+    specs = Specs.load(spec)
+    extract(export, specs, duckdb_file, show_per_file_progress)
 
+    with duckdb.connect(duckdb_file) as duckdb_con:
         if csv_dir is not None:
             print_runtime(
                 f"Exporting CSV files to {csv_dir} ...",
@@ -117,11 +117,12 @@ copy from database source to target;
 def extract(
     export,
     specs: Specs,
-    duckdb_con: duckdb.DuckDBPyConnection,
+    duckdb_file,
     show_per_file_progress,
 ):
-    for spec in specs.specs:
-        duckdb_con.sql(spec.duckdb_schema())
+    with duckdb.connect(duckdb_file) as duckdb_con:
+        for spec in specs.specs:
+            duckdb_con.sql(spec.duckdb_schema())
 
     with zipfile.ZipFile(export) as z:
         # Sanity check: do we know how to handle all the files in the export?
@@ -162,10 +163,11 @@ def extract(
                     (name, field.polars_type) for name, field in d.fields.items()
                 ),
             )
-            duckdb_con.sql(f"""INSERT INTO "{d.element}" SELECT * FROM df""")
+            with duckdb.connect(duckdb_file) as duckdb_con:
+                duckdb_con.sql(f"""INSERT INTO "{d.element}" SELECT * FROM df""")
 
-    duckdb_con.sql("vacuum analyze")
-    return spec_to_xml_files
+    with duckdb.connect(duckdb_file) as duckdb_con:
+        duckdb_con.sql("vacuum analyze")
 
 
 cli()
