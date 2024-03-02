@@ -87,15 +87,16 @@ def run(
     specs = Specs.load(spec)
     extract(export, specs, duckdb_file, show_per_file_progress)
 
-    with duckdb.connect(duckdb_file) as duckdb_con:
-        if csv_dir is not None:
+    if csv_dir is not None:
+        with duckdb.connect(duckdb_file, read_only=True) as duckdb_con:
             print_runtime(
                 f"Exporting CSV files to {csv_dir} ...",
                 action=duckdb_con.sql,
                 arg=f"""export database '{csv_dir}' (format csv)""",
             )
 
-        if parquet_dir is not None:
+    if parquet_dir is not None:
+        with duckdb.connect(duckdb_file, read_only=True) as duckdb_con:
             print_runtime(
                 f"Exporting Parquet files to {parquet_dir} ...",
                 action=duckdb_con.sql,
