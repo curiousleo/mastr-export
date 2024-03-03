@@ -1,3 +1,4 @@
+import sqlite3
 from .spec import Specs
 from .parser import Parser
 
@@ -22,33 +23,64 @@ def cli():
     print_export_url = subparsers.add_parser("print-export-url")
     print_export_url.set_defaults(func=lambda _args: print(download.print_export_url()))
 
-    extract = subparsers.add_parser("extract-to-duckdb")
-    extract.add_argument(
+    duckdb_extract = subparsers.add_parser("extract-to-duckdb")
+    duckdb_extract.add_argument(
         "--export",
         required=True,
-        help="path to the Marktstammdatenregister export ZIP file",
+        help="(input) path to the Marktstammdatenregister export ZIP file",
     )
-    extract.add_argument(
+    duckdb_extract.add_argument(
         "--spec",
         default=(importlib.resources.files(spec_data) / "Gesamtdatenexport.yaml"),
-        help="path to the YAML file containing the list of specs",
+        help="(input) path to the YAML file containing the list of specs",
     )
-    extract.add_argument(
+    duckdb_extract.add_argument(
         "--duckdb",
         required=True,
-        help="DuckDB database file path",
+        help="(outpu) DuckDB database file path",
     )
-    extract.add_argument(
+    duckdb_extract.add_argument(
         "--show-per-file-progress",
         default=False,
         action="store_true",
         help="show a progress bar for each individual file?",
     )
-    extract.set_defaults(
+    duckdb_extract.set_defaults(
         func=lambda args: extract_to_duckdb(
             args.spec,
             args.export,
             args.duckdb,
+            args.show_per_file_progress,
+        )
+    )
+
+    sqlite_extract = subparsers.add_parser("extract-to-sqlite")
+    sqlite_extract.add_argument(
+        "--export",
+        required=True,
+        help="(input) path to the Marktstammdatenregister export ZIP file",
+    )
+    sqlite_extract.add_argument(
+        "--spec",
+        default=(importlib.resources.files(spec_data) / "Gesamtdatenexport.yaml"),
+        help="(input) path to the YAML file containing the list of specs",
+    )
+    sqlite_extract.add_argument(
+        "--sqlite",
+        required=True,
+        help="(output) SQLite database file path",
+    )
+    sqlite_extract.add_argument(
+        "--show-per-file-progress",
+        default=False,
+        action="store_true",
+        help="show a progress bar for each individual file?",
+    )
+    sqlite_extract.set_defaults(
+        func=lambda args: extract_to_sqlite(
+            args.spec,
+            args.export,
+            args.sqlite,
             args.show_per_file_progress,
         )
     )
@@ -93,12 +125,7 @@ def print_runtime(message, action, arg):
     print(f"took {str(delta)}")
 
 
-def extract_to_duckdb(spec, export, duckdb_file, show_per_file_progress):
-    specs = Specs.load(spec)
-    with duckdb.connect(duckdb_file) as duckdb_con:
-        for spec in specs.specs:
-            duckdb_con.sql(spec.duckdb_schema())
-
+def extract(specs: Specs, export, show_per_file_progress):
     with zipfile.ZipFile(export) as z:
         # Sanity check: do we know how to handle all the files in the export?
         spec_to_xml_files = {}
@@ -138,11 +165,40 @@ def extract_to_duckdb(spec, export, duckdb_file, show_per_file_progress):
                     (name, field.polars_type) for name, field in d.fields.items()
                 ),
             )
-            with duckdb.connect(duckdb_file) as duckdb_con:
-                duckdb_con.sql(f"""INSERT INTO "{d.element}" SELECT * FROM df""")
+            yield d, df
+
+
+def extract_to_duckdb(spec, export, duckdb_file, show_per_file_progress):
+    specs = Specs.load(spec)
+    with duckdb.connect(duckdb_file) as duckdb_con:
+        for spec in specs.specs:
+            duckdb_con.sql(spec.duckdb_schema())
+
+    for d, df in extract(specs, export, show_per_file_progress):
+        with duckdb.connect(duckdb_file) as duckdb_con:
+            duckdb_con.sql(f"""INSERT INTO "{d.element}" SELECT * FROM df""")
 
     with duckdb.connect(duckdb_file) as duckdb_con:
         duckdb_con.sql("vacuum analyze")
+
+
+def extract_to_sqlite(spec, export, sqlite_file, show_per_file_progress):
+    con = sqlite3.connect(sqlite_file)
+    specs = Specs.load(spec)
+    with con:
+        for spec in specs.specs:
+            con.execute(spec.sqlite_schema())
+
+    for d, df in extract(specs, export, show_per_file_progress):
+        with con:
+            columns = ", ".join(f"'{name}'" for name in df.columns)
+            values = ", ".join("?" for _ in range(len(df.columns)))
+            stmt = f"""insert into "{d.element}" ({columns}) values ({values})"""
+            con.executemany(stmt, df.iter_rows())
+
+    with con:
+        con.execute("analyze")
+        con.execute("vacuum")
 
 
 def export_from_duckdb(duckdb_file, sqlite_file, csv_dir, parquet_dir):
