@@ -2,6 +2,6 @@
 
 !/LICENSE
 !/README.md
-!/export-all-formats.sh
+!/download-and-extract-sqlite.sh
 !/mastr-export/
 !/pyproject.toml
