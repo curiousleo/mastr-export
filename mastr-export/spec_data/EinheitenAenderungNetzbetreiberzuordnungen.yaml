@@ -1,6 +1,5 @@
 root: EinheitenAenderungNetzbetreiberzuordnungen
 element: EinheitenAenderungNetzbetreiberzuordnungen
-primary: EinheitMastrNummer
 fields:
   - name: EinheitMastrNummer
   - name: LokationMastrNummer
