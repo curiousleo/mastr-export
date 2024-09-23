@@ -105,9 +105,14 @@ class Spec:
         columns = ",\n    ".join(
             field.sqlite_schema() for field in self.fields.values()
         )
+        primary = (
+            f""",
+    primary key ("{self.primary}")"""
+            if self.primary is not None
+            else ""
+        )
         return f"""create table if not exists "{self.element}" (
-    {columns}{f""",
-    primary key ("{self.primary}")""" if self.primary is not None else ""}
+    {columns}{primary}
 ) strict{", without rowid" if self.without_rowid else ""};
 """
 
@@ -122,9 +127,14 @@ class Spec:
         columns = ",\n    ".join(
             field.duckdb_schema() for field in self.fields.values()
         )
+        primary = (
+            f""",
+    primary key ("{self.primary}")"""
+            if self.primary is not None
+            else ""
+        )
         return f"""create table if not exists "{self.element}" (
-    {columns},
-    primary key ("{self.primary}")
+    {columns}{primary}
 );
 """
 
