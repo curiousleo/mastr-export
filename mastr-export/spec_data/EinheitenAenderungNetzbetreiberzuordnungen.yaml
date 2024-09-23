@@ -1,0 +1,17 @@
+root: EinheitenAenderungNetzbetreiberzuordnungen
+element: EinheitenAenderungNetzbetreiberzuordnungen
+primary: EinheitMastrNummer
+fields:
+  - name: EinheitMastrNummer
+  - name: LokationMastrNummer
+  - name: NetzbetreiberMastrNummerAlt
+  - name: NetzbetreiberMastrNummerNeu
+  - name: ArtDerAenderung
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: RegistrierungsdatumNetzbetreiberzuordnungsaenderung
+    xsd: dateTime
+  - name: Netzbetreiberzuordnungsaenderungsdatum
+    xsd: dateTime
