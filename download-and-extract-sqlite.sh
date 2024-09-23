@@ -6,4 +6,4 @@ axel --num-connections=10 --quiet \
     "$(python -m mastr-export print-export-url)"
 python -m mastr-export extract-to-sqlite \
     --export /mnt/out/Gesamtdatenexport.zip \
-    --sqlite /mnt/out/bnetza.duckdb
+    --sqlite /mnt/out/bnetza.sqlite3
