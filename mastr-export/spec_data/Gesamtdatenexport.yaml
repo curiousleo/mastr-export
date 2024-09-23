@@ -1,5 +1,8 @@
 # The order is significant! Later items may reference earlier items.
 - Katalogkategorien.yaml
+
+- EinheitenAenderungNetzbetreiberzuordnungen.yaml
+
 - Katalogwerte.yaml
 - Bilanzierungsgebiete.yaml
 - Ertuechtigungen.yaml
@@ -35,5 +38,3 @@
 - EinheitenGasErzeuger.yaml
 - EinheitenGasSpeicher.yaml
 - EinheitenGasverbraucher.yaml
-
-- EinheitenAenderungNetzbetreiberzuordnungen.yaml
