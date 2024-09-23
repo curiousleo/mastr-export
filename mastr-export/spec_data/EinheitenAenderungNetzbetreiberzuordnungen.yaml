@@ -4,6 +4,7 @@ primary: EinheitMastrNummer
 fields:
   - name: EinheitMastrNummer
   - name: LokationMastrNummer
+  - name: NetzanschlusspunktMastrNummer
   - name: NetzbetreiberMastrNummerAlt
   - name: NetzbetreiberMastrNummerNeu
   - name: ArtDerAenderung
