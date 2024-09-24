@@ -121,11 +121,6 @@ fields:
       column: GenMastrNummer
   - name: ZugeordneteWirkleistungWechselrichter
     xsd: decimal
-  - name: GemeinsamerWechselrichterMitSpeicher
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
   - name: AnzahlModule
     xsd: nonNegativeInteger
   - name: Lage

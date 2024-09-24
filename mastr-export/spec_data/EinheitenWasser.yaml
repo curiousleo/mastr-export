@@ -124,15 +124,6 @@ fields:
     references:
       table: Katalogwert
       column: Id
-  - name: AnzeigeEinerStilllegung
-    xsd: boolean
-  - name: ArtDerStilllegung
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: DatumBeginnVorlaeufigenOderEndgueltigenStilllegung
-    xsd: dateTime
   - name: MinderungStromerzeugung
     xsd: boolean
   - name: BestandteilGrenzkraftwerk
@@ -144,6 +135,13 @@ fields:
     references:
       table: Katalogwert
       column: Id
+  - name: ReserveartNachDemEnWG
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: DatumDerUeberfuerungInReserve
+    xsd: date
   - name: EegMaStRNummer
     references:
       table: AnlageEegWasser

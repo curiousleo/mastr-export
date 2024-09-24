@@ -1,8 +1,5 @@
 # The order is significant! Later items may reference earlier items.
 - Katalogkategorien.yaml
-
-- EinheitenAenderungNetzbetreiberzuordnungen.yaml
-
 - Katalogwerte.yaml
 - Bilanzierungsgebiete.yaml
 - Ertuechtigungen.yaml
@@ -13,6 +10,10 @@
 - Netzanschlusspunkte.yaml
 - Netze.yaml
 
+- AnlagenEegGeothermieGrubengasDruckentspannung.yaml
+- Einheitentypen.yaml
+- EinheitenGeothermieGrubengasDruckentspannung.yaml
+
 - AnlagenStromSpeicher.yaml
 - AnlagenGasSpeicher.yaml
 - AnlagenEegWind.yaml
@@ -20,17 +21,14 @@
 - AnlagenEegBiomasse.yaml
 - AnlagenEegWasser.yaml
 - AnlagenEegSpeicher.yaml
-- AnlagenEegGeothermieGrubengasDruckentspannung.yaml
 - AnlagenKwk.yaml
 
-- Einheitentypen.yaml
 
 - EinheitenGenehmigung.yaml
 - EinheitenWind.yaml
 - EinheitenSolar.yaml
 - EinheitenBiomasse.yaml
 - EinheitenWasser.yaml
-- EinheitenGeothermieGrubengasDruckentspannung.yaml
 - EinheitenVerbrennung.yaml
 - EinheitenKernkraft.yaml
 - EinheitenStromSpeicher.yaml
@@ -38,3 +36,5 @@
 - EinheitenGasErzeuger.yaml
 - EinheitenGasSpeicher.yaml
 - EinheitenGasverbraucher.yaml
+
+- EinheitenAenderungNetzbetreiberzuordnungen.yaml
