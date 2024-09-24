@@ -1,5 +1,5 @@
 root: EinheitenGeothermieGrubengasDruckentspannung
-element: EinheitenGeothermieGrubengasDruckentspannung
+element: EinheitGeothermieGrubengasDruckentspannung
 primary: EinheitMastrNummer
 fields:
   - name: EinheitMastrNummer

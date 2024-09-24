@@ -1,6 +1,9 @@
 # The order is significant! Later items may reference earlier items.
 - Katalogkategorien.yaml
 - Katalogwerte.yaml
+
+- AnlagenEegGeothermieGrubengasDruckentspannung.yaml
+
 - Bilanzierungsgebiete.yaml
 - Ertuechtigungen.yaml
 - GeloeschteUndDeaktivierteEinheiten.yaml
@@ -10,8 +13,8 @@
 - Netzanschlusspunkte.yaml
 - Netze.yaml
 
-- AnlagenEegGeothermieGrubengasDruckentspannung.yaml
 - Einheitentypen.yaml
+- EinheitenGenehmigung.yaml
 - EinheitenGeothermieGrubengasDruckentspannung.yaml
 
 - AnlagenStromSpeicher.yaml
@@ -24,7 +27,6 @@
 - AnlagenKwk.yaml
 
 
-- EinheitenGenehmigung.yaml
 - EinheitenWind.yaml
 - EinheitenSolar.yaml
 - EinheitenBiomasse.yaml

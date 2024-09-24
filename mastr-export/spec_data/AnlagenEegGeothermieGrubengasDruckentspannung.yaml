@@ -1,5 +1,5 @@
 root: AnlagenEegGeothermieGrubengasDruckentspannung
-element: AnlagenEegGeothermieGrubengasDruckentspannung
+element: AnlageEegGeothermieGrubengasDruckentspannung
 primary: EegMaStRNummer
 without_rowid: true
 fields:
