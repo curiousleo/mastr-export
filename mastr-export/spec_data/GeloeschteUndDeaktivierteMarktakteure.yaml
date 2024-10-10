@@ -3,7 +3,7 @@ element: GeloeschteUndDeaktivierteMarktakteure
 primary: MarktakteurMastrNummer
 fields:
   - name: MarktakteurMastrNummer
-  - name: DatumLetzeAktualisierung
+  - name: DatumLetzteAktualisierung
     xsd: dateTime
   - name: MarktakteurStatus
     index: true
