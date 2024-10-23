@@ -122,15 +122,6 @@ fields:
   - name: NameKraftwerksblock
   - name: DatumBaubeginn
     xsd: date
-  - name: AnzeigeEinerStilllegung
-    xsd: boolean
-  - name: ArtDerStilllegung
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: DatumBeginnVorlaeufigenOderEndgueltigenStilllegung
-    xsd: date
   - name: SteigerungNettonennleistungKombibetrieb
     xsd: decimal
   - name: AnlageIstImKombibetrieb
@@ -155,7 +146,6 @@ fields:
     xsd: boolean
   - name: NettonennleistungDeutschland
     xsd: decimal
-  - name: AnteiligNutzungsberechtigte
   - name: Notstromaggregat
     xsd: boolean
   - name: Einsatzort
@@ -163,6 +153,13 @@ fields:
     references:
       table: Katalogwert
       column: Id
+  - name: ReserveartNachDemEnWG
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
+  - name: DatumDerUeberfuerungInReserve
+    xsd: date
   - name: KwkMaStRNummer
     references:
       table: AnlageKwk

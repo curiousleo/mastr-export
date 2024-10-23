@@ -118,6 +118,12 @@ fields:
     references:
       table: EinheitGenehmigung
       column: GenMastrNummer
+  # TODO: Check if this is documented.
+  - name: ReserveartNachDemEnWG
+    xsd: nonNegativeInteger
+    references:
+      table: Katalogwert
+      column: Id
   - name: Einsatzort
     xsd: nonNegativeInteger
     references:

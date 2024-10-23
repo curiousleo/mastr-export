@@ -1,4 +1,9 @@
 /out
+*.db
+*.sqlite
+*.sqlite3
+*.duckdb
+*.duckdb1
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
