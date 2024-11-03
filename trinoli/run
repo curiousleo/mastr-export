@@ -1,0 +1,44 @@
+#! /usr/bin/env bash
+set -Eeuox pipefail
+RUN_DIR="${1}"
+
+# Fail early if this file is missing
+DUCKDB_FILE=$(<"${RUN_DIR}/duckdb_file")
+
+# Store temporary trinoli build directory in a file so the ./finish script can clean it up
+TRINOLI_DIR="$(mktemp -d)"
+echo "${TRINOLI_DIR}" >"${RUN_DIR}/trinoli_dir"
+
+# Build trinoli
+cd "${TRINOLI_DIR}"
+wget -sSL https://github.com/curiousleo/mastr-export/archive/refs/heads/main.tar.gz
+tar -xzf main.tar.gz --strip-components=1
+go build -o server server.go
+TRINOLI_BIN="$(pwd)/server"
+
+# Other setup
+BIND_HOST='localhost:8080'
+EXTERNAL_HOST='1af6-2a01-4f8-1c1b-a680-00-1.ngrok-free.app'
+
+# TODO: Write readiness notification (perhaps with https://pkg.go.dev/syscall#Write)
+
+exec bwrap \
+    --ro-bind "${TRINOLI_BIN}" /opt/trinoli \
+    --ro-bind "${DUCKDB_FILE}" /var/duck.db \
+    --ro-bind /usr /usr \
+    --ro-bind /sys /sys \
+    --ro-bind /lib /lib \
+    --ro-bind /etc/resolv.conf /etc/resolv.conf \
+    --tmpfs /tmp \
+    --proc /proc \
+    --dev /dev \
+    --die-with-parent \
+    --dir /run/user/0 \
+    --clearenv \
+    --setenv DUCKDB_FILE /var/duck.db \
+    --setenv BIND_HOST "${BIND_HOST}" \
+    --setenv EXTERNAL_HOST "${EXTERNAL_HOST}" \
+    --unshare-all \
+    --share-net \
+    /opt/trinoli/server \
+    2>&1

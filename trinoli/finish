@@ -1,0 +1,7 @@
+#! /usr/bin/env bash
+set -Eeuox pipefail
+RUN_DIR="${3}"
+
+# Delete temporary trinoli build directory
+TRINOLI_DIR=$(<"${RUN_DIR}/trinoli_dir")
+rm -rf "${TRINOLI_DIR}"
