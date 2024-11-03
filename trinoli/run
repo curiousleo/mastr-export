@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 set -Eeuox pipefail
-RUN_DIR="${1}"
+RUN_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 
 # Fail early if this file is missing
 DUCKDB_FILE=$(<"${RUN_DIR}/duckdb_file")
@@ -11,8 +11,8 @@ echo "${TRINOLI_DIR}" >"${RUN_DIR}/trinoli_dir"
 
 # Build trinoli
 cd "${TRINOLI_DIR}"
-wget -sSL https://github.com/curiousleo/mastr-export/archive/refs/heads/main.tar.gz
-tar -xzf main.tar.gz --strip-components=1
+wget https://github.com/curiousleo/trinoli/archive/refs/heads/main.tar.gz
+tar -xzf main.tar.gz --touch --strip-components=1
 go build -o server server.go
 TRINOLI_BIN="$(pwd)/server"
 
@@ -40,5 +40,5 @@ exec bwrap \
     --setenv EXTERNAL_HOST "${EXTERNAL_HOST}" \
     --unshare-all \
     --share-net \
-    /opt/trinoli/server \
+    /opt/trinoli \
     2>&1

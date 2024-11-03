@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 set -Eeuox pipefail
-RUN_DIR="${3}"
+RUN_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 
 # Delete temporary trinoli build directory
 TRINOLI_DIR=$(<"${RUN_DIR}/trinoli_dir")
