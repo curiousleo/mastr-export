@@ -37,7 +37,7 @@ def cli():
     duckdb_extract.add_argument(
         "--duckdb",
         required=True,
-        help="(outpu) DuckDB database file path",
+        help="(output) DuckDB database file path",
     )
     duckdb_extract.add_argument(
         "--show-per-file-progress",

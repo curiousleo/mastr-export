@@ -13,39 +13,32 @@ First, download the latest export file. Using a download accelerator like
 $ axel --output=Gesamtdatenexport.zip "$(python -m mastr-export print-export-url)"
 ```
 
-Then, extract the export. At least one of `--parquet-dir` or `csv-dir` must be
-passed:
+Then, extract the export to DuckDB or SQLite:
 
 ```
-$ python -m mastr-export extract \
-    Gesamtdatenexport.zip \
-    --parquet-dir out/parquet \
-    --csv-dir out/csv
+$ python -m mastr-export extract-to-duckdb --help
+usage: mastr-export extract-to-duckdb [-h] --export EXPORT [--spec SPEC] --duckdb DUCKDB [--show-per-file-progress]
+
+options:
+  -h, --help            show this help message and exit
+  --export EXPORT       (input) path to the Marktstammdatenregister export ZIP file
+  --spec SPEC           (input) path to the YAML file containing the list of specs
+  --duckdb DUCKDB       (output) DuckDB database file path
+  --show-per-file-progress
+                        show a progress bar for each individual file?
 ```
 
-Optionally, you can now package the data up in databases: the Parquet files can
-be assembled into a DuckDB database file, and the CSV files into a SQLite
-database file.
-
-The `extract` command will output the appropriate instructions. If you passed
-`--parquet-dir`, you'll get:
+... or for SQLite:
 
 ```
-Parquet export finished. You can import the Parquet files into a DuckDB file
-called 'bnetza.duckdb' with the following command:
+$ python -m mastr-export extract-to-sqlite --help 
+usage: mastr-export extract-to-sqlite [-h] --export EXPORT [--spec SPEC] --sqlite SQLITE [--show-per-file-progress]
 
-$ duckdb 'bnetza.duckdb' -init 'out/parquet/import-duckdb.sql' -bail -batch -echo -no-stdin
-```
-
-... and if you passed `--csv-dir`, it will print:
-
-```
-CSV export finished. You can import the CSV files into a SQLite file
-called 'bnetza.sqlite3' with the following command:
-
-$ sqlite3 -bail 'bnetza.sqlite3' <'out/csv/import-sqlite.sql' 
-
-You can optionally add common indices with this command:
-
-$ sqlite3 -bail 'bnetza.sqlite3' <'out/csv/index-sqlite.sql'
+options:
+  -h, --help            show this help message and exit
+  --export EXPORT       (input) path to the Marktstammdatenregister export ZIP file
+  --spec SPEC           (input) path to the YAML file containing the list of specs
+  --sqlite SQLITE       (output) SQLite database file path
+  --show-per-file-progress
+                        show a progress bar for each individual file?
 ```
