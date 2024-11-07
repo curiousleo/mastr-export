@@ -1,20 +1,13 @@
 #! /usr/bin/env bash
 set -Eeuox pipefail
-RUN_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+RUN_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
 # Fail early if this file is missing
 DUCKDB_FILE=$(<"${RUN_DIR}/duckdb_file")
 
-# Store temporary trinoli build directory in a file so the ./finish script can clean it up
-TRINOLI_DIR="$(mktemp -d)"
-echo "${TRINOLI_DIR}" >"${RUN_DIR}/trinoli_dir"
-
 # Build trinoli
-cd "${TRINOLI_DIR}"
-wget https://github.com/curiousleo/trinoli/archive/refs/heads/main.tar.gz
-tar -xzf main.tar.gz --touch --strip-components=1
-go build -o server server.go
-TRINOLI_BIN="$(pwd)/server"
+GOPROXY=direct GOBIN="${RUN_DIR}/bin" go install github.com/curiousleo/trinoli@main
+TRINOLI_BIN="${RUN_DIR}/bin/trinoli"
 
 # Other setup
 BIND_HOST='localhost:8080'
