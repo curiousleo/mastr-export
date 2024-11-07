@@ -18,6 +18,9 @@ dependencies = ["certifi", "duckdb", "polars[pyarrow]", "PyYAML", "tqdm"]
 Homepage = "https://github.com/marktstammdatenregister-dev/mastr-export"
 Issues = "https://github.com/marktstammdatenregister-dev/mastr-export/issues"
 
+[project.scripts]
+cli = "mastr_export.cli:cli"
+
 [tool.hatch.build.targets.wheel]
-packages = ["mastr-export/"]
-artifacts = ["mastr-export/spec_data/*.yaml"]
+packages = ["mastr_export/"]
+artifacts = ["mastr_export/spec_data/*.yaml"]

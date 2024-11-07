@@ -228,6 +228,3 @@ attach '{sqlite_file}' as target (type sqlite);
 copy from database source to target;
 """,
         )
-
-
-cli()
