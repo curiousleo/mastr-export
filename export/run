@@ -2,6 +2,11 @@
 set -Eeuox pipefail
 RUN_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
+# TODO: Clean this up occasionally, perhaps in ./finish
+# Where to store exports
+DATA_DIR="/var/opt/mastr-export"
+mkdir -p "${DATA_DIR}"
+
 # Wait until the next hour has passed, with 60s jitter
 snooze -H'*' -J60
 
@@ -9,22 +14,27 @@ snooze -H'*' -J60
 function mastr() {
     pipx run --spec='git+https://github.com/curiousleo/mastr-export@main' cli "$@"
 }
-EXPORT='bnetza_mastr.xml.zip'
-DUCKDB='bnetza_mastr.duckdb1'
 
 # Check if there is a newer version of the export
 LATEST_URL="$(mastr print-export-url)"
-LATEST_URL_FILE="${RUN_DIR}/latest-url"
-if [[ -f "${LATEST_URL_FILE}" && "<(${LATEST_URL_FILE})" = "${LATEST_URL}" ]]; then
-    # Nothing to do
-    exit 0
+LATEST_DATE="$(printf '%s\n' "${LATEST_URL}" | sed 's/^.*_\([0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]\)_.*$/\1/')"
+LATEST_DIR="${DATA_DIR}/${LATEST_DATE}"
+ZIP="${LATEST_DIR}/export.xml.zip"
+DUCKDB="${LATEST_DIR}/export.duckdb1"
+
+# Download file if missing
+if ! [[ -f "${ZIP}" ]]; then
+    axel --quiet --output="${ZIP}" "${LATEST_URL}"
 fi
 
-# Download and extract the new export
-axel --quiet --output="${EXPORT}" "$(mastr print-export-url)"
-mastr extract-to-duckdb --export "${EXPORT}" --duckdb "${DUCKDB}"
+# Extract DuckDB if missing, and restart trinoli
+if ! [[ -f "${DUCKDB}" ]]; then
+    rm -f "${DUCKDB}.tmp"
+    mastr extract-to-duckdb --export "${ZIP}" --duckdb "${DUCKDB}.tmp"
+    mv "${DUCKDB}.tmp" "${DUCKDB}"
 
-# Restart trinoli
-TRINOLI_SVC_DIR="${RUN_DIR}/../trinoli"
-echo "${DUCKDB}" >"${TRINOLI_SVC_DIR}/duckdb-file"
-s6-svc -wr "${TRINOLI_SVC_DIR}"
+    # Restart trinoli
+    TRINOLI_SVC_DIR="${RUN_DIR}/../trinoli"
+    echo "${DUCKDB}" >"${TRINOLI_SVC_DIR}/duckdb-file"
+    s6-svc -wr "${TRINOLI_SVC_DIR}"
+fi
