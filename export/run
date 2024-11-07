@@ -24,6 +24,7 @@ DUCKDB="${LATEST_DIR}/export.duckdb1"
 
 # Download file if missing
 if ! [[ -f "${ZIP}" ]]; then
+    mkdir -p "${LATEST_DIR}"
     axel --quiet --output="${ZIP}" "${LATEST_URL}"
 fi
 
