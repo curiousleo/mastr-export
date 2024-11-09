@@ -14,6 +14,7 @@ BIND_HOST='localhost:8080'
 EXTERNAL_HOST='1af6-2a01-4f8-1c1b-a680-00-1.ngrok-free.app'
 
 # TODO: Write readiness notification (perhaps with https://pkg.go.dev/syscall#Write)
+# TODO: Consider using s6-envdir for environment variables, including DUCKDB_FILE
 
 exec bwrap \
     --ro-bind "${TRINOLI_BIN}" /opt/trinoli \
