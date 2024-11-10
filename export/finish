@@ -8,4 +8,4 @@ mkdir -p "${DATA_DIR}"
 find "${DATA_DIR}" -maxdepth 1 -type d -regex '.*/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]' |
   sort --reverse |
   tail --lines=+3 |
-  xargs rm -rf
+  xargs --no-run-if-empty rm -rf
