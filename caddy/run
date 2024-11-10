@@ -1,0 +1,5 @@
+#! /usr/bin/env bash
+set -Eeuox pipefail
+RUN_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
+caddy run --config "${RUN_DIR}/Caddyfile"
