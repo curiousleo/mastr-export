@@ -12,27 +12,30 @@ function mastr() {
     pipx run --spec='git+https://github.com/curiousleo/mastr-export@main' cli "$@"
 }
 
-# Check if there is a newer version of the export
+# Get latest URL
 LATEST_URL="$(mastr print-export-url)"
 LATEST_DATE="$(printf '%s\n' "${LATEST_URL}" | sed 's/^.*_\([0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]\)_.*$/\1/')"
 LATEST_DIR="${DATA_DIR}/${LATEST_DATE}"
+
+# Exit if DuckDB file already exists
 ZIP="${LATEST_DIR}/export.xml.zip"
 DUCKDB="${LATEST_DIR}/export.duckdb1"
+if [[ -f "${DUCKDB}" ]]; then
+    exit 0
+fi
 
-# Download file if missing
+# Download export file if missing
 if ! [[ -f "${ZIP}" ]]; then
     mkdir -p "${LATEST_DIR}"
     axel --quiet --output="${ZIP}" "${LATEST_URL}"
 fi
 
-# Extract DuckDB if missing, and restart trinoli
-if ! [[ -f "${DUCKDB}" ]]; then
-    rm -f "${DUCKDB}.tmp"
-    mastr extract-to-duckdb --export "${ZIP}" --duckdb "${DUCKDB}.tmp"
-    mv "${DUCKDB}.tmp" "${DUCKDB}"
+# Extract to DuckDB
+rm -f "${DUCKDB}.tmp"
+mastr extract-to-duckdb --export "${ZIP}" --duckdb "${DUCKDB}.tmp"
+mv "${DUCKDB}.tmp" "${DUCKDB}"
 
-    # Restart trinoli
-    TRINOLI_SVC_DIR="${RUN_DIR}/../trinoli"
-    echo "${DUCKDB}" >"${TRINOLI_SVC_DIR}/duckdb-file"
-    s6-svc -r "${TRINOLI_SVC_DIR}"
-fi
+# Restart trinoli
+TRINOLI_SVC_DIR="${RUN_DIR}/../trinoli"
+echo "${DUCKDB}" >"${TRINOLI_SVC_DIR}/duckdb-file"
+s6-svc -r "${TRINOLI_SVC_DIR}"
