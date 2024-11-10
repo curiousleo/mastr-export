@@ -1,9 +1,6 @@
 #! /usr/bin/env bash
 set -Eeuox pipefail
 RUN_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
-
-# TODO: Clean this up occasionally, perhaps in ./finish
-# Where to store exports
 DATA_DIR="/var/opt/mastr-export"
 mkdir -p "${DATA_DIR}"
 
