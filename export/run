@@ -37,5 +37,5 @@ mv "${DUCKDB}.tmp" "${DUCKDB}"
 
 # Restart trinoli
 TRINOLI_SVC_DIR="${RUN_DIR}/../trinoli"
-echo "${DUCKDB}" >"${TRINOLI_SVC_DIR}/duckdb-file"
+echo "${DUCKDB}" >"${TRINOLI_SVC_DIR}/duckdb_file"
 s6-svc -r "${TRINOLI_SVC_DIR}"
