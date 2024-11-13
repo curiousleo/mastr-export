@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Optional
+from typing import Generator, Optional
 import polars as pl
 import os.path
 import yaml
@@ -101,7 +101,7 @@ class Spec:
         self.primary = primary
         self.without_rowid = without_rowid
 
-    def sqlite_schema(self):
+    def sqlite_schema(self) -> str:
         columns = ",\n    ".join(
             field.sqlite_schema() for field in self.fields.values()
         )
@@ -116,14 +116,14 @@ class Spec:
 ) strict{", without rowid" if self.without_rowid else ""};
 """
 
-    def sqlite_indices(self):
+    def sqlite_indices(self) -> list[str]:
         return [
             field.sqlite_index(self.element)
             for field in self.fields.values()
             if field.index
         ]
 
-    def duckdb_schema(self):
+    def duckdb_schema(self) -> str:
         columns = ",\n    ".join(
             field.duckdb_schema() for field in self.fields.values()
         )
@@ -145,12 +145,12 @@ class Specs:
     def __init__(self, specs):
         self.specs = specs
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[Spec]:
         for d in self.specs:
             yield d
 
     @staticmethod
-    def load(spec_file):
+    def load(spec_file) -> Spec:
         spec_path = os.path.dirname(spec_file)
         specs = [
             Spec(**yaml.safe_load(open(os.path.join(spec_path, descr))))
@@ -158,7 +158,7 @@ class Specs:
         ]
         return Specs(specs)
 
-    def for_file(self, filename):
+    def for_file(self, filename) -> Spec:
         for descr in self.specs:
             if filename.startswith(descr.root):
                 return descr
