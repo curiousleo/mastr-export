@@ -1,5 +1,6 @@
 import sqlite3
-from .spec import Specs
+from typing import Generator
+from .spec import Spec, Specs
 from .parser import Parser
 
 from . import download
@@ -125,10 +126,10 @@ def print_runtime(message, action, arg):
     print(f"took {str(delta)}")
 
 
-def extract(specs: Specs, export, show_per_file_progress):
+def extract(specs: Specs, export, show_per_file_progress) -> Generator[tuple[str, Spec, pl.DataFrame]]:
     with zipfile.ZipFile(export) as z:
         # Sanity check: do we know how to handle all the files in the export?
-        spec_to_xml_files = {}
+        spec_to_xml_files: dict[str, list[zipfile.ZipInfo]] = {}
         for i in z.infolist():
             d = specs.for_file(i.filename)
             if not i.filename.endswith(".xml"):
@@ -136,10 +137,7 @@ def extract(specs: Specs, export, show_per_file_progress):
             spec_to_xml_files[d.element] = spec_to_xml_files.get(d.element, []) + [i]
 
         # Assemble the list of files in the order of their specs.
-        xml_files = []
-        for d in specs:
-            for i in spec_to_xml_files[d.element]:
-                xml_files.append((i, d))
+        xml_files = [(i, d) for i in spec_to_xml_files[d.element] for d in specs]
 
         # Convert XML to DataFrames
         xml_files_progress = tqdm(xml_files, desc="Files")
@@ -165,7 +163,7 @@ def extract(specs: Specs, export, show_per_file_progress):
                     (name, field.polars_type) for name, field in d.fields.items()
                 ),
             )
-            yield d, df
+            yield i.filename, d, df
 
 
 def extract_to_duckdb(spec, export, duckdb_file, show_per_file_progress):
@@ -174,9 +172,13 @@ def extract_to_duckdb(spec, export, duckdb_file, show_per_file_progress):
         for spec in specs.specs:
             duckdb_con.sql(spec.duckdb_schema())
 
-    for d, df in extract(specs, export, show_per_file_progress):
+    for f, d, df in extract(specs, export, show_per_file_progress):
         with duckdb.connect(duckdb_file) as duckdb_con:
-            duckdb_con.sql(f"""INSERT INTO "{d.element}" SELECT * FROM df""")
+            try:
+                duckdb_con.sql(f"""INSERT INTO "{d.element}" SELECT * FROM df""")
+            except duckdb.ConstraintException as e:
+                e.add_note(f"File: %{f}")
+                raise
 
     with duckdb.connect(duckdb_file) as duckdb_con:
         duckdb_con.sql("vacuum analyze")
@@ -189,7 +191,7 @@ def extract_to_sqlite(spec, export, sqlite_file, show_per_file_progress):
         for spec in specs.specs:
             con.execute(spec.sqlite_schema())
 
-    for d, df in extract(specs, export, show_per_file_progress):
+    for f, d, df in extract(specs, export, show_per_file_progress):
         with con:
             columns = ", ".join(f"'{name}'" for name in df.columns)
             values = ", ".join("?" for _ in range(len(df.columns)))
