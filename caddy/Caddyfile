@@ -1,3 +1,4 @@
 trino.marktstammdatenregister.dev {
   reverse_proxy /v1/* :8080
+  reverse_proxy /_metrics/* :9090
 }

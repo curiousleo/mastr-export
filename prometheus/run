@@ -1,0 +1,5 @@
+#! /usr/bin/env bash
+set -Eeuox pipefail
+RUN_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
+prometheus --config.file="${RUN_DIR}/prometheus.yaml" --web.external-url='/_metrics/'
