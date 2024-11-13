@@ -126,7 +126,9 @@ def print_runtime(message, action, arg):
     print(f"took {str(delta)}")
 
 
-def extract(specs: Specs, export, show_per_file_progress) -> Generator[tuple[str, Spec, pl.DataFrame]]:
+def extract(
+    specs: Specs, export, show_per_file_progress
+) -> Generator[tuple[str, Spec, pl.DataFrame]]:
     with zipfile.ZipFile(export) as z:
         # Sanity check: do we know how to handle all the files in the export?
         spec_to_xml_files: dict[str, list[zipfile.ZipInfo]] = {}
@@ -196,7 +198,11 @@ def extract_to_sqlite(spec, export, sqlite_file, show_per_file_progress):
             columns = ", ".join(f"'{name}'" for name in df.columns)
             values = ", ".join("?" for _ in range(len(df.columns)))
             stmt = f"""insert into "{d.element}" ({columns}) values ({values})"""
-            con.executemany(stmt, df.iter_rows())
+            try:
+                con.executemany(stmt, df.iter_rows())
+            except sqlite3.IntegrityError as e:
+                e.add_note(f"File: %{f}")
+                raise
 
     with con:
         con.execute("analyze")
