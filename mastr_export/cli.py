@@ -177,13 +177,13 @@ def extract_to_duckdb(spec, export, duckdb_file, show_per_file_progress):
     for f, d, df in extract(specs, export, show_per_file_progress):
         with duckdb.connect(duckdb_file) as duckdb_con:
             try:
-                duckdb_con.sql(f"""INSERT INTO "{d.element}" SELECT * FROM df""")
+                duckdb_con.sql(f"""INSERT OR IGNORE INTO "{d.element}" SELECT * FROM df""")
             except duckdb.ConstraintException as e:
                 e.add_note(f"File: %{f}")
                 raise
 
     with duckdb.connect(duckdb_file) as duckdb_con:
-        duckdb_con.sql("vacuum analyze")
+        duckdb_con.sql("VACUUM ANALYZE")
 
 
 def extract_to_sqlite(spec, export, sqlite_file, show_per_file_progress):
@@ -197,7 +197,7 @@ def extract_to_sqlite(spec, export, sqlite_file, show_per_file_progress):
         with con:
             columns = ", ".join(f"'{name}'" for name in df.columns)
             values = ", ".join("?" for _ in range(len(df.columns)))
-            stmt = f"""insert into "{d.element}" ({columns}) values ({values})"""
+            stmt = f"""INSERT INTO "{d.element}" ({columns}) VALUES ({values}) ON CONFLICT DO NOTHING"""
             try:
                 con.executemany(stmt, df.iter_rows())
             except sqlite3.IntegrityError as e:
@@ -205,8 +205,8 @@ def extract_to_sqlite(spec, export, sqlite_file, show_per_file_progress):
                 raise
 
     with con:
-        con.execute("analyze")
-        con.execute("vacuum")
+        con.execute("ANALYZE")
+        con.execute("VACUUM")
 
 
 def export_from_duckdb(duckdb_file, sqlite_file, csv_dir, parquet_dir):
