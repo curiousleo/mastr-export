@@ -180,7 +180,10 @@ def extract_to_duckdb(spec, export, duckdb_file, show_per_file_progress):
     for f, d, df in extract(specs, export, show_per_file_progress):
         with duckdb.connect(duckdb_file) as duckdb_con:
             try:
-                duckdb_con.sql(f"""INSERT OR IGNORE INTO "{d.element}" SELECT * FROM df""")
+                if d.primary is None:
+                    duckdb_con.sql(f"""INSERT INTO "{d.element}" SELECT * FROM df""")
+                else:
+                    duckdb_con.sql(f"""INSERT OR IGNORE INTO "{d.element}" SELECT * FROM df""")
             except duckdb.ConstraintException as e:
                 e.add_note(f"File: %{f}")
                 raise
@@ -200,7 +203,9 @@ def extract_to_sqlite(spec, export, sqlite_file, show_per_file_progress):
         with con:
             columns = ", ".join(f"'{name}'" for name in df.columns)
             values = ", ".join("?" for _ in range(len(df.columns)))
-            stmt = f"""INSERT INTO "{d.element}" ({columns}) VALUES ({values}) ON CONFLICT DO NOTHING"""
+            stmt = f"""INSERT INTO "{d.element}" ({columns}) VALUES ({values})"""
+            if d.primary is not None:
+                stmt += " ON CONFLICT DO NOTHING"
             try:
                 con.executemany(stmt, df.iter_rows())
             except sqlite3.IntegrityError as e:
