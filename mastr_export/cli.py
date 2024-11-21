@@ -1,5 +1,5 @@
 import sqlite3
-from typing import Generator
+from typing import Iterator
 from .spec import Spec, Specs
 from .parser import Parser
 
@@ -128,7 +128,7 @@ def print_runtime(message, action, arg):
 
 def extract(
     specs: Specs, export, show_per_file_progress
-) -> Generator[tuple[str, Spec, pl.DataFrame]]:
+) -> Iterator[tuple[str, Spec, pl.DataFrame]]:
     with zipfile.ZipFile(export) as z:
         # Sanity check: do we know how to handle all the files in the export?
         spec_to_xml_files: dict[str, list[zipfile.ZipInfo]] = {}

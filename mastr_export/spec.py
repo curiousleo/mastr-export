@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Generator, Optional
+from typing import Iterator, Optional
 import polars as pl
 import os.path
 import yaml
@@ -145,7 +145,7 @@ class Specs:
     def __init__(self, specs):
         self.specs = specs
 
-    def __iter__(self) -> Generator[Spec]:
+    def __iter__(self) -> Iterator[Spec]:
         for d in self.specs:
             yield d
 
