@@ -139,7 +139,10 @@ def extract(
             spec_to_xml_files[d.element] = spec_to_xml_files.get(d.element, []) + [i]
 
         # Assemble the list of files in the order of their specs.
-        xml_files = [(i, d) for i in spec_to_xml_files[d.element] for d in specs]
+        xml_files: list[tuple[zipfile.ZipInfo, Spec]] = []
+        for d in specs:
+            for i in spec_to_xml_files[d.element]:
+                xml_files.append((i, d))
 
         # Convert XML to DataFrames
         xml_files_progress = tqdm(xml_files, desc="Files")
