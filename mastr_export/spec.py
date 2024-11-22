@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import date, datetime
 from typing import Iterator, Optional
 import polars as pl
@@ -58,9 +60,9 @@ class Field:
     name: str
     index: bool
     xsd: str
-    references: Reference
+    references: Optional[Reference]
 
-    def __init__(self, name, index=None, xsd="string", references=None):
+    def __init__(self, name, index=False, xsd="string", references=None):
         self.name = name
         self.index = index
         self.xsd = xsd
@@ -150,7 +152,7 @@ class Specs:
             yield d
 
     @staticmethod
-    def load(spec_file) -> Spec:
+    def load(spec_file) -> Specs:
         spec_path = os.path.dirname(spec_file)
         specs = [
             Spec(**yaml.safe_load(open(os.path.join(spec_path, descr))))
