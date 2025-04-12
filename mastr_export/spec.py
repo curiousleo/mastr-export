@@ -7,20 +7,38 @@ import os.path
 import yaml
 
 XSD_TO_POLARS = {
-    "boolean": pl.Boolean,
+    # Date and time
     "date": pl.Date,
     "dateTime": pl.Datetime(time_unit="us", time_zone=None),
+    # Float
+    "float": pl.Float32,
+    "double": pl.Float64,
     "decimal": pl.Float64,
+    # Int
+    "byte": pl.Int8,
+    "short": pl.Int16,
+    "int": pl.Int32,
     "nonNegativeInteger": pl.UInt64,
+    # Other
+    "boolean": pl.Boolean,
     "string": pl.Utf8,
 }
 
 XSD_TO_PYTHON = {
-    "boolean": bool,
+    # Date and time
     "date": date.fromisoformat,
     "dateTime": datetime.fromisoformat,
+    # Float
+    "float": float,
+    "double": float,
     "decimal": float,
+    # Int
+    "byte": int,
+    "short": int,
+    "int": int,
     "nonNegativeInteger": int,
+    # Other
+    "boolean": bool,
     "string": lambda s: s,
 }
 
@@ -35,11 +53,20 @@ XSD_TO_SQLITE = {
 
 
 XSD_TO_DUCKDB = {
-    "boolean": "boolean",
+    # Date and time
     "date": "date",
     "dateTime": "timestamp",
+    # Float
+    "float": "float",
+    "double": "double",
     "decimal": "double",
-    "nonNegativeInteger": "bigint",
+    # Int
+    "byte": "tinyint",
+    "short": "smallint",
+    "int": "integer",
+    "nonNegativeInteger": "ubigint",
+    # Other
+    "boolean": "boolean",
     "string": "text",
 }
 
@@ -51,6 +78,12 @@ class Reference:
     def __init__(self, table, column):
         self.table = table
         self.column = column
+
+    def to_object(self):
+        return {
+            "table": self.table,
+            "column": self.column,
+        }
 
     def sqlite_schema(self):
         return f"""references "{self.table}"("{self.column}")"""
@@ -69,6 +102,18 @@ class Field:
         self.references = Reference(**references) if references is not None else None
         self.polars_type = XSD_TO_POLARS[self.xsd]
         self.python_type = XSD_TO_PYTHON[self.xsd]
+
+    def to_object(self):
+        object = {
+            "name": self.name,
+        }
+        if self.xsd != "string":
+            object["xsd"] = self.xsd
+        if self.index:
+            object["index"] = self.index
+        if self.references is not None:
+            object["references"] = self.references.to_object()
+        return object
 
     def convert(self, s):
         return self.python_type(s) if s is not None else None
@@ -102,6 +147,18 @@ class Spec:
 
         self.primary = primary
         self.without_rowid = without_rowid
+
+    def to_object(self):
+        object = {
+            "root": self.root,
+            "element": self.element,
+            "fields": [field.to_object() for field in self.fields.values()],
+        }
+        if self.without_rowid:
+            object["without_rowid"] = self.without_rowid
+        if self.primary:
+            object["primary"] = self.primary
+        return object
 
     def sqlite_schema(self) -> str:
         columns = ",\n    ".join(
@@ -154,11 +211,52 @@ class Specs:
     @staticmethod
     def load(spec_file) -> Specs:
         spec_path = os.path.dirname(spec_file)
+        spec_items = yaml.safe_load(open(spec_file))
         specs = [
-            Spec(**yaml.safe_load(open(os.path.join(spec_path, descr))))
-            for descr in yaml.safe_load(open(spec_file))
+            Spec(
+                primary=descr.get("primary", None),
+                **yaml.safe_load(open(os.path.join(spec_path, descr["spec"]))),
+            )
+            for descr in spec_items
         ]
         return Specs(specs)
+
+    def save(self, spec_file):
+        # Sanity check `spec_file`
+        failed = False
+
+        spec_items = yaml.safe_load(open(spec_file))
+        spec_items = {spec["spec"]: spec.get("primary", None) for spec in spec_items}
+        for spec in self.specs:
+            f = f"{spec.root}.yaml"
+            if f not in spec_items:
+                print(f"Add {f} to {spec_file}")
+                failed = True
+                continue
+            if spec_items[f] is not None and spec_items[f] not in spec.fields:
+                print(
+                    f"The primary key configured for {spec.element} is {spec_items[f]}, but it is not a field of the spec"
+                )
+                failed = True
+
+        for spec in spec_items.keys():
+            found = False
+            for s in self.specs:
+                if spec == f"{s.root}.yaml":
+                    found = True
+                    break
+            if not found:
+                print(f"Remove {spec} from {spec_file}")
+                failed = True
+
+        assert not failed
+
+        # Actually save the specs
+        spec_path = os.path.dirname(spec_file)
+        os.makedirs(spec_path, exist_ok=True)
+        p = lambda spec: os.path.join(spec_path, spec.root) + ".yaml"
+        for spec in self.specs:
+            yaml.safe_dump(spec.to_object(), open(p(spec), "w"), sort_keys=False)
 
     def for_file(self, filename) -> Spec:
         for descr in self.specs:

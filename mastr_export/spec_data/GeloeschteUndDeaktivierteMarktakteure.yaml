@@ -1,5 +1,5 @@
 root: GeloeschteUndDeaktivierteMarktakteure
-element: GeloeschteUndDeaktivierteMarktakteure
+element: GeloeschterUndDeaktivierterMarktakteur
 primary: MarktakteurMastrNummer
 fields:
   - name: MarktakteurMastrNummer
