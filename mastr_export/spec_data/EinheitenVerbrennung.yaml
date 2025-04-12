@@ -1,173 +1,119 @@
-root: EinheitenVerbrennung # docs say EineitenVerbrennung
-element: EinheitVerbrennung # docs say EineitVerbrennung
-primary: EinheitMastrNummer
+root: EinheitenVerbrennung
+element: EinheitVerbrennung
 fields:
-  - name: EinheitMastrNummer
-  - name: DatumLetzteAktualisierung
-    xsd: dateTime
-  - name: LokationMaStRNummer
-    references:
-      table: Lokation
-      column: MastrNummer
-  - name: NetzbetreiberpruefungStatus
-    xsd: nonNegativeInteger
-  - name: NetzbetreiberpruefungDatum
-    xsd: date
-  - name: AnlagenbetreiberMastrNummer
-    references:
-      table: Marktakteur
-      column: MastrNummer
-  - name: Land
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Bundesland
-    index: true
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Landkreis
-  - name: Gemeinde
-  - name: Gemeindeschluessel
-  - name: Postleitzahl
-    index: true
-  - name: Gemarkung
-  - name: FlurFlurstuecknummern
-  - name: Strasse
-  - name: StrasseNichtGefunden
-    xsd: boolean
-  - name: Hausnummer
-  - name: Hausnummer_nv
-    xsd: boolean
-  - name: HausnummerNichtGefunden
-    xsd: boolean
-  - name: Adresszusatz
-  - name: Ort
-    index: true
-  - name: Laengengrad
-    xsd: decimal
-  - name: Breitengrad
-    xsd: decimal
-  - name: Registrierungsdatum
-  - name: GeplantesInbetriebnahmedatum
-  - name: Inbetriebnahmedatum
-    index: true
-  - name: DatumEndgueltigeStilllegung
-  - name: DatumBeginnVoruebergehendeStilllegung
-  - name: DatumWiederaufnahmeBetrieb
-  - name: EinheitSystemstatus
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: EinheitBetriebsstatus
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: BestandsanlageMastrNummer
-  - name: NichtVorhandenInMigriertenEinheiten
-    xsd: boolean
-  - name: AltAnlagenbentreiberMastrNummer
-  - name: DatumDesBetreiberwechsels
-    xsd: date
-  - name: DatumRegistrierungDesBetreiberwechsels
-    xsd: date
-  - name: NameStromerzeugungseinheit
-  - name: Weic
-  - name: Weic_nv
-    xsd: boolean
-  - name: WeicDisplayName
-  - name: Kraftwerksnummer
-  - name: Kraftwerksnummer_nv
-    xsd: boolean
-  - name: Energietraeger
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Bruttoleistung
-    index: true
-    xsd: decimal
-  - name: Nettonennleistung
-    #index: true
-    xsd: decimal
-  - name: AnschlussAnHoechstOderHochSpannung
-    xsd: boolean
-  - name: Schwarzstartfaehigkeit
-    xsd: boolean
-  - name: Inselbetriebsfaehigkeit
-    xsd: boolean
-  - name: Einsatzverantwortlicher
-  - name: FernsteuerbarkeitNb
-    xsd: boolean
-  - name: FernsteuerbarkeitDv
-    xsd: boolean
-  - name: FernsteuerbarkeitDr
-    xsd: boolean
-  - name: Einspeisungsart
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: PraequalifiziertFuerRegelenergie
-    xsd: boolean
-  - name: GenMastrNummer
-    references:
-      table: EinheitGenehmigung
-      column: GenMastrNummer
-  - name: NameKraftwerk
-  - name: NameKraftwerksblock
-  - name: DatumBaubeginn
-    xsd: date
-  - name: SteigerungNettonennleistungKombibetrieb
-    xsd: decimal
-  - name: AnlageIstImKombibetrieb
-    xsd: boolean
-  - name: MastrNummernKombibetrieb
-  - name: NetzreserveAbDatum
-    xsd: date
-  - name: SicherheitsbereitschaftAbDatum
-    xsd: date
-  - name: Hauptbrennstoff
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: WeitererHauptbrennstoff
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: WeitereBrennstoffe # docs say this is an int, but it's a list of strings
-  - name: BestandteilGrenzkraftwerk
-    xsd: boolean
-  - name: NettonennleistungDeutschland
-    xsd: decimal
-  - name: Notstromaggregat
-    xsd: boolean
-  - name: Einsatzort
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: ReserveartNachDemEnWG
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: DatumDerUeberfuerungInReserve
-    xsd: date
-  - name: KwkMaStRNummer
-    references:
-      table: AnlageKwk
-      column: KwkMaStRNummer
-  - name: Technologie
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: AusschliesslicheVerwendungImKombibetrieb
-    xsd: boolean
+- name: EinheitMastrNummer
+- name: DatumLetzteAktualisierung
+  xsd: dateTime
+- name: LokationMaStRNummer
+- name: NetzbetreiberpruefungStatus
+  xsd: short
+- name: NetzbetreiberpruefungDatum
+  xsd: date
+- name: AnlagenbetreiberMastrNummer
+- name: Land
+  xsd: short
+- name: Bundesland
+  xsd: short
+- name: Landkreis
+- name: Gemeinde
+- name: Gemeindeschluessel
+- name: Postleitzahl
+- name: Strasse
+- name: Gemarkung
+- name: FlurFlurstuecknummern
+- name: StrasseNichtGefunden
+  xsd: boolean
+- name: Hausnummer
+- name: Hausnummer_nv
+  xsd: boolean
+- name: HausnummerNichtGefunden
+  xsd: boolean
+- name: Ort
+- name: Laengengrad
+  xsd: float
+- name: Breitengrad
+  xsd: float
+- name: Registrierungsdatum
+  xsd: date
+- name: Inbetriebnahmedatum
+  xsd: date
+- name: DatumEndgueltigeStilllegung
+  xsd: date
+- name: DatumBeginnVoruebergehendeStilllegung
+  xsd: date
+- name: DatumWiederaufnahmeBetrieb
+  xsd: date
+- name: GeplantesInbetriebnahmedatum
+  xsd: date
+- name: EinheitSystemstatus
+  xsd: short
+- name: EinheitBetriebsstatus
+  xsd: byte
+- name: BestandsanlageMastrNummer
+- name: NichtVorhandenInMigriertenEinheiten
+  xsd: boolean
+- name: AltAnlagenbetreiberMastrNummer
+- name: DatumDesBetreiberwechsels
+  xsd: date
+- name: DatumRegistrierungDesBetreiberwechsels
+  xsd: date
+- name: NameStromerzeugungseinheit
+- name: Weic
+- name: Weic_nv
+  xsd: boolean
+- name: WeicDisplayName
+- name: Kraftwerksnummer
+- name: Kraftwerksnummer_nv
+  xsd: boolean
+- name: Energietraeger
+  xsd: short
+- name: Bruttoleistung
+  xsd: float
+- name: Nettonennleistung
+  xsd: float
+- name: AnschlussAnHoechstOderHochSpannung
+  xsd: boolean
+- name: Einsatzverantwortlicher
+- name: FernsteuerbarkeitNb
+  xsd: boolean
+- name: FernsteuerbarkeitDv
+  xsd: boolean
+- name: Einspeisungsart
+  xsd: short
+- name: GenMastrNummer
+- name: ReserveartNachDemEnWG
+  xsd: short
+- name: DatumUeberfuehrungInReserve
+  xsd: date
+- name: NameKraftwerk
+- name: NameKraftwerksblock
+- name: AnlageIstImKombibetrieb
+  xsd: boolean
+- name: Hauptbrennstoff
+  xsd: short
+- name: BestandteilGrenzkraftwerk
+  xsd: boolean
+- name: WeitererHauptbrennstoff
+  xsd: short
+- name: WeitereBrennstoffe
+- name: Notstromaggregat
+  xsd: boolean
+- name: KwkMaStRNummer
+- name: Einsatzort
+  xsd: short
+- name: Technologie
+  xsd: short
+- name: SteigerungNettonennleistungKombibetrieb
+  xsd: float
+- name: Adresszusatz
+- name: MastrNummernKombibetrieb
+- name: DatumBaubeginn
+  xsd: date
+- name: NetzreserveAbDatum
+  xsd: date
+- name: SicherheitsbereitschaftAbDatum
+  xsd: date
+- name: NettonennleistungDeutschland
+  xsd: float
+- name: AusschliesslicheVerwendungImKombibetrieb
+  xsd: boolean

@@ -1,20 +1,12 @@
 root: GeloeschteUndDeaktivierteEinheiten
 element: GeloeschteUndDeaktivierteEinheit
-primary: EinheitMastrNummer
-without_rowid: true
 fields:
-  - name: DatumLetzteAktualisierung
-    xsd: dateTime
-  - name: EinheitMastrNummer
-  - name: Einheittyp
-    xsd: nonNegativeInteger
-  - name: EinheitSystemstatus
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: EinheitBetriebsstatus
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
+- name: DatumLetzteAktualisierung
+  xsd: dateTime
+- name: EinheitMastrNummer
+- name: Einheittyp
+  xsd: byte
+- name: EinheitSystemstatus
+  xsd: short
+- name: EinheitBetriebsstatus
+  xsd: byte

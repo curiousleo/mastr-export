@@ -1,19 +1,12 @@
 root: AnlagenGasSpeicher
 element: AnlageGasSpeicher
-primary: MaStRNummer
-without_rowid: true
 fields:
-  - name: MaStRNummer
-  - name: DatumLetzteAktualisierung
-    xsd: dateTime
-  - name: Speichername
-  - name: Registrierungsdatum
-    #index: true
-    xsd: date
-  - name: AnlageBetriebsstatus
-    #index: true
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: VerknuepfteEinheitenMaStRNummern
+- name: MaStRNummer
+- name: DatumLetzteAktualisierung
+  xsd: dateTime
+- name: Speichername
+- name: Registrierungsdatum
+  xsd: date
+- name: AnlageBetriebsstatus
+  xsd: byte
+- name: VerknuepfteEinheitenMaStRNummern

@@ -1,24 +1,16 @@
 root: Netze
 element: Netz
-primary: MastrNummer
-without_rowid: true
 fields:
-  - name: DatumLetzteAktualisierung
-    xsd: dateTime
-  - name: MastrNummer
-  - name: Sparte
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: KundenAngeschlossen
-    xsd: boolean
-  - name: GeschlossenesVerteilnetz
-    xsd: boolean
-  - name: Bezeichnung
-  - name: Marktgebiet
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Bundesland # string of comma separated Katalogwert.Id values
+- name: DatumLetzteAktualisierung
+  xsd: dateTime
+- name: MastrNummer
+- name: Sparte
+  xsd: byte
+- name: KundenAngeschlossen
+  xsd: boolean
+- name: GeschlossenesVerteilnetz
+  xsd: boolean
+- name: Bezeichnung
+- name: Marktgebiet
+  xsd: int
+- name: Bundesland

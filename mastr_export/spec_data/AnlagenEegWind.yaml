@@ -1,51 +1,42 @@
 root: AnlagenEegWind
 element: AnlageEegWind
-primary: EegMaStRNummer
 fields:
-  - name: Registrierungsdatum
-    index: true
-    xsd: date
-  - name: DatumLetzteAktualisierung
-    xsd: dateTime
-  - name: EegInbetriebnahmedatum
-    index: true
-    xsd: date
-  - name: EegMaStRNummer
-  - name: AnlagenkennzifferAnlagenregister
-  - name: AnlagenkennzifferAnlagenregister_nv
-    xsd: boolean
-  - name: AnlagenschluesselEeg
-  - name: PrototypAnlage
-    xsd: boolean
-  - name: PilotAnlage
-    xsd: boolean
-  - name: InstallierteLeistung
-    index: true
-    xsd: decimal
-  - name: VerhaeltnisErtragsschaetzungReferenzertrag
-    xsd: decimal
-  - name: VerhaeltnisErtragsschaetzungReferenzertrag_nv
-    xsd: boolean
-  - name: VerhaeltnisReferenzertragErtrag5Jahre
-    xsd: decimal
-  - name: VerhaeltnisReferenzertragErtrag5Jahre_nv
-    xsd: boolean
-  - name: VerhaeltnisReferenzertragErtrag10Jahre
-    xsd: decimal
-  - name: VerhaeltnisReferenzertragErtrag10Jahre_nv
-    xsd: boolean
-  - name: VerhaeltnisReferenzertragErtrag15Jahre
-    xsd: decimal
-  - name: VerhaeltnisReferenzertragErtrag15Jahre_nv
-    xsd: boolean
-  - name: AusschreibungZuschlag
-    xsd: boolean
-  - name: Zuschlagsnummer
-  - name: AnlageBetriebsstatus
-    index: true
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: VerknuepfteEinheitenMaStRNummern
-  - name: Zuschlagsnummer
+- name: Registrierungsdatum
+  xsd: date
+- name: DatumLetzteAktualisierung
+  xsd: dateTime
+- name: EegInbetriebnahmedatum
+  xsd: date
+- name: EegMaStRNummer
+- name: AnlagenkennzifferAnlagenregister
+- name: AnlagenkennzifferAnlagenregister_nv
+  xsd: boolean
+- name: AnlagenschluesselEeg
+- name: PrototypAnlage
+  xsd: boolean
+- name: PilotAnlage
+  xsd: boolean
+- name: InstallierteLeistung
+  xsd: float
+- name: VerhaeltnisErtragsschaetzungReferenzertrag
+  xsd: float
+- name: VerhaeltnisErtragsschaetzungReferenzertrag_nv
+  xsd: boolean
+- name: VerhaeltnisReferenzertragErtrag5Jahre
+  xsd: float
+- name: VerhaeltnisReferenzertragErtrag5Jahre_nv
+  xsd: boolean
+- name: VerhaeltnisReferenzertragErtrag10Jahre
+  xsd: float
+- name: VerhaeltnisReferenzertragErtrag10Jahre_nv
+  xsd: boolean
+- name: VerhaeltnisReferenzertragErtrag15Jahre
+  xsd: float
+- name: VerhaeltnisReferenzertragErtrag15Jahre_nv
+  xsd: boolean
+- name: AusschreibungZuschlag
+  xsd: boolean
+- name: Zuschlagsnummer
+- name: AnlageBetriebsstatus
+  xsd: byte
+- name: VerknuepfteEinheitenMaStRNummern

@@ -1,13 +1,6 @@
 root: GeloeschteUndDeaktivierteMarktakteure
-element: GeloeschteUndDeaktivierteMarktakteure
-primary: MarktakteurMastrNummer
+element: GeloeschterUndDeaktivierterMarktakteur
 fields:
-  - name: MarktakteurMastrNummer
-  - name: DatumLetzteAktualisierung
-    xsd: dateTime
-  - name: MarktakteurStatus
-    index: true
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
+- name: MarktakteurMastrNummer
+- name: MarktakteurStatus
+- name: DatumLetzteAktualisierung
