@@ -1,20 +1,15 @@
 root: Marktrollen
 element: Marktrolle
-primary: MastrNummer
-without_rowid: true
 fields:
-  - name: MarktakteurMastrNummer
-    references:
-      table: Marktakteur
-      column: Id
-  - name: DatumLetzteAktualisierung
-    xsd: dateTime
-  - name: MastrNummer
-  - name: Marktrolle
-  - name: BundesnetzagenturBetriebsnummer
-  - name: BundesnetzagenturBetriebsnummer_nv
-    xsd: boolean
-  - name: Marktpartneridentifikationsnummer
-  - name: Marktpartneridentifikationsnummer_nv
-    xsd: boolean
-  - name: KontaktdatenMarktrolle
+- name: MarktakteurMastrNummer
+- name: DatumLetzteAktualisierung
+  xsd: dateTime
+- name: MastrNummer
+- name: Marktrolle
+- name: BundesnetzagenturBetriebsnummer
+- name: BundesnetzagenturBetriebsnummer_nv
+  xsd: boolean
+- name: Marktpartneridentifikationsnummer
+- name: Marktpartneridentifikationsnummer_nv
+  xsd: boolean
+- name: KontaktdatenMarktrolle

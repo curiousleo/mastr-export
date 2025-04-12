@@ -1,135 +1,97 @@
 root: Marktakteure
 element: Marktakteur
-primary: MastrNummer
 fields:
-  - name: MastrNummer
-  - name: DatumLetzeAktualisierung
-    xsd: dateTime
-  - name: Personenart
-    index: true
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: MarktakteurVorname
-  - name: MarktakteurNachname
-  - name: Firmenname
-    index: true
-  - name: Marktfunktion
-    index: true
-    xsd: nonNegativeInteger
-  - name: Rechtsform
-    index: true
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: SonstigeRechtsform
-  - name: Marktrollen
-  - name: Land
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Region
-  - name: Strasse
-  - name: Hausnummer
-  - name: Hausnummer_nv
-    xsd: boolean
-  - name: Adresszusatz
-  - name: Postleitzahl
-  - name: Ort
-    index: true
-  - name: Bundesland
-    #index: true
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Netz
-  - name: Nuts2
-  - name: Email
-  - name: Telefon
-  - name: Fax
-  - name: Fax_nv
-    xsd: boolean
-  - name: Webseite
-  - name: Webseite_nv
-    xsd: boolean
-  - name: Registergericht
-    xsd: nonNegativeInteger
-  - name: Registergericht_nv
-    xsd: boolean
-  - name: RegistergerichtAusland
-  - name: RegistergerichtAusland_nv
-    xsd: boolean
-  - name: Registernummer
-  - name: Registernummer_nv
-    xsd: boolean
-  - name: RegisternummerAusland
-  - name: RegisternummerAusland_nv
-    xsd: boolean
-  - name: Taetigkeitsbeginn
-    #index: true
-    xsd: date
-  - name: AcerCode
-  - name: AcerCode_nv
-    xsd: boolean
-  - name: Umsatzsteueridentifikationsnummer
-  - name: Umsatzsteueridentifikationsnummer_nv
-    xsd: boolean
-  - name: Taetigkeitsende
-    #index: true
-    xsd: date
-  - name: Taetigkeitsende_nv
-    xsd: boolean
-  - name: BundesnetzagenturBetriebsnummer
-  - name: BundesnetzagenturBetriebsnummer_nv
-    xsd: boolean
-  - name: LandAnZustelladresse
-    xsd: nonNegativeInteger
-  - name: PostleitzahlAnZustelladresse
-  - name: OrtAnZustelladresse
-  - name: StrasseAnZustelladresse
-  - name: HausnummerAnZustelladresse
-  - name: HausnummerAnZustelladresse_nv
-    xsd: boolean
-  - name: AdresszusatzAnZustelladresse
-  - name: Kmu
-    xsd: boolean
-  - name: TelefonnummerVMav
-  - name: EmailVMav
-  - name: RegistrierungsdatumMarktakteur
-    xsd: dateTime
-  - name: HauptwirtdschaftszweigAbteilung
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: HauptwirtdschaftszweigGruppe
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: HauptwirtdschaftszweigAbschnitt
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Direktvermarktungsunternehmen
-    xsd: boolean
-  - name: BelieferungVonLetztverbrauchernStrom
-    xsd: boolean
-  - name: BelieferungHaushaltskundenStrom
-    xsd: boolean
-  - name: Gasgrosshaendler
-    xsd: boolean
-  - name: Stromgrosshaendler
-    xsd: boolean
-  - name: BelieferungVonLetztverbrauchernGas
-    xsd: boolean
-  - name: BelieferungHaushaltskundenGas
-    xsd: boolean
-  - name: RegisternummerPraefix
-    xsd: nonNegativeInteger
-  - name: WebportalDesNetzbetreibers
+- name: MastrNummer
+- name: DatumLetzeAktualisierung
+  xsd: dateTime
+- name: Personenart
+  xsd: short
+- name: MarktakteurAnrede
+  xsd: short
+- name: MarktakteurTitel
+  xsd: short
+- name: MarktakteurVorname
+- name: MarktakteurNachname
+- name: Firmenname
+- name: Marktfunktion
+  xsd: short
+- name: Rechtsform
+  xsd: int
+- name: SonstigeRechtsform
+- name: Marktrollen
+- name: Land
+  xsd: short
+- name: Region
+- name: Strasse
+- name: Hausnummer
+- name: Hausnummer_nv
+  xsd: boolean
+- name: Adresszusatz
+- name: Postleitzahl
+- name: Ort
+- name: Bundesland
+  xsd: short
+- name: Netz
+- name: Nuts2
+- name: Email
+- name: Telefon
+- name: Fax
+- name: Fax_nv
+  xsd: boolean
+- name: Webseite
+- name: Webseite_nv
+  xsd: boolean
+- name: Registergericht
+  xsd: int
+- name: RegistergerichtAusland
+- name: RegisternummerPraefix
+  xsd: short
+- name: Registernummer
+- name: RegisternummerAusland
+- name: Taetigkeitsbeginn
+  xsd: date
+- name: AcerCode
+- name: AcerCode_nv
+  xsd: boolean
+- name: Umsatzsteueridentifikationsnummer
+- name: Umsatzsteueridentifikationsnummer_nv
+  xsd: boolean
+- name: Taetigkeitsende
+  xsd: date
+- name: BundesnetzagenturBetriebsnummer
+- name: BundesnetzagenturBetriebsnummer_nv
+  xsd: byte
+- name: LandAnZustelladresse
+  xsd: short
+- name: PostleitzahlAnZustelladresse
+- name: OrtAnZustelladresse
+- name: StrasseAnZustelladresse
+- name: HausnummerAnZustelladresse
+- name: HausnummerAnZustelladresse_nv
+  xsd: boolean
+- name: AdresszusatzAnZustelladresse
+- name: Kmu
+  xsd: boolean
+- name: RegistrierungsdatumMarktakteur
+  xsd: dateTime
+- name: HauptwirtdschaftszweigAbteilung
+  xsd: short
+- name: HauptwirtdschaftszweigGruppe
+  xsd: short
+- name: HauptwirtdschaftszweigAbschnitt
+  xsd: short
+- name: Direktvermarktungsunternehmen
+  xsd: boolean
+- name: BelieferungVonLetztverbrauchernStrom
+  xsd: boolean
+- name: BelieferungHaushaltskundenStrom
+  xsd: boolean
+- name: Gasgrosshaendler
+  xsd: boolean
+- name: Stromgrosshaendler
+  xsd: boolean
+- name: BelieferungVonLetztverbrauchernGas
+  xsd: boolean
+- name: BelieferungHaushaltskundenGas
+  xsd: boolean
+- name: WebportalDesNetzbetreibers

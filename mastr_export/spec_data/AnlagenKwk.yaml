@@ -1,28 +1,17 @@
 root: AnlagenKwk
 element: AnlageKwk
-primary: KwkMastrNummer
 fields:
-  - name: KwkMastrNummer
-  - name: AusschreibungZuschlag
-    xsd: boolean
-  - name: Zuschlagnummer
-  - name: DatumLetzteAktualisierung
-    xsd: dateTime
-  - name: Inbetriebnahmedatum
-    index: true
-    xsd: date
-  - name: Registrierungsdatum
-    index: true
-    xsd: date
-  - name: ThermischeNutzleistung
-    index: true
-    xsd: decimal
-  - name: ElektrischeKwkLeistung
-    index: true
-    xsd: decimal
-  - name: AnlageBetriebsstatus
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: VerknuepfteEinheitenMaStRNummern
+- name: KwkMastrNummer
+- name: AusschreibungZuschlag
+  xsd: boolean
+- name: Zuschlagnummer
+- name: DatumLetzteAktualisierung
+  xsd: dateTime
+- name: Inbetriebnahmedatum
+  xsd: date
+- name: Registrierungsdatum
+  xsd: date
+- name: ThermischeNutzleistung
+  xsd: float
+- name: ElektrischeKwkLeistung
+  xsd: float

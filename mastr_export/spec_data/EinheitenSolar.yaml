@@ -1,173 +1,114 @@
 root: EinheitenSolar
 element: EinheitSolar
-primary: EinheitMastrNummer
 fields:
-  - name: EinheitMastrNummer
-  - name: DatumLetzteAktualisierung
-    xsd: dateTime
-  - name: LokationMaStRNummer
-    references:
-      table: Lokation
-      column: MastrNummer
-  - name: NetzbetreiberpruefungStatus
-    xsd: nonNegativeInteger
-  - name: NetzbetreiberpruefungDatum
-    xsd: date
-  - name: AnlagenbetreiberMastrNummer
-    references:
-      table: Marktakteur
-      column: MastrNummer
-  - name: Land
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Bundesland
-    index: true
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Landkreis
-  - name: Gemeinde
-  - name: Gemeindeschluessel
-    index: true
-  - name: Postleitzahl
-    index: true
-  - name: Gemarkung
-  - name: FlurFlurstuecknummern
-  - name: Strasse
-  - name: StrasseNichtGefunden
-    xsd: boolean
-  - name: Hausnummer
-  - name: Hausnummer_nv
-    xsd: boolean
-  - name: HausnummerNichtGefunden
-    xsd: boolean
-  - name: Adresszusatz
-  - name: Ort
-    index: true
-  - name: Laengengrad
-    xsd: decimal
-  - name: Breitengrad
-    xsd: decimal
-  - name: Registrierungsdatum
-  - name: GeplantesInbetriebnahmedatum
-  - name: Inbetriebnahmedatum
-    index: true
-  - name: DatumEndgueltigeStilllegung
-  - name: DatumBeginnVoruebergehendeStilllegung
-  - name: DatumWiederaufnahmeBetrieb
-  - name: EinheitSystemstatus
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: EinheitBetriebsstatus
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: BestandsanlageMastrNummer
-  - name: NichtVorhandenInMigriertenEinheiten
-    xsd: boolean
-  - name: AltAnlagenbentreiberMastrNummer
-  - name: DatumDesBetreiberwechsels
-    xsd: date
-  - name: DatumRegistrierungDesBetreiberwechsels
-    xsd: date
-  - name: NameStromerzeugungseinheit
-  - name: Weic
-  - name: Weic_nv
-    xsd: boolean
-  - name: WeicDisplayName
-  - name: Kraftwerksnummer
-  - name: Kraftwerksnummer_nv
-    xsd: boolean
-  - name: Energietraeger
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Bruttoleistung
-    index: true
-    xsd: decimal
-  - name: Nettonennleistung
-    #index: true
-    xsd: decimal
-  - name: AnschlussAnHoechstOderHochSpannung
-    xsd: boolean
-  - name: Schwarzstartfaehigkeit
-    xsd: boolean
-  - name: Inselbetriebsfaehigkeit
-    xsd: boolean
-  - name: Einsatzverantwortlicher
-  - name: FernsteuerbarkeitNb
-    xsd: boolean
-  - name: FernsteuerbarkeitDv
-    xsd: boolean
-  - name: FernsteuerbarkeitDr
-    xsd: boolean
-  - name: Einspeisungsart
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: PraequalifiziertFuerRegelenergie
-    xsd: boolean
-  - name: GenMastrNummer
-    references:
-      table: EinheitGenehmigung
-      column: GenMastrNummer
-  - name: ZugeordneteWirkleistungWechselrichter
-    xsd: decimal
-  - name: AnzahlModule
-    xsd: nonNegativeInteger
-  - name: Lage
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Leistungsbegrenzung
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: EinheitlicheAusrichtungUndNeigungswinkel
-    xsd: boolean
-  - name: Hauptausrichtung
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: HauptausrichtungNeigungswinkel
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Nebenausrichtung
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: NebenausrichtungNeigungswinkel
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: InAnspruchGenommeneFlaeche
-    xsd: decimal
-  - name: ArtDerFlaecheIds
-  - name: InAnspruchGenommeneAckerflaeche
-    xsd: decimal
-  - name: Nutzungsbereich
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Buergerenergie
-    xsd: decimal
-  - name: EegMaStRNummer
-    references:
-      table: AnlageEegSolar
-      column: EegMaStRNummer
+- name: EinheitMastrNummer
+- name: DatumLetzteAktualisierung
+  xsd: dateTime
+- name: LokationMaStRNummer
+- name: NetzbetreiberpruefungStatus
+  xsd: short
+- name: NetzbetreiberpruefungDatum
+  xsd: date
+- name: AnlagenbetreiberMastrNummer
+- name: Land
+  xsd: short
+- name: Bundesland
+  xsd: short
+- name: Landkreis
+- name: Gemeinde
+- name: Gemeindeschluessel
+- name: Postleitzahl
+- name: Strasse
+- name: Gemarkung
+- name: FlurFlurstuecknummern
+- name: StrasseNichtGefunden
+  xsd: boolean
+- name: Hausnummer
+- name: Hausnummer_nv
+  xsd: boolean
+- name: HausnummerNichtGefunden
+  xsd: boolean
+- name: Adresszusatz
+- name: Ort
+- name: Laengengrad
+  xsd: float
+- name: Breitengrad
+  xsd: float
+- name: Registrierungsdatum
+  xsd: date
+- name: Inbetriebnahmedatum
+  xsd: date
+- name: DatumEndgueltigeStilllegung
+  xsd: date
+- name: DatumBeginnVoruebergehendeStilllegung
+  xsd: date
+- name: DatumWiederaufnahmeBetrieb
+  xsd: date
+- name: GeplantesInbetriebnahmedatum
+  xsd: date
+- name: EinheitSystemstatus
+  xsd: short
+- name: EinheitBetriebsstatus
+  xsd: byte
+- name: BestandsanlageMastrNummer
+- name: NichtVorhandenInMigriertenEinheiten
+  xsd: boolean
+- name: AltAnlagenbetreiberMastrNummer
+- name: DatumDesBetreiberwechsels
+  xsd: date
+- name: DatumRegistrierungDesBetreiberwechsels
+  xsd: date
+- name: NameStromerzeugungseinheit
+- name: Weic
+- name: Weic_nv
+  xsd: boolean
+- name: WeicDisplayName
+- name: Kraftwerksnummer
+- name: Kraftwerksnummer_nv
+  xsd: boolean
+- name: Energietraeger
+  xsd: short
+- name: Bruttoleistung
+  xsd: float
+- name: Nettonennleistung
+  xsd: float
+- name: AnschlussAnHoechstOderHochSpannung
+  xsd: boolean
+- name: FernsteuerbarkeitNb
+  xsd: boolean
+- name: FernsteuerbarkeitDv
+  xsd: boolean
+- name: Einspeisungsart
+  xsd: short
+- name: ZugeordneteWirkleistungWechselrichter
+  xsd: float
+- name: AnzahlModule
+  xsd: int
+- name: ArtDerSolaranlage
+  xsd: short
+- name: Leistungsbegrenzung
+  xsd: short
+- name: EinheitlicheAusrichtungUndNeigungswinkel
+  xsd: boolean
+- name: Hauptausrichtung
+  xsd: short
+- name: HauptausrichtungNeigungswinkel
+  xsd: short
+- name: Nebenausrichtung
+  xsd: short
+- name: NebenausrichtungNeigungswinkel
+  xsd: short
+- name: Nutzungsbereich
+  xsd: short
+- name: Buergerenergie
+  xsd: boolean
+- name: EegMaStRNummer
+- name: InAnspruchGenommeneFlaeche
+  xsd: float
+- name: ArtDerFlaecheIds
+- name: InAnspruchGenommeneAckerflaeche
+  xsd: float
+- name: Einsatzverantwortlicher
+- name: GenMastrNummer
+- name: SpeicherAmGleichenOrt
+  xsd: boolean

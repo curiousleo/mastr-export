@@ -1,13 +1,8 @@
 root: Katalogwerte
 element: Katalogwert
-primary: Id
-without_rowid: true
 fields:
-  - name: Id
-    xsd: nonNegativeInteger
-  - name: Wert
-  - name: KatalogKategorieId
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogkategorie
-      column: Id
+- name: Id
+  xsd: int
+- name: Wert
+- name: KatalogKategorieId
+  xsd: short

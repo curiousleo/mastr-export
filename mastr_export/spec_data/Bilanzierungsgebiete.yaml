@@ -1,11 +1,9 @@
 root: Bilanzierungsgebiete
 element: Bilanzierungsgebiet
-primary: Id
-without_rowid: true
 fields:
-  - name: Id
-    xsd: nonNegativeInteger
-  - name: Yeic
-  - name: BilanzierungsgebietNetzanschlusspunkt
-  - name: RegelzoneNetzanschlusspunkt
-    xsd: nonNegativeInteger
+- name: Id
+  xsd: short
+- name: Yeic
+- name: BilanzierungsgebietNetzanschlusspunkt
+- name: RegelzoneNetzanschlusspunkt
+  xsd: int

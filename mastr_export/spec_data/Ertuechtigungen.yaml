@@ -1,27 +1,16 @@
 root: Ertuechtigungen
 element: Ertuechtigung
-primary: Id
 fields:
-  - name: Id
-    xsd: nonNegativeInteger
-  - name: DatumLetzteAktualisierung
-    xsd: dateTime
-  - name: EegMastrNummer
-  - name: Ertuechtigungsart
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: ErtuechtigungIstZulassungspflichtig
-    xsd: boolean
-  - name: Leistungserhoehung
-    xsd: decimal
-  - name: WiederinbetriebnahmeDatum
-    xsd: dateTime
-  - name: Einheittyp
-    xsd: nonNegativeInteger
-  - name: EinheitSystemstatus
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
+- name: Id
+  xsd: int
+- name: DatumLetzteAktualisierung
+  xsd: dateTime
+- name: EegMastrNummer
+- name: Ertuechtigungsart
+  xsd: short
+- name: ErtuechtigungIstZulassungspflichtig
+  xsd: boolean
+- name: Leistungserhoehung
+  xsd: float
+- name: WiederinbetriebnahmeDatum
+  xsd: dateTime

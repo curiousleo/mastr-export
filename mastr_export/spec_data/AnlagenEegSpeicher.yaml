@@ -1,21 +1,15 @@
 root: AnlagenEegSpeicher
 element: AnlageEegSpeicher
-primary: EegMaStRNummer
-without_rowid: true
 fields:
-  - name: Registrierungsdatum
-    index: true
-    xsd: date
-  - name: DatumLetzteAktualisierung
-    xsd: dateTime
-  - name: EegInbetriebnahmedatum
-    index: true
-    xsd: date
-  - name: EegMaStRNummer
-  - name: VerknuepfteEinheitenMaStRNummern
-  - name: AnlagenschluesselEeg
-  - name: AusschreibungZuschlag
-    xsd: boolean
-  - name: ZugeordneteGebotsmenge
-    xsd: decimal
-  - name: Zuschlagsnummer
+- name: Registrierungsdatum
+  xsd: date
+- name: DatumLetzteAktualisierung
+  xsd: dateTime
+- name: EegInbetriebnahmedatum
+  xsd: date
+- name: EegMaStRNummer
+- name: AnlagenschluesselEeg
+- name: AusschreibungZuschlag
+  xsd: boolean
+- name: Zuschlagsnummer
+- name: VerknuepfteEinheitenMaStRNummern

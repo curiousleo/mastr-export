@@ -1,57 +1,33 @@
 root: Netzanschlusspunkte
 element: Netzanschlusspunkt
-primary: NetzanschlusspunktMastrNummer
 fields:
-  - name: NetzanschlusspunktMastrNummer
-  - name: NetzanschlusspunktBezeichnung
-  - name: LetzteAenderung
-    xsd: dateTime
-  - name: LokationMaStRNummer
-    references:
-      table: Lokation
-      column: MastrNummer
-  - name: NameDerTechnischenLokation
-  - name: Lokationtyp
-    xsd: nonNegativeInteger
-  - name: Messlokation
-  - name: Spannungsebene
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: Nettoengpassleistung
-    xsd: decimal
-  - name: BilanzierungsgebietNetzanschlusspunkId
-    xsd: nonNegativeInteger
-    references:
-      table: Bilanzierungsgebiet
-      column: Id
-  - name: Netzanschlusskapazitaet
-    xsd: decimal
-  - name: Marktgebiet
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: MaximaleEinspeiseleistung
-    xsd: decimal
-  - name: MaximaleAusspeiseleistung
-    xsd: decimal
-  - name: Gasqualitaet
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: RegelzoneNetzanschlusspunkt
-    xsd: nonNegativeInteger
-    references:
-      table: Katalogwert
-      column: Id
-  - name: NetzMaStRNummer
-    references:
-      table: Netz
-      column: MastrNummer
-  - name: NochInPlanung
-    xsd: boolean
-  - name: BilanzierungsgebietNetzanschlusspunktId
-    xsd: nonNegativeInteger
+- name: NetzanschlusspunktMastrNummer
+- name: NetzanschlusspunktBezeichnung
+- name: LetzteAenderung
+  xsd: dateTime
+- name: LokationMaStRNummer
+- name: NameDerTechnischenLokation
+- name: Lokationtyp
+  xsd: byte
+- name: MaximaleEinspeiseleistung
+  xsd: float
+- name: MaximaleAusspeiseleistung
+  xsd: float
+- name: Gasqualitaet
+  xsd: short
+- name: Messlokation
+- name: Marktgebiet
+  xsd: int
+- name: Spannungsebene
+  xsd: short
+- name: RegelzoneNetzanschlusspunkt
+  xsd: int
+- name: Nettoengpassleistung
+  xsd: float
+- name: BilanzierungsgebietNetzanschlusspunktId
+  xsd: int
+- name: Netzanschlusskapazitaet
+  xsd: float
+- name: NetzMaStRNummer
+- name: NochInPlanung
+  xsd: boolean

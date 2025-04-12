@@ -1,40 +1,74 @@
 # The order is significant! Later items may reference earlier items.
-- Katalogkategorien.yaml
-- Katalogwerte.yaml
-- Bilanzierungsgebiete.yaml
-- Ertuechtigungen.yaml
-- GeloeschteUndDeaktivierteEinheiten.yaml
-- Lokationen.yaml
-- Marktakteure.yaml
-- GeloeschteUndDeaktivierteMarktakteure.yaml
-- Marktrollen.yaml
-- Netzanschlusspunkte.yaml
-- Netze.yaml
+- spec: Katalogkategorien.yaml
+  primary: Id
+- spec: Katalogwerte.yaml
+  primary: Id
+- spec: Bilanzierungsgebiete.yaml
+  primary: Id
+- spec: Ertuechtigungen.yaml
+  primary: Id
+- spec: GeloeschteUndDeaktivierteEinheiten.yaml
+  primary: EinheitMastrNummer
+- spec: Lokationen.yaml
+  primary: MastrNummer
+- spec: Marktakteure.yaml
+  primary: MastrNummer
+- spec: GeloeschteUndDeaktivierteMarktakteure.yaml
+  primary: MarktakteurMastrNummer
+- spec: Marktrollen.yaml
+  primary: MastrNummer
+- spec: Netzanschlusspunkte.yaml
+  primary: NetzanschlusspunktMastrNummer
+- spec: Netze.yaml
+  primary: MastrNummer
 
-- AnlagenStromSpeicher.yaml
-- AnlagenGasSpeicher.yaml
-- AnlagenEegWind.yaml
-- AnlagenEegSolar.yaml
-- AnlagenEegBiomasse.yaml
-- AnlagenEegWasser.yaml
-- AnlagenEegSpeicher.yaml
-- AnlagenEegGeothermieGrubengasDruckentspannung.yaml
-- AnlagenKwk.yaml
+- spec: AnlagenStromSpeicher.yaml
+  primary: MaStRNummer
+- spec: AnlagenGasSpeicher.yaml
+  primary: MaStRNummer
+- spec: AnlagenEegWind.yaml
+  primary: EegMaStRNummer
+- spec: AnlagenEegSolar.yaml
+  primary: EegMaStRNummer
+- spec: AnlagenEegBiomasse.yaml
+  primary: EegMaStRNummer
+- spec: AnlagenEegWasser.yaml
+  primary: EegMaStRNummer
+- spec: AnlagenEegSpeicher.yaml
+  primary: EegMaStRNummer
+- spec: AnlagenEegGeothermieGrubengasDruckentspannung.yaml
+  primary: EegMaStRNummer
+- spec: AnlagenKwk.yaml
+  primary: KwkMastrNummer
 
-- Einheitentypen.yaml
+- spec: Einheitentypen.yaml
+  primary: Id
 
-- EinheitenGenehmigung.yaml
-- EinheitenWind.yaml
-- EinheitenSolar.yaml
-- EinheitenBiomasse.yaml
-- EinheitenWasser.yaml
-- EinheitenGeothermieGrubengasDruckentspannung.yaml
-- EinheitenVerbrennung.yaml
-- EinheitenKernkraft.yaml
-- EinheitenStromSpeicher.yaml
-- EinheitenStromVerbraucher.yaml
-- EinheitenGasErzeuger.yaml
-- EinheitenGasSpeicher.yaml
-- EinheitenGasverbraucher.yaml
+- spec: EinheitenBiomasse.yaml
+  primary: EinheitMastrNummer
+- spec: EinheitenGasErzeuger.yaml
+  primary: EinheitMastrNummer
+- spec: EinheitenGasSpeicher.yaml
+  primary: EinheitMastrNummer
+- spec: EinheitenGasverbraucher.yaml
+  primary: EinheitMastrNummer
+- spec: EinheitenGenehmigung.yaml
+  primary: GenMastrNummer
+- spec: EinheitenGeothermieGrubengasDruckentspannung.yaml
+  primary: EinheitMastrNummer
+- spec: EinheitenKernkraft.yaml
+  primary: EinheitMastrNummer
+- spec: EinheitenSolar.yaml
+  primary: EinheitMastrNummer
+- spec: EinheitenStromSpeicher.yaml
+  primary: EinheitMastrNummer
+- spec: EinheitenStromVerbraucher.yaml
+  primary: EinheitMastrNummer
+- spec: EinheitenVerbrennung.yaml
+  primary: EinheitMastrNummer
+- spec: EinheitenWasser.yaml
+  primary: EinheitMastrNummer
+- spec: EinheitenWind.yaml
+  primary: EinheitMastrNummer
 
-- EinheitenAenderungNetzbetreiberzuordnungen.yaml
+- spec: EinheitenAenderungNetzbetreiberzuordnungen.yaml
