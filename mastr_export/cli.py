@@ -5,6 +5,7 @@ from .parser import Parser
 
 from . import download
 from . import spec_data
+from . import static_data
 from . import xsd_parser
 
 import argparse
@@ -47,6 +48,11 @@ def cli():
         help="(input) path to the YAML file containing the list of specs",
     )
     duckdb_extract.add_argument(
+        "--census",
+        default=(importlib.resources.files(static_data) / "zensus2022.parquet"),
+        help="(input) path to the Parquet file containing census data. Set to empty to skip copying census data into the database",
+    )
+    duckdb_extract.add_argument(
         "--duckdb",
         required=True,
         help="(output) DuckDB database file path",
@@ -61,6 +67,7 @@ def cli():
         func=lambda args: extract_to_duckdb(
             args.spec,
             args.export,
+            args.census,
             args.duckdb,
             args.show_per_file_progress,
         )
@@ -182,7 +189,7 @@ def extract(
             yield i.filename, d, df
 
 
-def extract_to_duckdb(spec, export, duckdb_file, show_per_file_progress):
+def extract_to_duckdb(spec, export, census, duckdb_file, show_per_file_progress):
     specs = Specs.load(spec)
     with duckdb.connect(duckdb_file) as duckdb_con:
         for spec in specs.specs:
@@ -201,6 +208,11 @@ def extract_to_duckdb(spec, export, duckdb_file, show_per_file_progress):
                 e.add_note(f"File: {f}")
                 e.add_note(str(df))
                 raise
+
+    if census != "":
+        with duckdb.connect(duckdb_file) as duckdb_con:
+            duckdb_con.sql("CREATE TABLE Zensus (AGS TEXT PRIMARY KEY, Gemeinde TEXT NOT NULL, AnzahlPersonen UINTEGER NOT NULL)")
+            duckdb_con.sql(f"INSERT INTO Zensus (SELECT * FROM '{census}')")
 
     with duckdb.connect(duckdb_file) as duckdb_con:
         duckdb_con.sql("VACUUM ANALYZE")
