@@ -20,4 +20,4 @@ To regenerate `zensus2022.parquet`, run:
    ) to 'zensus2022.parquet' (format parquet, compression zstd);
    ```
 
-[View `zensus2022.parquet` in the DuckDB Shell.](https://shell.duckdb.org/#queries=v0,CREATE-TABLE-Zensus-AS-(SELECT-*-FROM-'https%3A%2F%2Fraw.githubusercontent.com%2Fcuriousleo%2Fmastr%20export%2Fmain%2Fmastr_export%2Fstatic_data%2Fzensus2022.parquet')~,SELECT-*-FROM-Zensus-LIMIT-20~)
+[View `zensus2022.parquet` in the DuckDB Shell.](https://shell.duckdb.org/#queries=v0,CREATE-TABLE-Zensus2022-AS-(SELECT-*-FROM-'https%3A%2F%2Fraw.githubusercontent.com%2Fcuriousleo%2Fmastr%20export%2Fmain%2Fmastr_export%2Fstatic_data%2Fzensus2022.parquet')~,SELECT-*-FROM-Zensus2022-LIMIT-20~)

@@ -32,9 +32,7 @@ def cli():
         default=(importlib.resources.files(spec_data) / "Gesamtdatenexport.yaml"),
         help="(input) path to the YAML file containing the list of specs",
     )
-    parse_xsd.set_defaults(
-        func=lambda args: parse_xsd_from_docs(args.spec)
-    )
+    parse_xsd.set_defaults(func=lambda args: parse_xsd_from_docs(args.spec))
 
     duckdb_extract = subparsers.add_parser("extract-to-duckdb")
     duckdb_extract.add_argument(
@@ -211,8 +209,10 @@ def extract_to_duckdb(spec, export, census, duckdb_file, show_per_file_progress)
 
     if census != "":
         with duckdb.connect(duckdb_file) as duckdb_con:
-            duckdb_con.sql("CREATE TABLE Zensus (AGS TEXT PRIMARY KEY, Gemeinde TEXT NOT NULL, AnzahlPersonen UINTEGER NOT NULL)")
-            duckdb_con.sql(f"INSERT INTO Zensus (SELECT * FROM '{census}')")
+            duckdb_con.sql(
+                "CREATE TABLE Zensus2022 (AGS TEXT PRIMARY KEY, Gemeinde TEXT NOT NULL, AnzahlPersonen UINTEGER NOT NULL)"
+            )
+            duckdb_con.sql(f"INSERT INTO Zensus2022 (SELECT * FROM '{census}')")
 
     with duckdb.connect(duckdb_file) as duckdb_con:
         duckdb_con.sql("VACUUM ANALYZE")
@@ -275,6 +275,7 @@ copy from database source to target;
 def parse_xsd_from_docs(yaml_spec):
     import urllib
     import tempfile
+
     DOCS_URL = "https://www.marktstammdatenregister.de/MaStRHilfe/files/gesamtdatenexport/Dokumentation%20MaStR%20Gesamtdatenexport.zip"
     print(f"Downloading {DOCS_URL} ...")
     with urllib.request.urlopen(DOCS_URL) as docs:
@@ -283,11 +284,15 @@ def parse_xsd_from_docs(yaml_spec):
             print(f"Parsing XSD files ...")
             with zipfile.ZipFile(tmp) as outer:
                 xsd_zip = [
-                    i.filename for i in outer.infolist() if i.filename.endswith("xsd.zip")
+                    i.filename
+                    for i in outer.infolist()
+                    if i.filename.endswith("xsd.zip")
                 ][0]
                 with zipfile.ZipFile(outer.open(xsd_zip)) as inner:
                     xsd_files = [
-                        i.filename for i in inner.infolist() if i.filename.endswith(".xsd")
+                        i.filename
+                        for i in inner.infolist()
+                        if i.filename.endswith(".xsd")
                     ]
                     specs: list[Spec] = []
                     for xsd_file in xsd_files:
