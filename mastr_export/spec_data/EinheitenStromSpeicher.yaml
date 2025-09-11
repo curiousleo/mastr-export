@@ -87,7 +87,7 @@ fields:
 - name: ReserveartNachDemEnWG
   xsd: short
 - name: DatumUeberfuehrungInReserve
-  xsd: date
+  xsd: dateTime
 - name: AcDcKoppelung
   xsd: short
 - name: Batterietechnologie
