@@ -175,7 +175,7 @@ def extract(
             ) as xml_progress:
                 if not show_per_file_progress:
                     xml_files_progress.set_description(i.filename)
-                if not i.filename.endswith("EinheitenStromSpeicher_21.xml"):
+                if not i.filename.startswith("EinheitenStromSpeicher"):
                     continue
                 with z.open(i) as f:
                     f = CallbackIOWrapper(xml_progress.update, f)
