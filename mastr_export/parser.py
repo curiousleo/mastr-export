@@ -93,13 +93,28 @@ class Parser:
         self.filename = filename
 
         def start_element_handler(name, _attrs):
-            self.parser = self.parser(START_ELEMENT, name)
+            try:
+                self.parser = self.parser(START_ELEMENT, name)
+            except Exception as e:
+                e.add_note(f"Filename: {filename}")
+                e.add_note(f"Element: {name}")
+                raise e
 
         def end_element_handler(name):
-            self.parser = self.parser(END_ELEMENT, name)
+            try:
+                self.parser = self.parser(END_ELEMENT, name)
+            except Exception as e:
+                e.add_note(f"Filename: {filename}")
+                e.add_note(f"Element: {name}")
+                raise e
 
         def cdata_handler(cdata):
-            self.parser = self.parser(CDATA, cdata)
+            try:
+                self.parser = self.parser(CDATA, cdata)
+            except Exception as e:
+                e.add_note(f"Filename: {filename}")
+                e.add_note(f"CDATA: {cdata}")
+                raise e
 
         p = sax.ParserCreate()
         p.StartElementHandler = start_element_handler
