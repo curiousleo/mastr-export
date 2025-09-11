@@ -116,7 +116,12 @@ class Field:
         return object
 
     def convert(self, s):
-        return self.python_type(s) if s is not None else None
+        try:
+            return self.python_type(s) if s is not None else None
+        except Exception as e:
+            e.add_note(f"XSD type: {self.xsd}")
+            e.add_note(f"Tried to convert: '{s}'")
+            raise e
 
     def sqlite_schema(self):
         references = (
