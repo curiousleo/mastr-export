@@ -1,3 +1,4 @@
+from collections import defaultdict
 import sqlite3
 from typing import Iterator
 from .spec import Spec, Specs
@@ -174,6 +175,8 @@ def extract(
             ) as xml_progress:
                 if not show_per_file_progress:
                     xml_files_progress.set_description(i.filename)
+                if not i.filename.endswith("EinheitenStromSpeicher_21.xml"):
+                    continue
                 with z.open(i) as f:
                     f = CallbackIOWrapper(xml_progress.update, f)
                     data = Parser(d).parse(f, i.filename)
