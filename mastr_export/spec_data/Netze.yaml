@@ -14,3 +14,4 @@ fields:
 - name: Marktgebiet
   xsd: int
 - name: Bundesland
+- name: Bilanzierungsgebiete

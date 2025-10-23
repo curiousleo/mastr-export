@@ -64,3 +64,5 @@ fields:
   xsd: short
 - name: Erzeugungsleistung
   xsd: float
+- name: InbetriebnahmedatumAmAktuellenStandort
+  xsd: date

@@ -1,5 +1,5 @@
-root: Marktrollen
-element: Marktrolle
+root: Lokationstypen
+element: Lokationstyp
 fields:
 - name: Id
   xsd: byte

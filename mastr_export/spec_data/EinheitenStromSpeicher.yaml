@@ -84,10 +84,6 @@ fields:
 - name: Einsatzort
   xsd: short
 - name: GenMastrNummer
-- name: ReserveartNachDemEnWG
-  xsd: short
-- name: DatumUeberfuehrungInReserve
-  xsd: dateTime
 - name: AcDcKoppelung
   xsd: short
 - name: Batterietechnologie
@@ -113,3 +109,13 @@ fields:
 - name: Technologie
   xsd: short
 - name: GemeinsamRegistrierteSolareinheitMastrNummer
+- name: NetzreserveZugeordnet
+  xsd: boolean
+- name: DatumNetzreserve
+  xsd: date
+- name: KapazitaetsreserveZugeordnet
+  xsd: boolean
+- name: DatumKapazitaetsreserve
+  xsd: date
+- name: InbetriebnahmedatumAmAktuellenStandort
+  xsd: date

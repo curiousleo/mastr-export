@@ -86,3 +86,13 @@ fields:
 - name: NameKraftwerksblock
 - name: Technologie
   xsd: short
+- name: NetzreserveZugeordnet
+  xsd: boolean
+- name: DatumNetzreserve
+  xsd: date
+- name: KapazitaetsreserveZugeordnet
+  xsd: boolean
+- name: DatumKapazitaetsreserve
+  xsd: date
+- name: InbetriebnahmedatumAmAktuellenStandort
+  xsd: date

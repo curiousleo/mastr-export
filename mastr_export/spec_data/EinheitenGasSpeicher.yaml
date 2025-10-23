@@ -73,3 +73,5 @@ fields:
 - name: Weic_Na
   xsd: boolean
 - name: SpeicherMaStRNummer
+- name: InbetriebnahmedatumAmAktuellenStandort
+  xsd: date

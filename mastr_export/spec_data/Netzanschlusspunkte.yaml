@@ -31,3 +31,4 @@ fields:
 - name: NetzMaStRNummer
 - name: NochInPlanung
   xsd: boolean
+- name: NetzbetreiberMaStRNummer
