@@ -82,11 +82,17 @@ fields:
 - name: Einspeisungsart
   xsd: short
 - name: GenMastrNummer
-- name: ReserveartNachDemEnWG
-  xsd: short
-- name: DatumUeberfuehrungInReserve
-  xsd: date
 - name: Technologie
   xsd: short
 - name: KwkMaStRNummer
 - name: EegMaStRNummer
+- name: NetzreserveZugeordnet
+  xsd: boolean
+- name: DatumNetzreserve
+  xsd: date
+- name: KapazitaetsreserveZugeordnet
+  xsd: boolean
+- name: DatumKapazitaetsreserve
+  xsd: date
+- name: InbetriebnahmedatumAmAktuellenStandort
+  xsd: date

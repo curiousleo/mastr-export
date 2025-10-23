@@ -3,6 +3,12 @@
   primary: Id
 - spec: Katalogwerte.yaml
   primary: Id
+- spec: Lokationstypen.yaml
+  primary: Id
+- spec: Marktfunktionen.yaml
+  primary: Id
+- spec: MarktakteureUndRollen.yaml
+  #primary: Id
 - spec: Bilanzierungsgebiete.yaml
   primary: Id
 - spec: Ertuechtigungen.yaml
@@ -16,7 +22,7 @@
 - spec: GeloeschteUndDeaktivierteMarktakteure.yaml
   primary: MarktakteurMastrNummer
 - spec: Marktrollen.yaml
-  primary: MastrNummer
+  #primary: MastrNummer
 - spec: Netzanschlusspunkte.yaml
   primary: NetzanschlusspunktMastrNummer
 - spec: Netze.yaml

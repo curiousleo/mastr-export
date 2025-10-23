@@ -87,9 +87,9 @@ fields:
   xsd: short
 - name: Seelage
   xsd: short
-- name: ClusterNordsee
+- name: GebietNachDemFlaechenentwicklungsplanNordsee
   xsd: short
-- name: ClusterOstsee
+- name: GebietNachDemFlaechenentwicklungsplanOstsee
   xsd: short
 - name: Hersteller
   xsd: int
@@ -131,3 +131,5 @@ fields:
   xsd: float
 - name: Flugradius
   xsd: float
+- name: InbetriebnahmedatumAmAktuellenStandort
+  xsd: date

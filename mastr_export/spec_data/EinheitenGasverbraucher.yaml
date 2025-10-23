@@ -64,3 +64,5 @@ fields:
 - name: EinheitDientDerStromerzeugung
   xsd: boolean
 - name: VerknuepfteEinheitenMaStRNummern
+- name: InbetriebnahmedatumAmAktuellenStandort
+  xsd: date

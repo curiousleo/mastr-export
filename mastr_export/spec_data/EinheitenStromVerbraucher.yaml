@@ -65,3 +65,5 @@ fields:
 - name: PraequalifiziertGemaessAblav
   xsd: boolean
 - name: GemeinsamRegistrierteSolareinheitMastrNummer
+- name: InbetriebnahmedatumAmAktuellenStandort
+  xsd: date
