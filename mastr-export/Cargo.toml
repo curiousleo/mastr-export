@@ -1,0 +1,11 @@
+[package]
+name = "mastr-export"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.100"
+polars = "0.51.0"
+quick-xml = "0.38.3"
+serde_json = "1.0.145"
+zip = "6.0.0"
