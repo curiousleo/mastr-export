@@ -1,0 +1,20 @@
+{
+  "root": "Bilanzierungsgebiete",
+  "element": "Bilanzierungsgebiet",
+  "fields": [
+    {
+      "name": "Id",
+      "xsd": "short"
+    },
+    {
+      "name": "Yeic"
+    },
+    {
+      "name": "BilanzierungsgebietNetzanschlusspunkt"
+    },
+    {
+      "name": "RegelzoneNetzanschlusspunkt",
+      "xsd": "int"
+    }
+  ]
+}

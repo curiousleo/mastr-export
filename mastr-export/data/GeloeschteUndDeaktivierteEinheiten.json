@@ -1,0 +1,25 @@
+{
+  "root": "GeloeschteUndDeaktivierteEinheiten",
+  "element": "GeloeschteUndDeaktivierteEinheit",
+  "fields": [
+    {
+      "name": "DatumLetzteAktualisierung",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "EinheitMastrNummer"
+    },
+    {
+      "name": "Einheittyp",
+      "xsd": "byte"
+    },
+    {
+      "name": "EinheitSystemstatus",
+      "xsd": "short"
+    },
+    {
+      "name": "EinheitBetriebsstatus",
+      "xsd": "byte"
+    }
+  ]
+}

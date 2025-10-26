@@ -1,0 +1,93 @@
+{
+  "root": "AnlagenEegBiomasse",
+  "element": "AnlageEegBiomasse",
+  "fields": [
+    {
+      "name": "Registrierungsdatum",
+      "xsd": "date"
+    },
+    {
+      "name": "DatumLetzteAktualisierung",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "EegInbetriebnahmedatum",
+      "xsd": "date"
+    },
+    {
+      "name": "EegMaStRNummer"
+    },
+    {
+      "name": "AnlagenschluesselEeg"
+    },
+    {
+      "name": "AnlagenkennzifferAnlagenregister"
+    },
+    {
+      "name": "AnlagenkennzifferAnlagenregister_nv",
+      "xsd": "boolean"
+    },
+    {
+      "name": "InstallierteLeistung",
+      "xsd": "float"
+    },
+    {
+      "name": "AusschliesslicheVerwendungBiomasse",
+      "xsd": "boolean"
+    },
+    {
+      "name": "AusschreibungZuschlag",
+      "xsd": "boolean"
+    },
+    {
+      "name": "Zuschlagsnummer"
+    },
+    {
+      "name": "BiogasInanspruchnahmeFlexiPraemie",
+      "xsd": "boolean"
+    },
+    {
+      "name": "BiogasDatumInanspruchnahmeFlexiPraemie",
+      "xsd": "date"
+    },
+    {
+      "name": "BiogasLeistungserhoehung",
+      "xsd": "boolean"
+    },
+    {
+      "name": "BiogasDatumLeistungserhoehung",
+      "xsd": "date"
+    },
+    {
+      "name": "BiogasUmfangLeistungserhoehung",
+      "xsd": "float"
+    },
+    {
+      "name": "BiogasGaserzeugungskapazitaet",
+      "xsd": "float"
+    },
+    {
+      "name": "BiogasGaserzeugungskapazitaet_nv",
+      "xsd": "boolean"
+    },
+    {
+      "name": "BiogasHoechstbemessungsleistung",
+      "xsd": "float"
+    },
+    {
+      "name": "BiomethanErstmaligerEinsatz",
+      "xsd": "date"
+    },
+    {
+      "name": "BiomethanErstmaligerEinsatz_nv",
+      "xsd": "boolean"
+    },
+    {
+      "name": "AnlageBetriebsstatus",
+      "xsd": "byte"
+    },
+    {
+      "name": "VerknuepfteEinheitenMaStRNummern"
+    }
+  ]
+}

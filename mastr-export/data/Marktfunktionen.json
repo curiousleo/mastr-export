@@ -1,0 +1,13 @@
+{
+  "root": "Marktfunktionen",
+  "element": "Marktfunktion",
+  "fields": [
+    {
+      "name": "Id",
+      "xsd": "byte"
+    },
+    {
+      "name": "Wert"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "root": "AnlagenStromSpeicher",
+  "element": "AnlageStromSpeicher",
+  "fields": [
+    {
+      "name": "MaStRNummer"
+    },
+    {
+      "name": "Registrierungsdatum",
+      "xsd": "date"
+    },
+    {
+      "name": "DatumLetzteAktualisierung",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "NutzbareSpeicherkapazitaet",
+      "xsd": "float"
+    },
+    {
+      "name": "VerknuepfteEinheitenMaStRNummern"
+    },
+    {
+      "name": "AnlageBetriebsstatus",
+      "xsd": "byte"
+    }
+  ]
+}

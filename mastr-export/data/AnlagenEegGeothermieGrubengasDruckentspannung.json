@@ -1,0 +1,42 @@
+{
+  "root": "AnlagenEegGeothermieGrubengasDruckentspannung",
+  "element": "AnlageEegGeothermieGrubengasDruckentspannung",
+  "fields": [
+    {
+      "name": "Registrierungsdatum",
+      "xsd": "date"
+    },
+    {
+      "name": "DatumLetzteAktualisierung",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "EegInbetriebnahmedatum",
+      "xsd": "date"
+    },
+    {
+      "name": "EegMaStRNummer"
+    },
+    {
+      "name": "AnlagenschluesselEeg"
+    },
+    {
+      "name": "AnlagenkennzifferAnlagenregister"
+    },
+    {
+      "name": "AnlagenkennzifferAnlagenregister_nv",
+      "xsd": "boolean"
+    },
+    {
+      "name": "InstallierteLeistung",
+      "xsd": "float"
+    },
+    {
+      "name": "AnlageBetriebsstatus",
+      "xsd": "byte"
+    },
+    {
+      "name": "VerknuepfteEinheitenMaStRNummern"
+    }
+  ]
+}

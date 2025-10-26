@@ -1,0 +1,13 @@
+{
+  "root": "Einheitentypen",
+  "element": "Einheitentyp",
+  "fields": [
+    {
+      "name": "Id",
+      "xsd": "byte"
+    },
+    {
+      "name": "Wert"
+    }
+  ]
+}

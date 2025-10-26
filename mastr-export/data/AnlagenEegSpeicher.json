@@ -1,0 +1,34 @@
+{
+  "root": "AnlagenEegSpeicher",
+  "element": "AnlageEegSpeicher",
+  "fields": [
+    {
+      "name": "Registrierungsdatum",
+      "xsd": "date"
+    },
+    {
+      "name": "DatumLetzteAktualisierung",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "EegInbetriebnahmedatum",
+      "xsd": "date"
+    },
+    {
+      "name": "EegMaStRNummer"
+    },
+    {
+      "name": "AnlagenschluesselEeg"
+    },
+    {
+      "name": "AusschreibungZuschlag",
+      "xsd": "boolean"
+    },
+    {
+      "name": "Zuschlagsnummer"
+    },
+    {
+      "name": "VerknuepfteEinheitenMaStRNummern"
+    }
+  ]
+}

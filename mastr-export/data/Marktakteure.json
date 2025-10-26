@@ -1,0 +1,224 @@
+{
+  "root": "Marktakteure",
+  "element": "Marktakteur",
+  "fields": [
+    {
+      "name": "MastrNummer"
+    },
+    {
+      "name": "DatumLetzeAktualisierung",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "Personenart",
+      "xsd": "short"
+    },
+    {
+      "name": "MarktakteurAnrede",
+      "xsd": "short"
+    },
+    {
+      "name": "MarktakteurTitel",
+      "xsd": "short"
+    },
+    {
+      "name": "MarktakteurVorname"
+    },
+    {
+      "name": "MarktakteurNachname"
+    },
+    {
+      "name": "Firmenname"
+    },
+    {
+      "name": "Marktfunktion",
+      "xsd": "short"
+    },
+    {
+      "name": "Rechtsform",
+      "xsd": "int"
+    },
+    {
+      "name": "SonstigeRechtsform"
+    },
+    {
+      "name": "Marktrollen"
+    },
+    {
+      "name": "Land",
+      "xsd": "short"
+    },
+    {
+      "name": "Region"
+    },
+    {
+      "name": "Strasse"
+    },
+    {
+      "name": "Hausnummer"
+    },
+    {
+      "name": "Hausnummer_nv",
+      "xsd": "boolean"
+    },
+    {
+      "name": "Adresszusatz"
+    },
+    {
+      "name": "Postleitzahl"
+    },
+    {
+      "name": "Ort"
+    },
+    {
+      "name": "Bundesland",
+      "xsd": "short"
+    },
+    {
+      "name": "Netz"
+    },
+    {
+      "name": "Nuts2"
+    },
+    {
+      "name": "Email"
+    },
+    {
+      "name": "Telefon"
+    },
+    {
+      "name": "Fax"
+    },
+    {
+      "name": "Fax_nv",
+      "xsd": "boolean"
+    },
+    {
+      "name": "Webseite"
+    },
+    {
+      "name": "Webseite_nv",
+      "xsd": "boolean"
+    },
+    {
+      "name": "Registergericht",
+      "xsd": "int"
+    },
+    {
+      "name": "RegistergerichtAusland"
+    },
+    {
+      "name": "RegisternummerPraefix",
+      "xsd": "short"
+    },
+    {
+      "name": "Registernummer"
+    },
+    {
+      "name": "RegisternummerAusland"
+    },
+    {
+      "name": "Taetigkeitsbeginn",
+      "xsd": "date"
+    },
+    {
+      "name": "AcerCode"
+    },
+    {
+      "name": "AcerCode_nv",
+      "xsd": "boolean"
+    },
+    {
+      "name": "Umsatzsteueridentifikationsnummer"
+    },
+    {
+      "name": "Umsatzsteueridentifikationsnummer_nv",
+      "xsd": "boolean"
+    },
+    {
+      "name": "Taetigkeitsende",
+      "xsd": "date"
+    },
+    {
+      "name": "BundesnetzagenturBetriebsnummer"
+    },
+    {
+      "name": "BundesnetzagenturBetriebsnummer_nv",
+      "xsd": "byte"
+    },
+    {
+      "name": "LandAnZustelladresse",
+      "xsd": "short"
+    },
+    {
+      "name": "PostleitzahlAnZustelladresse"
+    },
+    {
+      "name": "OrtAnZustelladresse"
+    },
+    {
+      "name": "StrasseAnZustelladresse"
+    },
+    {
+      "name": "HausnummerAnZustelladresse"
+    },
+    {
+      "name": "HausnummerAnZustelladresse_nv",
+      "xsd": "boolean"
+    },
+    {
+      "name": "AdresszusatzAnZustelladresse"
+    },
+    {
+      "name": "Kmu",
+      "xsd": "boolean"
+    },
+    {
+      "name": "RegistrierungsdatumMarktakteur",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "HauptwirtdschaftszweigAbteilung",
+      "xsd": "short"
+    },
+    {
+      "name": "HauptwirtdschaftszweigGruppe",
+      "xsd": "short"
+    },
+    {
+      "name": "HauptwirtdschaftszweigAbschnitt",
+      "xsd": "short"
+    },
+    {
+      "name": "Direktvermarktungsunternehmen",
+      "xsd": "boolean"
+    },
+    {
+      "name": "BelieferungVonLetztverbrauchernStrom",
+      "xsd": "boolean"
+    },
+    {
+      "name": "BelieferungHaushaltskundenStrom",
+      "xsd": "boolean"
+    },
+    {
+      "name": "Gasgrosshaendler",
+      "xsd": "boolean"
+    },
+    {
+      "name": "Stromgrosshaendler",
+      "xsd": "boolean"
+    },
+    {
+      "name": "BelieferungVonLetztverbrauchernGas",
+      "xsd": "boolean"
+    },
+    {
+      "name": "BelieferungHaushaltskundenGas",
+      "xsd": "boolean"
+    },
+    {
+      "name": "WebportalDesNetzbetreibers"
+    }
+  ]
+}

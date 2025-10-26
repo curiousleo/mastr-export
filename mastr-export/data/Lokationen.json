@@ -1,0 +1,26 @@
+{
+  "root": "Lokationen",
+  "element": "Lokation",
+  "fields": [
+    {
+      "name": "DatumLetzteAktualisierung",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "MastrNummer"
+    },
+    {
+      "name": "NameDerTechnischenLokation"
+    },
+    {
+      "name": "Lokationtyp",
+      "xsd": "byte"
+    },
+    {
+      "name": "VerknuepfteEinheitenMaStRNummern"
+    },
+    {
+      "name": "NetzanschlusspunkteMaStRNummern"
+    }
+  ]
+}
