@@ -18,6 +18,7 @@ fn to_sqlite_schema(reference: &Reference) -> String {
     )
 }
 
+#[derive(Serialize, Deserialize)]
 enum XsdType {
     Date,
     DateTime,
@@ -81,7 +82,7 @@ struct Field<'a> {
     name: &'a str,
     index: bool,
     xsd: XsdType,
-    references: Option<&'a Reference<'a>>,
+    references: Option<Reference<'a>>,
 }
 
 fn to_duckdb_schema(field: &Field) -> String {
@@ -167,7 +168,7 @@ fn parse<'a>(spec: Spec<'a>, mut reader: Reader<&[u8]>) -> HashMap<String, Vec<S
             }
             (ParserState::AttrCdataOrEndAttr(element), Ok(Event::Text(e))) => {
                 let content = e.xml_content().unwrap();
-                let column = columns
+                columns
                     .get_mut(element)
                     .unwrap()
                     .last_mut()
