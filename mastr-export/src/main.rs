@@ -147,25 +147,15 @@ enum ParserState {
     Done,
 }
 
-// fn parse<R>(_spec: &Schema, reader: EventReader<R>)
-// where
-//     R: std::io::BufRead,
-// {
-//     for event in reader {
-//         match event {
-//             Err(e) => panic!("Error: {:?}", e),
-//             Ok(event) => {
-//                 println!("{:?}", event);
-//             }
-//         }
-//     }
-// }
-
-fn parse<R>(spec: &Schema, reader: EventReader<R>) -> HashMap<String, Vec<String>>
+fn parse<R>(schema: &Schema, reader: EventReader<R>) -> HashMap<String, Vec<String>>
 where
     R: std::io::BufRead,
 {
+    // TODO(leo): Read into StructArray or something like that.
     let mut columns: HashMap<String, Vec<String>> = HashMap::new();
+    for field in schema.fields.iter() {
+        columns.insert(field.name.clone(), Vec::new());
+    }
     let mut state = ParserState::StartDocument;
     for event in reader {
         match (&mut state, event) {
@@ -178,15 +168,18 @@ where
             }
             (ParserState::StartRoot, Ok(XmlEvent::StartElement { name, .. })) => {
                 let OwnedName { local_name, .. } = name;
-                if spec.root == local_name {
+                if schema.root == local_name {
                     state = ParserState::StartElementOrEndRoot;
                 } else {
-                    panic!("Expected root element {}, got {:?}", spec.root, local_name)
+                    panic!(
+                        "Expected root element {}, got {:?}",
+                        schema.root, local_name
+                    )
                 }
             }
             (ParserState::StartElementOrEndRoot, Ok(XmlEvent::StartElement { name, .. })) => {
                 let OwnedName { local_name, .. } = name;
-                if spec.element != local_name {
+                if schema.element != local_name {
                     panic!("Unknown element {}", local_name)
                 }
                 columns.values_mut().for_each(|v| v.push("".to_string()));
@@ -218,23 +211,26 @@ where
             }
             (ParserState::StartAttrOrEndElement, Ok(XmlEvent::EndElement { name })) => {
                 let OwnedName { local_name, .. } = name;
-                if spec.element != local_name {
+                if schema.element != local_name {
                     panic!(
                         "Expected closing of tag {}, got {}",
-                        spec.element, local_name
+                        schema.element, local_name
                     )
                 }
                 state = ParserState::StartElementOrEndRoot
             }
             (ParserState::StartElementOrEndRoot, Ok(XmlEvent::EndElement { name })) => {
                 let OwnedName { local_name, .. } = name;
-                if spec.root != local_name {
+                if schema.root != local_name {
                     panic!(
                         "Expected closing of tag {}, got {}",
-                        spec.element, local_name
+                        schema.element, local_name
                     )
                 }
                 state = ParserState::Done
+            }
+            (ParserState::Done, Ok(XmlEvent::EndDocument)) => {
+                // Done
             }
             (
                 _,
@@ -272,8 +268,6 @@ fn main() {
         .trim_whitespace(true)
         .ignore_comments(true)
         .create_reader(buf_reader);
-    // reader.config_mut().trim_text(true);
     let columns = parse(&schema, reader);
-    // parse(&schema, reader)
     println!("len = {}", columns.values().last().unwrap().len());
 }
