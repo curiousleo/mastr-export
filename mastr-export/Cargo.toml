@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.100"
 arrow = { version = "57.0.0", default-features = false }
+chrono = "0.4.42"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 xml = "1.0.1"
