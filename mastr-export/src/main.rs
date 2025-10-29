@@ -1,12 +1,7 @@
 use arrow::{
-    array::{
-        ArrayBuilder, BooleanBuilder, Date32Builder, Float32Builder, Float64Builder, Int8Builder,
-        Int16Builder, Int32Builder, RecordBatch, StringBuilder, TimestampSecondBuilder,
-        UInt64Builder,
-    },
+    array::{RecordBatch, StringBuilder},
     datatypes::{DataType, TimeUnit},
 };
-use chrono::{NaiveDate, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
 
@@ -127,177 +122,6 @@ impl Into<arrow::datatypes::Schema> for &Schema {
     }
 }
 
-fn append_value_to_builder(builder: &mut Box<dyn ArrayBuilder>, value: &str, data_type: &DataType) {
-    match data_type {
-        DataType::Date32 => {
-            let builder = builder
-                .as_any_mut()
-                .downcast_mut::<Date32Builder>()
-                .unwrap();
-            if value.is_empty() {
-                builder.append_null();
-            } else {
-                // Try to parse date in common formats
-                let parsed_date = NaiveDate::parse_from_str(value, "%Y-%m-%d")
-                    .or_else(|_| NaiveDate::parse_from_str(value, "%d.%m.%Y"))
-                    .or_else(|_| NaiveDate::parse_from_str(value, "%m/%d/%Y"));
-
-                match parsed_date {
-                    Ok(date) => {
-                        // Convert to days since epoch (1970-01-01)
-                        let epoch = NaiveDate::from_ymd_opt(1970, 1, 1).unwrap();
-                        let days = date.signed_duration_since(epoch).num_days() as i32;
-                        builder.append_value(days);
-                    }
-                    Err(_) => builder.append_null(),
-                }
-            }
-        }
-        DataType::Timestamp(TimeUnit::Second, None) => {
-            let builder = builder
-                .as_any_mut()
-                .downcast_mut::<TimestampSecondBuilder>()
-                .unwrap();
-            if value.is_empty() {
-                builder.append_null();
-            } else {
-                // Try to parse timestamp in common formats
-                let parsed_datetime = NaiveDateTime::parse_from_str(value, "%Y-%m-%d %H:%M:%S")
-                    .or_else(|_| NaiveDateTime::parse_from_str(value, "%Y-%m-%dT%H:%M:%S"))
-                    .or_else(|_| NaiveDateTime::parse_from_str(value, "%d.%m.%Y %H:%M:%S"));
-
-                match parsed_datetime {
-                    Ok(datetime) => {
-                        let timestamp = datetime.and_utc().timestamp();
-                        builder.append_value(timestamp);
-                    }
-                    Err(_) => builder.append_null(),
-                }
-            }
-        }
-        DataType::Float32 => {
-            let builder = builder
-                .as_any_mut()
-                .downcast_mut::<Float32Builder>()
-                .unwrap();
-            if value.is_empty() {
-                builder.append_null();
-            } else {
-                match value.parse::<f32>() {
-                    Ok(v) => builder.append_value(v),
-                    Err(_) => builder.append_null(),
-                }
-            }
-        }
-        DataType::Float64 => {
-            let builder = builder
-                .as_any_mut()
-                .downcast_mut::<Float64Builder>()
-                .unwrap();
-            if value.is_empty() {
-                builder.append_null();
-            } else {
-                match value.parse::<f64>() {
-                    Ok(v) => builder.append_value(v),
-                    Err(_) => builder.append_null(),
-                }
-            }
-        }
-        DataType::Int8 => {
-            let builder = builder.as_any_mut().downcast_mut::<Int8Builder>().unwrap();
-            if value.is_empty() {
-                builder.append_null();
-            } else {
-                match value.parse::<i8>() {
-                    Ok(v) => builder.append_value(v),
-                    Err(_) => builder.append_null(),
-                }
-            }
-        }
-        DataType::Int16 => {
-            let builder = builder.as_any_mut().downcast_mut::<Int16Builder>().unwrap();
-            if value.is_empty() {
-                builder.append_null();
-            } else {
-                match value.parse::<i16>() {
-                    Ok(v) => builder.append_value(v),
-                    Err(_) => builder.append_null(),
-                }
-            }
-        }
-        DataType::Int32 => {
-            let builder = builder.as_any_mut().downcast_mut::<Int32Builder>().unwrap();
-            if value.is_empty() {
-                builder.append_null();
-            } else {
-                match value.parse::<i32>() {
-                    Ok(v) => builder.append_value(v),
-                    Err(_) => builder.append_null(),
-                }
-            }
-        }
-        DataType::UInt64 => {
-            let builder = builder
-                .as_any_mut()
-                .downcast_mut::<UInt64Builder>()
-                .unwrap();
-            if value.is_empty() {
-                builder.append_null();
-            } else {
-                match value.parse::<u64>() {
-                    Ok(v) => builder.append_value(v),
-                    Err(_) => builder.append_null(),
-                }
-            }
-        }
-        DataType::Boolean => {
-            let builder = builder
-                .as_any_mut()
-                .downcast_mut::<BooleanBuilder>()
-                .unwrap();
-            if value.is_empty() {
-                builder.append_null();
-            } else {
-                match value.to_lowercase().as_str() {
-                    "true" | "1" | "yes" => builder.append_value(true),
-                    "false" | "0" | "no" => builder.append_value(false),
-                    _ => builder.append_null(),
-                }
-            }
-        }
-        DataType::Utf8 => {
-            let builder = builder
-                .as_any_mut()
-                .downcast_mut::<StringBuilder>()
-                .unwrap();
-            if value.is_empty() {
-                builder.append_null();
-            } else {
-                builder.append_value(value);
-            }
-        }
-        _ => unimplemented!(),
-    }
-}
-
-// fn duckdb_schema<'a>(spec: Schema<'a>) -> String {
-//     let columns = spec
-//         .fields
-//         .values()
-//         .map(|field| to_duckdb_schema(field))
-//         .collect::<Vec<_>>()
-//         .join(",\n    ");
-//     let primary = if let Some(primary) = spec.primary {
-//         &format!(",\nprimary key (\"{}\")", primary)
-//     } else {
-//         ""
-//     };
-//     format!(
-//         "create table if not exists \"{}\" (\n{}{}))",
-//         spec.element, columns, primary
-//     )
-// }
-
 #[derive(Debug)]
 enum ParserState {
     StartDocument,
@@ -308,28 +132,10 @@ enum ParserState {
     Done,
 }
 
-fn array_builder_from_data_type(data_type: &DataType) -> Box<dyn ArrayBuilder> {
-    match data_type {
-        DataType::Date32 => Box::new(Date32Builder::new()),
-        DataType::Timestamp(TimeUnit::Second, None) => Box::new(TimestampSecondBuilder::new()),
-        DataType::Float32 => Box::new(Float32Builder::new()),
-        DataType::Float64 => Box::new(Float64Builder::new()),
-        DataType::Int8 => Box::new(Int8Builder::new()),
-        DataType::Int16 => Box::new(Int16Builder::new()),
-        DataType::Int32 => Box::new(Int32Builder::new()),
-        DataType::UInt64 => Box::new(UInt64Builder::new()),
-        DataType::Boolean => Box::new(BooleanBuilder::new()),
-        DataType::Utf8 => Box::new(StringBuilder::new()),
-        _ => unimplemented!(),
-    }
-}
-
 fn parse<R>(schema: &Schema, reader: EventReader<R>) -> RecordBatch
 where
     R: std::io::BufRead,
 {
-    // TODO(leo): Accumulate into `StringArray`s and use
-    // `arrow_cast::cast::cast` to convert them to the appropriate data types.
     let fields = Into::<arrow::datatypes::Schema>::into(schema)
         .fields()
         .clone();
@@ -338,17 +144,15 @@ where
         .map(|field| {
             (
                 field.name().to_string(),
-                array_builder_from_data_type(field.data_type()),
+                StringBuilder::with_capacity(100_000, 100_000 * 32),
             )
         })
-        .collect::<HashMap<String, Box<dyn ArrayBuilder>>>();
-
-    // Create a mapping from field name to data type for easy lookup
-    let field_types = fields
-        .iter()
-        .map(|field| (field.name().to_string(), field.data_type().clone()))
-        .collect::<HashMap<String, DataType>>();
+        .collect::<HashMap<_, _>>();
     let mut state = ParserState::StartDocument;
+    let mut current_values: HashMap<String, String> = fields
+        .iter()
+        .map(|field| (field.name().to_string(), String::new()))
+        .collect();
     for event in reader {
         match (&mut state, event) {
             (ParserState::StartDocument, Ok(XmlEvent::StartDocument { .. })) => {
@@ -381,10 +185,11 @@ where
                 state = ParserState::AttrCdataOrEndAttr(local_name)
             }
             (ParserState::AttrCdataOrEndAttr(element), Ok(XmlEvent::Characters(content))) => {
-                if let (Some(builder), Some(data_type)) =
-                    (builders.get_mut(element), field_types.get(element))
-                {
-                    append_value_to_builder(builder, content.as_ref(), data_type);
+                // Accumulate content for this element
+                if let Some(existing_content) = current_values.get_mut(element) {
+                    existing_content.push_str(&content);
+                } else {
+                    panic!("Element {} not found in builders", element);
                 }
             }
             (ParserState::AttrCdataOrEndAttr(element), Ok(XmlEvent::EndElement { name })) => {
@@ -401,6 +206,20 @@ where
                         "Expected closing of tag {}, got {}",
                         schema.element, local_name
                     )
+                }
+                // Append accumulated values to builders
+                for field in &fields {
+                    let field_name = field.name();
+                    let value_builder = current_values.get_mut(field_name).unwrap();
+                    if value_builder.is_empty() {
+                        builders.get_mut(field_name).unwrap().append_null();
+                    } else {
+                        let drained_value: String = value_builder.drain(..).collect();
+                        builders
+                            .get_mut(field_name)
+                            .unwrap()
+                            .append_value(drained_value);
+                    }
                 }
                 state = ParserState::StartElementOrEndRoot
             }
@@ -433,15 +252,17 @@ where
     }
 
     // Convert builders to arrays
-    let columns = builders
-        .into_values()
-        .map(|mut builder| (builder.finish()))
+    let schema = Arc::new(Into::<arrow::datatypes::Schema>::into(schema));
+    let columns = schema
+        .fields()
+        .iter()
+        .map(|field| {
+            let builder = builders.get_mut(field.name()).unwrap();
+            let string_array = builder.finish();
+            arrow_cast::cast(&string_array, &field.data_type()).unwrap()
+        })
         .collect::<Vec<_>>();
-    RecordBatch::try_new(
-        Arc::new(Into::<arrow::datatypes::Schema>::into(schema)),
-        columns,
-    )
-    .unwrap()
+    RecordBatch::try_new(schema, columns).unwrap()
 }
 
 fn main() {
