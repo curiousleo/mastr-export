@@ -84,8 +84,21 @@ struct Schema {
     fields: Vec<Field>,
 }
 
-// TODO: Consider using string constants for metadata keys to avoid typos
-// TODO: This should consume self, not take &self for better performance
+impl Schema {
+    fn get_metadata(self: &Self) -> HashMap<String, String> {
+        let mut map = HashMap::new();
+        map.insert("root".to_string(), self.root.clone());
+        map.insert("element".to_string(), self.element.clone());
+        if self.without_rowid {
+            map.insert("without_rowid".to_string(), "true".to_string());
+        }
+        if let Some(primary) = self.primary.clone() {
+            map.insert("primary".to_string(), primary);
+        }
+        map
+    }
+}
+
 impl From<&Schema> for arrow::datatypes::Schema {
     fn from(schema: &Schema) -> Self {
         let fields = schema
@@ -94,17 +107,7 @@ impl From<&Schema> for arrow::datatypes::Schema {
             .map(|field| arrow::datatypes::Field::from(field))
             .collect::<Vec<_>>();
         let fields = arrow::datatypes::Fields::from(fields);
-        let mut metadata = HashMap::from([
-            ("root".to_string(), schema.root.to_string()),
-            ("element".to_string(), schema.element.to_string()),
-        ]);
-        if schema.without_rowid {
-            metadata.insert("without_rowid".to_string(), "true".to_string());
-        }
-        if let Some(primary) = &schema.primary {
-            metadata.insert("primary".to_string(), primary.to_string());
-        }
-        arrow::datatypes::Schema::new(fields).with_metadata(metadata)
+        arrow::datatypes::Schema::new(fields).with_metadata(schema.get_metadata())
     }
 }
 
