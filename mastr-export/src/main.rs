@@ -1,3 +1,5 @@
+// TODO: Move schema types and XML parser to separate modules for better organization
+use anyhow::{Result, anyhow};
 use arrow::{
     array::{RecordBatch, StringBuilder},
     datatypes::{DataType, TimeUnit},
@@ -9,19 +11,6 @@ use xml::{
     name::OwnedName,
     reader::{EventReader, ParserConfig, XmlEvent},
 };
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Reference {
-    table: String,
-    column: String,
-}
-
-// fn to_sqlite_schema(reference: &Reference) -> String {
-//     format!(
-//         "references \"{}\"(\"{}\")",
-//         reference.table, reference.column
-//     )
-// }
 
 #[derive(Debug, Serialize, Deserialize)]
 enum XsdType {
@@ -53,6 +42,7 @@ impl Default for XsdType {
     }
 }
 
+// TODO: Prefer implementing From<XsdType> instead of Into<DataType> for &XsdType
 impl Into<DataType> for &XsdType {
     fn into(self) -> DataType {
         match self {
@@ -77,17 +67,13 @@ struct Field {
     xsd: XsdType,
 }
 
+// TODO: Prefer implementing From<Field> instead of Into<arrow::datatypes::Field> for &Field
 impl Into<arrow::datatypes::Field> for &Field {
     fn into(self) -> arrow::datatypes::Field {
         let data_type = Into::<arrow::datatypes::DataType>::into(&self.xsd);
         arrow::datatypes::Field::new(&self.name, data_type, true)
     }
 }
-
-// fn to_duckdb_schema(field: &Field) -> String {
-//     let duckdb_type = duckdb_type_to_string(to_duckdb_type(&field.xsd));
-//     format!("{} {}", field.name, duckdb_type)
-// }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Schema {
@@ -100,6 +86,8 @@ struct Schema {
     fields: Vec<Field>,
 }
 
+// TODO: Prefer implementing From<Schema> instead of Into<arrow::datatypes::Schema> for &Schema
+// TODO: Consider using string constants for metadata keys to avoid typos
 impl Into<arrow::datatypes::Schema> for &Schema {
     fn into(self) -> arrow::datatypes::Schema {
         let fields = self
@@ -122,6 +110,8 @@ impl Into<arrow::datatypes::Schema> for &Schema {
     }
 }
 
+// TODO: Consider moving parser state and logic to a separate Parser struct
+// TODO: Add documentation comments for each state
 #[derive(Debug)]
 enum ParserState {
     StartDocument,
@@ -132,13 +122,16 @@ enum ParserState {
     Done,
 }
 
-fn parse<R>(schema: &Schema, reader: EventReader<R>) -> RecordBatch
+// TODO: This function is too large - consider breaking into smaller functions
+fn parse<R>(schema: &Schema, reader: EventReader<R>) -> Result<RecordBatch>
 where
     R: std::io::BufRead,
 {
     let fields = Into::<arrow::datatypes::Schema>::into(schema)
         .fields()
         .clone();
+    // TODO: Magic numbers should be constants or configurable
+    // TODO: Consider using Vec instead of HashMap for better performance with indexed access
     let mut builders = fields
         .iter()
         .map(|field| {
@@ -149,6 +142,7 @@ where
         })
         .collect::<HashMap<_, _>>();
     let mut state = ParserState::StartDocument;
+    // TODO: Consider using Vec<String> indexed by field position for better performance
     let mut current_values: HashMap<String, String> = fields
         .iter()
         .map(|field| (field.name().to_string(), String::new()))
@@ -158,7 +152,9 @@ where
             (ParserState::StartDocument, Ok(XmlEvent::StartDocument { .. })) => {
                 state = ParserState::StartRoot;
             }
-            (state, Err(e)) => panic!("Error in state {:?}: {:?}", state, e),
+            (state, Err(e)) => {
+                return Err(anyhow!("XML parsing error in state {:?}: {}", state, e));
+            }
             (ParserState::StartRoot, Ok(XmlEvent::Characters(_))) => {
                 // Leading text, ignore
             }
@@ -167,16 +163,17 @@ where
                 if schema.root == local_name {
                     state = ParserState::StartElementOrEndRoot;
                 } else {
-                    panic!(
-                        "Expected root element {}, got {:?}",
-                        schema.root, local_name
-                    )
+                    return Err(anyhow!(
+                        "Expected root element {}, got {}",
+                        schema.root,
+                        local_name
+                    ));
                 }
             }
             (ParserState::StartElementOrEndRoot, Ok(XmlEvent::StartElement { name, .. })) => {
                 let OwnedName { local_name, .. } = name;
                 if schema.element != local_name {
-                    panic!("Unknown element {}", local_name)
+                    return Err(anyhow!("Unknown element {}", local_name));
                 }
                 state = ParserState::StartAttrOrEndElement
             }
@@ -185,39 +182,51 @@ where
                 state = ParserState::AttrCdataOrEndAttr(local_name)
             }
             (ParserState::AttrCdataOrEndAttr(element), Ok(XmlEvent::Characters(content))) => {
+                // TODO: String concatenation can be expensive - consider using a more efficient buffer
                 // Accumulate content for this element
                 if let Some(existing_content) = current_values.get_mut(element) {
                     existing_content.push_str(&content);
                 } else {
-                    panic!("Element {} not found in builders", element);
+                    return Err(anyhow!("Element {} not found in schema", element));
                 }
             }
             (ParserState::AttrCdataOrEndAttr(element), Ok(XmlEvent::EndElement { name })) => {
                 let OwnedName { local_name, .. } = name;
                 if &local_name != element {
-                    panic!("Expected closing of tag {}, got {}", element, local_name)
+                    return Err(anyhow!(
+                        "Expected closing of tag {}, got {}",
+                        element,
+                        local_name
+                    ));
                 }
                 state = ParserState::StartAttrOrEndElement
             }
             (ParserState::StartAttrOrEndElement, Ok(XmlEvent::EndElement { name })) => {
                 let OwnedName { local_name, .. } = name;
                 if schema.element != local_name {
-                    panic!(
+                    return Err(anyhow!(
                         "Expected closing of tag {}, got {}",
-                        schema.element, local_name
-                    )
+                        schema.element,
+                        local_name
+                    ));
                 }
                 // Append accumulated values to builders
+                // TODO: Consider pre-computing field indices for faster access
                 for field in &fields {
                     let field_name = field.name();
-                    let value_builder = current_values.get_mut(field_name).unwrap();
+                    let value_builder = current_values.get_mut(field_name).ok_or_else(|| {
+                        anyhow!("Field {} not found in current values", field_name)
+                    })?;
                     if value_builder.is_empty() {
-                        builders.get_mut(field_name).unwrap().append_null();
+                        builders
+                            .get_mut(field_name)
+                            .ok_or_else(|| anyhow!("Builder for field {} not found", field_name))?
+                            .append_null();
                     } else {
                         let drained_value: String = value_builder.drain(..).collect();
                         builders
                             .get_mut(field_name)
-                            .unwrap()
+                            .ok_or_else(|| anyhow!("Builder for field {} not found", field_name))?
                             .append_value(drained_value);
                     }
                 }
@@ -226,10 +235,11 @@ where
             (ParserState::StartElementOrEndRoot, Ok(XmlEvent::EndElement { name })) => {
                 let OwnedName { local_name, .. } = name;
                 if schema.root != local_name {
-                    panic!(
-                        "Expected closing of tag {}, got {}",
-                        schema.element, local_name
-                    )
+                    return Err(anyhow!(
+                        "Expected closing of root tag {}, got {}",
+                        schema.root,
+                        local_name
+                    ));
                 }
                 state = ParserState::Done
             }
@@ -246,7 +256,7 @@ where
                 // Ignore
             }
             (state, event) => {
-                panic!("Unexpected event {:?} in state {:?}", state, event)
+                return Err(anyhow!("Unexpected event {:?} in state {:?}", event, state));
             }
         }
     }
@@ -256,35 +266,59 @@ where
     let columns = schema
         .fields()
         .iter()
-        .map(|field| {
-            let builder = builders.get_mut(field.name()).unwrap();
+        .map(|field| -> Result<_> {
+            let builder = builders
+                .get_mut(field.name())
+                .ok_or_else(|| anyhow!("Builder for field {} not found", field.name()))?;
             let string_array = builder.finish();
-            arrow_cast::cast(&string_array, &field.data_type()).unwrap()
+            let casted_array = arrow_cast::cast(&string_array, &field.data_type())
+                .map_err(|e| anyhow!("Failed to cast field {}: {}", field.name(), e))?;
+            Ok(casted_array)
         })
-        .collect::<Vec<_>>();
-    RecordBatch::try_new(schema, columns).unwrap()
+        .collect::<Result<Vec<_>>>()?;
+    let record_batch = RecordBatch::try_new(schema, columns)
+        .map_err(|e| anyhow!("Failed to create RecordBatch: {}", e))?;
+    Ok(record_batch)
 }
 
-fn main() {
-    let schema_path = std::path::PathBuf::from(std::env::args().nth(1).unwrap());
-    let schema_file = std::fs::File::open(schema_path).unwrap();
-    let schema: Schema = serde_json::from_reader(schema_file).unwrap();
+// TODO: Use clap or similar for proper CLI argument parsing
+fn main() -> Result<()> {
+    let schema_path = std::path::PathBuf::from(
+        std::env::args()
+            .nth(1)
+            .ok_or_else(|| anyhow!("Missing schema file argument"))?,
+    );
+    let schema_file = std::fs::File::open(&schema_path)
+        .map_err(|e| anyhow!("Failed to open schema file {:?}: {}", schema_path, e))?;
+    let schema: Schema = serde_json::from_reader(schema_file)
+        .map_err(|e| anyhow!("Failed to parse schema JSON: {}", e))?;
 
     println!("{:?}", Into::<arrow::datatypes::Schema>::into(&schema));
 
-    let zip_path = std::path::PathBuf::from(std::env::args().nth(2).unwrap());
-    let zip_file = std::fs::File::open(zip_path).unwrap();
+    let zip_path = std::path::PathBuf::from(
+        std::env::args()
+            .nth(2)
+            .ok_or_else(|| anyhow!("Missing ZIP file argument"))?,
+    );
+    let zip_file = std::fs::File::open(&zip_path)
+        .map_err(|e| anyhow!("Failed to open ZIP file {:?}: {}", zip_path, e))?;
 
-    let xml_name = std::env::args().nth(3).unwrap();
+    let xml_name = std::env::args()
+        .nth(3)
+        .ok_or_else(|| anyhow!("Missing XML file name argument"))?;
 
-    let mut archive = zip::ZipArchive::new(zip_file).unwrap();
-    let file = archive.by_name(&xml_name).unwrap();
+    let mut archive =
+        zip::ZipArchive::new(zip_file).map_err(|e| anyhow!("Failed to read ZIP archive: {}", e))?;
+    let file = archive
+        .by_name(&xml_name)
+        .map_err(|e| anyhow!("Failed to find XML file '{}' in archive: {}", xml_name, e))?;
     let buf_reader = std::io::BufReader::new(file);
     let reader = ParserConfig::new()
         .trim_whitespace(true)
         .ignore_comments(true)
         .create_reader(buf_reader);
-    let record_batch = parse(&schema, reader);
+    let record_batch = parse(&schema, reader)?;
     println!("Number of columns: {}", record_batch.num_columns());
     println!("Number of rows: {}", record_batch.num_rows());
+    Ok(())
 }
