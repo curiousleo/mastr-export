@@ -12,7 +12,7 @@ use xml::{
     reader::{EventReader, ParserConfig, XmlEvent},
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 enum XsdType {
     #[serde(rename = "date")]
     Date,
@@ -42,10 +42,9 @@ impl Default for XsdType {
     }
 }
 
-// TODO: Prefer implementing From<XsdType> instead of Into<DataType> for &XsdType
-impl Into<DataType> for &XsdType {
-    fn into(self) -> DataType {
-        match self {
+impl From<XsdType> for DataType {
+    fn from(xsd_type: XsdType) -> Self {
+        match xsd_type {
             XsdType::Date => DataType::Date32,
             XsdType::DateTime => DataType::Timestamp(TimeUnit::Second, None),
             XsdType::Float => DataType::Float32,
@@ -67,11 +66,10 @@ struct Field {
     xsd: XsdType,
 }
 
-// TODO: Prefer implementing From<Field> instead of Into<arrow::datatypes::Field> for &Field
-impl Into<arrow::datatypes::Field> for &Field {
-    fn into(self) -> arrow::datatypes::Field {
-        let data_type = Into::<arrow::datatypes::DataType>::into(&self.xsd);
-        arrow::datatypes::Field::new(&self.name, data_type, true)
+impl From<&Field> for arrow::datatypes::Field {
+    fn from(field: &Field) -> Self {
+        let data_type = DataType::from(field.xsd);
+        arrow::datatypes::Field::new(&field.name, data_type, true)
     }
 }
 
@@ -86,24 +84,24 @@ struct Schema {
     fields: Vec<Field>,
 }
 
-// TODO: Prefer implementing From<Schema> instead of Into<arrow::datatypes::Schema> for &Schema
 // TODO: Consider using string constants for metadata keys to avoid typos
-impl Into<arrow::datatypes::Schema> for &Schema {
-    fn into(self) -> arrow::datatypes::Schema {
-        let fields = self
+// TODO: This should consume self, not take &self for better performance
+impl From<&Schema> for arrow::datatypes::Schema {
+    fn from(schema: &Schema) -> Self {
+        let fields = schema
             .fields
             .iter()
-            .map(|field| Into::<arrow::datatypes::Field>::into(field))
+            .map(|field| arrow::datatypes::Field::from(field))
             .collect::<Vec<_>>();
         let fields = arrow::datatypes::Fields::from(fields);
         let mut metadata = HashMap::from([
-            ("root".to_string(), self.root.to_string()),
-            ("element".to_string(), self.element.to_string()),
+            ("root".to_string(), schema.root.to_string()),
+            ("element".to_string(), schema.element.to_string()),
         ]);
-        if self.without_rowid {
+        if schema.without_rowid {
             metadata.insert("without_rowid".to_string(), "true".to_string());
         }
-        if let Some(primary) = &self.primary {
+        if let Some(primary) = &schema.primary {
             metadata.insert("primary".to_string(), primary.to_string());
         }
         arrow::datatypes::Schema::new(fields).with_metadata(metadata)
@@ -127,9 +125,7 @@ fn parse<R>(schema: &Schema, reader: EventReader<R>) -> Result<RecordBatch>
 where
     R: std::io::BufRead,
 {
-    let fields = Into::<arrow::datatypes::Schema>::into(schema)
-        .fields()
-        .clone();
+    let fields = arrow::datatypes::Schema::from(schema).fields().clone();
     // TODO: Magic numbers should be constants or configurable
     // TODO: Consider using Vec instead of HashMap for better performance with indexed access
     let mut builders = fields
@@ -262,7 +258,7 @@ where
     }
 
     // Convert builders to arrays
-    let schema = Arc::new(Into::<arrow::datatypes::Schema>::into(schema));
+    let schema = Arc::new(arrow::datatypes::Schema::from(schema));
     let columns = schema
         .fields()
         .iter()
@@ -293,7 +289,7 @@ fn main() -> Result<()> {
     let schema: Schema = serde_json::from_reader(schema_file)
         .map_err(|e| anyhow!("Failed to parse schema JSON: {}", e))?;
 
-    println!("{:?}", Into::<arrow::datatypes::Schema>::into(&schema));
+    println!("{:?}", arrow::datatypes::Schema::from(&schema));
 
     let zip_path = std::path::PathBuf::from(
         std::env::args()
