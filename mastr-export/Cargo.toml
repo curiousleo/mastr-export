@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.100"
+argh = "0.1.13"
 arrow = { version = "57.0.0", default-features = false }
 arrow-cast = "57.0.0"
 serde = { version = "1.0.228", features = ["derive"] }

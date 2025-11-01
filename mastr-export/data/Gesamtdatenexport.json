@@ -1,151 +1,151 @@
 [
   {
-    "spec": "Katalogkategorien.yaml",
+    "schema": "Katalogkategorien.json",
     "primary": "Id"
   },
   {
-    "spec": "Katalogwerte.yaml",
+    "schema": "Katalogwerte.json",
     "primary": "Id"
   },
   {
-    "spec": "Lokationstypen.yaml",
+    "schema": "Lokationstypen.json",
     "primary": "Id"
   },
   {
-    "spec": "Marktfunktionen.yaml",
+    "schema": "Marktfunktionen.json",
     "primary": "Id"
   },
   {
-    "spec": "MarktakteureUndRollen.yaml"
+    "schema": "MarktakteureUndRollen.json"
   },
   {
-    "spec": "Bilanzierungsgebiete.yaml",
+    "schema": "Bilanzierungsgebiete.json",
     "primary": "Id"
   },
   {
-    "spec": "Ertuechtigungen.yaml",
+    "schema": "Ertuechtigungen.json",
     "primary": "Id"
   },
   {
-    "spec": "GeloeschteUndDeaktivierteEinheiten.yaml",
+    "schema": "GeloeschteUndDeaktivierteEinheiten.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "Lokationen.yaml",
+    "schema": "Lokationen.json",
     "primary": "MastrNummer"
   },
   {
-    "spec": "Marktakteure.yaml",
+    "schema": "Marktakteure.json",
     "primary": "MastrNummer"
   },
   {
-    "spec": "GeloeschteUndDeaktivierteMarktakteure.yaml",
+    "schema": "GeloeschteUndDeaktivierteMarktakteure.json",
     "primary": "MarktakteurMastrNummer"
   },
   {
-    "spec": "Marktrollen.yaml"
+    "schema": "Marktrollen.json"
   },
   {
-    "spec": "Netzanschlusspunkte.yaml",
+    "schema": "Netzanschlusspunkte.json",
     "primary": "NetzanschlusspunktMastrNummer"
   },
   {
-    "spec": "Netze.yaml",
+    "schema": "Netze.json",
     "primary": "MastrNummer"
   },
   {
-    "spec": "AnlagenStromSpeicher.yaml",
+    "schema": "AnlagenStromSpeicher.json",
     "primary": "MaStRNummer"
   },
   {
-    "spec": "AnlagenGasSpeicher.yaml",
+    "schema": "AnlagenGasSpeicher.json",
     "primary": "MaStRNummer"
   },
   {
-    "spec": "AnlagenEegWind.yaml",
+    "schema": "AnlagenEegWind.json",
     "primary": "EegMaStRNummer"
   },
   {
-    "spec": "AnlagenEegSolar.yaml",
+    "schema": "AnlagenEegSolar.json",
     "primary": "EegMaStRNummer"
   },
   {
-    "spec": "AnlagenEegBiomasse.yaml",
+    "schema": "AnlagenEegBiomasse.json",
     "primary": "EegMaStRNummer"
   },
   {
-    "spec": "AnlagenEegWasser.yaml",
+    "schema": "AnlagenEegWasser.json",
     "primary": "EegMaStRNummer"
   },
   {
-    "spec": "AnlagenEegSpeicher.yaml",
+    "schema": "AnlagenEegSpeicher.json",
     "primary": "EegMaStRNummer"
   },
   {
-    "spec": "AnlagenEegGeothermieGrubengasDruckentspannung.yaml",
+    "schema": "AnlagenEegGeothermieGrubengasDruckentspannung.json",
     "primary": "EegMaStRNummer"
   },
   {
-    "spec": "AnlagenKwk.yaml",
+    "schema": "AnlagenKwk.json",
     "primary": "KwkMastrNummer"
   },
   {
-    "spec": "Einheitentypen.yaml",
+    "schema": "Einheitentypen.json",
     "primary": "Id"
   },
   {
-    "spec": "EinheitenBiomasse.yaml",
+    "schema": "EinheitenBiomasse.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenGasErzeuger.yaml",
+    "schema": "EinheitenGasErzeuger.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenGasSpeicher.yaml",
+    "schema": "EinheitenGasSpeicher.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenGasverbraucher.yaml",
+    "schema": "EinheitenGasverbraucher.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenGenehmigung.yaml",
+    "schema": "EinheitenGenehmigung.json",
     "primary": "GenMastrNummer"
   },
   {
-    "spec": "EinheitenGeothermieGrubengasDruckentspannung.yaml",
+    "schema": "EinheitenGeothermieGrubengasDruckentspannung.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenKernkraft.yaml",
+    "schema": "EinheitenKernkraft.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenSolar.yaml",
+    "schema": "EinheitenSolar.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenStromSpeicher.yaml",
+    "schema": "EinheitenStromSpeicher.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenStromVerbraucher.yaml",
+    "schema": "EinheitenStromVerbraucher.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenVerbrennung.yaml",
+    "schema": "EinheitenVerbrennung.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenWasser.yaml",
+    "schema": "EinheitenWasser.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenWind.yaml",
+    "schema": "EinheitenWind.json",
     "primary": "EinheitMastrNummer"
   },
   {
-    "spec": "EinheitenAenderungNetzbetreiberzuordnungen.yaml"
+    "schema": "EinheitenAenderungNetzbetreiberzuordnungen.json"
   }
 ]
