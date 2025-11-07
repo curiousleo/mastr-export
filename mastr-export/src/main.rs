@@ -3,7 +3,8 @@ mod schema;
 
 use anyhow::{Context, Result, anyhow};
 use argh::FromArgs;
-use std::{ffi::OsStr, path::PathBuf};
+use parquet::{arrow::ArrowWriter, basic::ZstdLevel, file::properties::WriterProperties};
+use std::{ffi::OsStr, fs::File, io::BufWriter, path::PathBuf};
 
 use parser::XmlParser;
 use schema::load_schemas_from_file;
@@ -18,6 +19,10 @@ struct Args {
     #[argh(option)]
     /// path to the Marktstammdatenregister ZIP archive
     zip: PathBuf,
+
+    #[argh(option)]
+    /// path to the output directory
+    parquet_dir: PathBuf,
 }
 
 fn main() -> Result<()> {
@@ -32,6 +37,10 @@ fn main() -> Result<()> {
         .file_names()
         .map(|name| name.to_string())
         .collect::<Vec<_>>();
+
+    let parquet_writer_props = WriterProperties::builder()
+        .set_compression(parquet::basic::Compression::ZSTD(ZstdLevel::default()))
+        .build();
 
     for name in file_names {
         let (prefix, _) = name
@@ -51,6 +60,20 @@ fn main() -> Result<()> {
         let xml_reader = XmlParser::create_reader(buf_reader);
         let record_batch = XmlParser::parse(schema, xml_reader)
             .context(format!("Failed to parse XML file {}", name))?;
+
+        let (stem, _) = name
+            .split_once(&['.'])
+            .ok_or_else(|| anyhow!("XML file name does not contain '.': {}", name))?;
+        let writer = BufWriter::new(File::create(
+            args.parquet_dir.join(format!("{}.parquet", stem)),
+        )?);
+        let mut arrow_writer = ArrowWriter::try_new(
+            writer,
+            record_batch.schema(),
+            Some(parquet_writer_props.clone()),
+        )?;
+        arrow_writer.write(&record_batch)?;
+        arrow_writer.close()?;
         println!(
             "{}: {} x {}",
             name,
