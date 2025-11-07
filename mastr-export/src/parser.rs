@@ -1,6 +1,6 @@
 use anyhow::{Result, anyhow};
 use arrow::array::{RecordBatch, StringBuilder};
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 use xml::{
     name::OwnedName,
     reader::{EventReader, ParserConfig, XmlEvent},
@@ -20,7 +20,7 @@ enum ParserState {
     /// Expecting either an attribute start or element end
     StartAttrOrEndElement,
     /// Reading attribute content or expecting attribute end
-    AttrCdataOrEndAttr(String),
+    AttrCdataOrEndAttr(usize),
     /// Parsing complete
     Done,
 }
@@ -47,20 +47,15 @@ impl XmlParser {
         // TODO: Magic numbers should be constants or configurable
         let mut builders = fields
             .iter()
-            .map(|field| {
-                (
-                    field.name().to_string(),
-                    StringBuilder::with_capacity(100_000, 100_000 * 32),
-                )
-            })
-            .collect::<HashMap<_, _>>();
+            .map(|_| (StringBuilder::with_capacity(100_000, 100_000 * 64)))
+            .collect::<Vec<StringBuilder>>();
 
         let mut state = ParserState::StartDocument;
 
         // Track current values being accumulated for each field
-        let mut current_values: HashMap<String, String> = fields
+        let mut current_values: Vec<String> = fields
             .iter()
-            .map(|field| (field.name().to_string(), String::new()))
+            .map(|_| (String::with_capacity(1024)))
             .collect();
 
         for event in reader {
@@ -95,26 +90,31 @@ impl XmlParser {
                 }
                 (ParserState::StartAttrOrEndElement, Ok(XmlEvent::StartElement { name, .. })) => {
                     let OwnedName { local_name, .. } = name;
-                    state = ParserState::AttrCdataOrEndAttr(local_name)
+                    let idx = fields
+                        .find(&local_name)
+                        .ok_or_else(|| anyhow!("Unknown attribute {}", local_name))?
+                        .0;
+                    state = ParserState::AttrCdataOrEndAttr(idx)
                 }
-                (ParserState::AttrCdataOrEndAttr(element), Ok(XmlEvent::Characters(content))) => {
+                (ParserState::AttrCdataOrEndAttr(idx), Ok(XmlEvent::Characters(content))) => {
                     // TODO: String concatenation can be expensive - consider using a more efficient buffer
                     // Accumulate content for this element
-                    if let Some(existing_content) = current_values.get_mut(element) {
+                    if let Some(existing_content) = current_values.get_mut(*idx) {
                         existing_content.push_str(&content);
                     } else {
-                        return Err(anyhow!("Element {} not found in schema", element));
+                        return Err(anyhow!("Element {} not found in schema", idx));
                     }
                 }
-                (ParserState::AttrCdataOrEndAttr(element), Ok(XmlEvent::EndElement { name })) => {
-                    let OwnedName { local_name, .. } = name;
-                    if &local_name != element {
-                        return Err(anyhow!(
-                            "Expected closing of tag {}, got {}",
-                            element,
-                            local_name
-                        ));
-                    }
+                (ParserState::AttrCdataOrEndAttr(_idx), Ok(XmlEvent::EndElement { .. })) => {
+                    // TODO(leo): Bring this check back
+                    // let OwnedName { local_name, .. } = name;
+                    // if &local_name != element {
+                    //     return Err(anyhow!(
+                    //         "Expected closing of tag {}, got {}",
+                    //         element,
+                    //         local_name
+                    //     ));
+                    // }
                     state = ParserState::StartAttrOrEndElement
                 }
                 (ParserState::StartAttrOrEndElement, Ok(XmlEvent::EndElement { name })) => {
@@ -177,25 +177,24 @@ impl XmlParser {
     /// Flush current accumulated values to the string builders
     fn flush_current_values(
         fields: &arrow::datatypes::Fields,
-        current_values: &mut HashMap<String, String>,
-        builders: &mut HashMap<String, StringBuilder>,
+        current_values: &mut Vec<String>,
+        builders: &mut Vec<StringBuilder>,
     ) -> Result<()> {
-        // TODO: Consider pre-computing field indices for faster access
-        for field in fields {
+        for (idx, field) in fields.iter().enumerate() {
             let field_name = field.name();
             let value_builder = current_values
-                .get_mut(field_name)
+                .get_mut(idx)
                 .ok_or_else(|| anyhow!("Field {} not found in current values", field_name))?;
 
             if value_builder.is_empty() {
                 builders
-                    .get_mut(field_name)
+                    .get_mut(idx)
                     .ok_or_else(|| anyhow!("Builder for field {} not found", field_name))?
                     .append_null();
             } else {
                 let drained_value: String = value_builder.drain(..).collect();
                 builders
-                    .get_mut(field_name)
+                    .get_mut(idx)
                     .ok_or_else(|| anyhow!("Builder for field {} not found", field_name))?
                     .append_value(drained_value);
             }
@@ -204,25 +203,24 @@ impl XmlParser {
     }
 
     /// Convert string builders to a RecordBatch with proper type casting
-    fn build_record_batch(
-        schema: &Schema,
-        mut builders: HashMap<String, StringBuilder>,
-    ) -> Result<RecordBatch> {
+    fn build_record_batch(schema: &Schema, builders: Vec<StringBuilder>) -> Result<RecordBatch> {
         let arrow_schema = Arc::new(arrow::datatypes::Schema::from(schema));
 
-        let columns = arrow_schema
-            .fields()
-            .iter()
-            .map(|field| -> Result<_> {
-                let builder = builders
-                    .get_mut(field.name())
-                    .ok_or_else(|| anyhow!("Builder for field {} not found", field.name()))?;
+        let mut columns = Vec::with_capacity(schema.fields.len());
+        builders
+            .into_iter()
+            .enumerate()
+            .try_for_each(|(i, mut builder)| {
+                let field = arrow_schema
+                    .fields()
+                    .get(i)
+                    .ok_or_else(|| anyhow!("Field {} not found", i))?;
                 let string_array = builder.finish();
                 let casted_array = arrow_cast::cast(&string_array, &field.data_type())
                     .map_err(|e| anyhow!("Failed to cast field {}: {}", field.name(), e))?;
-                Ok(casted_array)
-            })
-            .collect::<Result<Vec<_>>>()?;
+                columns.push(casted_array);
+                Result::<()>::Ok(())
+            })?;
 
         let record_batch = RecordBatch::try_new(arrow_schema, columns)
             .map_err(|e| anyhow!("Failed to create RecordBatch: {}", e))?;

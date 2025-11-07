@@ -1,34 +1,12 @@
 mod parser;
 mod schema;
 
-use anyhow::{Result, anyhow};
+use anyhow::{Context, Result, anyhow};
 use argh::FromArgs;
 use std::{ffi::OsStr, path::PathBuf};
 
 use parser::XmlParser;
-use schema::{Schema, load_schemas_from_file};
-
-/// Load and parse XML data from a ZIP archive according to a schema
-fn process_xml_from_zip(
-    schema: &Schema,
-    zip_path: &PathBuf,
-    xml_name: &str,
-) -> Result<arrow::array::RecordBatch> {
-    let zip_file = std::fs::File::open(zip_path)
-        .map_err(|e| anyhow!("Failed to open ZIP file {:?}: {}", zip_path, e))?;
-
-    let mut archive =
-        zip::ZipArchive::new(zip_file).map_err(|e| anyhow!("Failed to read ZIP archive: {}", e))?;
-
-    let file = archive
-        .by_name(xml_name)
-        .map_err(|e| anyhow!("Failed to find XML file '{}' in archive: {}", xml_name, e))?;
-
-    let buf_reader = std::io::BufReader::new(file);
-    let xml_reader = XmlParser::create_reader(buf_reader);
-
-    XmlParser::parse(schema, xml_reader)
-}
+use schema::load_schemas_from_file;
 
 /// Marktstammdatenregister ZIP archive converter
 #[derive(Debug, FromArgs)]
@@ -42,7 +20,6 @@ struct Args {
     zip: PathBuf,
 }
 
-// TODO: Use clap or similar for proper CLI argument parsing
 fn main() -> Result<()> {
     let args: Args = argh::from_env();
     let schemas = load_schemas_from_file(&args.schemas)?;
@@ -72,7 +49,8 @@ fn main() -> Result<()> {
             .map_err(|e| anyhow!("Failed to read XML file '{}' in archive: {}", name, e))?;
         let buf_reader = std::io::BufReader::with_capacity(1024 * 1024, zip_file);
         let xml_reader = XmlParser::create_reader(buf_reader);
-        let record_batch = XmlParser::parse(schema, xml_reader)?;
+        let record_batch = XmlParser::parse(schema, xml_reader)
+            .context(format!("Failed to parse XML file {}", name))?;
         println!(
             "{}: {} x {}",
             name,
