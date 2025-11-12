@@ -50,8 +50,7 @@ fn main() -> Result<()> {
     arrow_writer.write(&record_batch)?;
     arrow_writer.close()?;
     println!(
-        "{:?}: {} x {}",
-        args.schema,
+        "{} x {}",
         record_batch.num_rows(),
         record_batch.num_columns(),
     );

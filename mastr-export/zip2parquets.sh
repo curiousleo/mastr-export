@@ -2,8 +2,6 @@
 set -Eeuo pipefail
 shopt -s extglob
 
-set -x
-
 list_xml_files() {
     local zip_file="$1"
 
@@ -33,6 +31,7 @@ main() {
 
     list_xml_files "$zip_file" | while read -r xml_file; do
         local table_name=$(table_name_of_file_name "$xml_file")
+        echo -n "$xml_file "
         extract_as_utf8 "$zip_file" "$xml_file" |
         ./target/release/mastr-export.exe --schema "$schema_dir/$table_name.json" --output "$parquet_dir/${xml_file%%.xml}.parquet"
     done
