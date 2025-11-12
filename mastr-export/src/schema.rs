@@ -122,7 +122,7 @@ struct Schemas {
     schemas: Vec<SchemaEntry>,
 }
 
-fn load_schema_from_file(path: &PathBuf, primary: Option<String>) -> Result<Schema> {
+pub fn load_schema_from_file(path: &PathBuf, primary: Option<String>) -> Result<Schema> {
     let schema_file = std::fs::File::open(path)
         .map_err(|e| anyhow!("Failed to open schema file {:?}: {}", path, e))?;
     let mut schema: Schema = serde_json::from_reader(schema_file)

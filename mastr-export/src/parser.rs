@@ -169,6 +169,7 @@ impl XmlParser {
         ParserConfig::new()
             .trim_whitespace(true)
             .ignore_comments(true)
+            .override_encoding(Some(xml::Encoding::Utf8))
             .create_reader(reader)
     }
 
