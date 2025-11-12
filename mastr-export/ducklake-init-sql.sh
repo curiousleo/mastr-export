@@ -32,9 +32,49 @@ add_data_statement() {
     echo "CALL ducklake_add_data_files('$db_name', '$table_name', '$parquet_file');"
 }
 
+usage() {
+    echo "Usage: $(basename "$0") --db-name <db_name> --parquet-dir <parquet_dir>"
+}
+
 main() {
-    local db_name="$1"
-    local parquet_dir="$2"
+    local db_name
+    local parquet_dir
+
+    local args
+    local valid
+    args=$(getopt -n "$(basename "$0")" -o h --long help,db-name:,parquet-dir: -- "$@")
+    valid=$?
+
+    if [ $valid -ne 0 ]; then
+        usage
+        exit $valid
+    fi
+
+    eval set -- "$args"
+    while true; do
+        case "$1" in
+            --db-name)
+                db_name="$2"
+                shift 2
+                ;;
+            --parquet-dir)
+                parquet_dir="$2"
+                shift 2
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                echo "Invalid option: $1" >&2
+                exit 2
+                ;;
+        esac
+    done
 
     cat <<-.
 .bail on
