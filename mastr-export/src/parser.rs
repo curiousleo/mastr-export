@@ -47,16 +47,14 @@ impl XmlParser {
         // TODO: Magic numbers should be constants or configurable
         let mut builders = fields
             .iter()
-            .map(|_| (StringBuilder::with_capacity(100_000, 100_000 * 64)))
+            .map(|_| StringBuilder::with_capacity(100_000, 100_000 * 64))
             .collect::<Vec<StringBuilder>>();
 
         let mut state = ParserState::StartDocument;
 
         // Track current values being accumulated for each field
-        let mut current_values: Vec<String> = fields
-            .iter()
-            .map(|_| (String::with_capacity(1024)))
-            .collect();
+        let mut current_values: Vec<String> =
+            fields.iter().map(|_| String::with_capacity(1024)).collect();
 
         for event in reader {
             match (&mut state, event) {
