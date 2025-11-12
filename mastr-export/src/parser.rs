@@ -1,10 +1,9 @@
 use anyhow::{Result, anyhow};
 use arrow::array::{RecordBatch, StringBuilder};
+use quick_xml::events::Event;
+use quick_xml::reader::Reader;
+use std::io::BufRead;
 use std::sync::Arc;
-use xml::{
-    name::OwnedName,
-    reader::{EventReader, ParserConfig, XmlEvent},
-};
 
 use crate::schema::Schema;
 
@@ -13,8 +12,6 @@ use crate::schema::Schema;
 enum ParserState {
     /// Initial state - expecting document start
     StartDocument,
-    /// Expecting the root element to start
-    StartRoot,
     /// Expecting either a new element or the end of root
     StartElementOrEndRoot,
     /// Expecting either an attribute start or element end
@@ -33,13 +30,13 @@ impl XmlParser {
     ///
     /// # Arguments
     /// * `schema` - The schema definition for parsing
-    /// * `reader` - XML event reader
+    /// * `reader` - Buffered reader containing XML data
     ///
     /// # Returns
     /// * `Result<RecordBatch>` - The parsed data as an Arrow RecordBatch
-    pub fn parse<R>(schema: &Schema, reader: EventReader<R>) -> Result<RecordBatch>
+    pub fn parse<R>(schema: &Schema, reader: R) -> Result<RecordBatch>
     where
-        R: std::io::BufRead,
+        R: BufRead,
     {
         let fields = arrow::datatypes::Schema::from(schema).fields().clone();
 
@@ -56,121 +53,166 @@ impl XmlParser {
         let mut current_values: Vec<String> =
             fields.iter().map(|_| String::with_capacity(1024)).collect();
 
-        for event in reader {
-            match (&mut state, event) {
-                (ParserState::StartDocument, Ok(XmlEvent::StartDocument { .. })) => {
-                    state = ParserState::StartRoot;
+        let mut xml_reader = Reader::from_reader(reader);
+        xml_reader.config_mut().trim_text(true);
+
+        let mut buf = Vec::new();
+
+        loop {
+            match xml_reader.read_event_into(&mut buf) {
+                Ok(Event::Start(ref e)) => {
+                    let name = std::str::from_utf8(e.name().into_inner())
+                        .map_err(|e| anyhow!("Invalid UTF-8 in element name: {}", e))?;
+
+                    match &mut state {
+                        ParserState::StartDocument => {
+                            if schema.root == name {
+                                state = ParserState::StartElementOrEndRoot;
+                            } else {
+                                return Err(anyhow!(
+                                    "Expected root element {}, got {}",
+                                    schema.root,
+                                    name
+                                ));
+                            }
+                        }
+                        ParserState::StartElementOrEndRoot => {
+                            if schema.element != name {
+                                return Err(anyhow!("Unknown element {}", name));
+                            }
+                            state = ParserState::StartAttrOrEndElement;
+                        }
+                        ParserState::StartAttrOrEndElement => {
+                            let idx = fields
+                                .find(name)
+                                .ok_or_else(|| anyhow!("Unknown attribute {}", name))?
+                                .0;
+                            state = ParserState::AttrCdataOrEndAttr(idx);
+                        }
+                        _ => {
+                            return Err(anyhow!(
+                                "Unexpected start element {} in state {:?}",
+                                name,
+                                state
+                            ));
+                        }
+                    }
                 }
-                (state, Err(e)) => {
+                Ok(Event::End(ref e)) => {
+                    let name = std::str::from_utf8(e.name().into_inner())
+                        .map_err(|e| anyhow!("Invalid UTF-8 in element name: {}", e))?;
+
+                    match &mut state {
+                        ParserState::AttrCdataOrEndAttr(_idx) => {
+                            // TODO(leo): Bring this check back
+                            // if name != element {
+                            //     return Err(anyhow!(
+                            //         "Expected closing of tag {}, got {}",
+                            //         element,
+                            //         name
+                            //     ));
+                            // }
+                            state = ParserState::StartAttrOrEndElement;
+                        }
+                        ParserState::StartAttrOrEndElement => {
+                            if schema.element != name {
+                                return Err(anyhow!(
+                                    "Expected closing of tag {}, got {}",
+                                    schema.element,
+                                    name
+                                ));
+                            }
+
+                            // Append accumulated values to builders
+                            Self::flush_current_values(
+                                &fields,
+                                &mut current_values,
+                                &mut builders,
+                            )?;
+                            state = ParserState::StartElementOrEndRoot;
+                        }
+                        ParserState::StartElementOrEndRoot => {
+                            if schema.root != name {
+                                return Err(anyhow!(
+                                    "Expected closing of root tag {}, got {}",
+                                    schema.root,
+                                    name
+                                ));
+                            }
+                            state = ParserState::Done;
+                        }
+                        _ => {
+                            return Err(anyhow!(
+                                "Unexpected end element {} in state {:?}",
+                                name,
+                                state
+                            ));
+                        }
+                    }
+                }
+                Ok(Event::Text(ref e)) => {
+                    match &state {
+                        ParserState::AttrCdataOrEndAttr(idx) => {
+                            let content = e
+                                .unescape()
+                                .map_err(|e| anyhow!("Failed to unescape text content: {}", e))?;
+
+                            // TODO: String concatenation can be expensive - consider using a more efficient buffer
+                            // Accumulate content for this element
+                            if let Some(existing_content) = current_values.get_mut(*idx) {
+                                existing_content.push_str(&content);
+                            } else {
+                                return Err(anyhow!("Element {} not found in schema", idx));
+                            }
+                        }
+                        _ => {
+                            // Ignore text in other states
+                        }
+                    }
+                }
+                Ok(Event::CData(ref e)) => {
+                    match &state {
+                        ParserState::AttrCdataOrEndAttr(idx) => {
+                            let content = std::str::from_utf8(e.as_ref())
+                                .map_err(|e| anyhow!("Invalid UTF-8 in CDATA: {}", e))?;
+
+                            // Accumulate CDATA content for this element
+                            if let Some(existing_content) = current_values.get_mut(*idx) {
+                                existing_content.push_str(content);
+                            } else {
+                                return Err(anyhow!("Element {} not found in schema", idx));
+                            }
+                        }
+                        _ => {
+                            // Ignore CDATA in other states
+                        }
+                    }
+                }
+                Ok(Event::Eof) => {
+                    if !matches!(state, ParserState::Done) {
+                        return Err(anyhow!("Unexpected end of document in state {:?}", state));
+                    }
+                    break;
+                }
+                Ok(Event::Comment(_))
+                | Ok(Event::Decl(_))
+                | Ok(Event::PI(_))
+                | Ok(Event::DocType(_)) => {
+                    // Ignore these events
+                }
+                Ok(Event::Empty(_)) => {
+                    // Handle self-closing tags if needed
+                    // For now, treat as ignored
+                }
+                Err(e) => {
                     return Err(anyhow!("XML parsing error in state {:?}: {}", state, e));
                 }
-                (ParserState::StartRoot, Ok(XmlEvent::Characters(_))) => {
-                    // Leading text, ignore
-                }
-                (ParserState::StartRoot, Ok(XmlEvent::StartElement { name, .. })) => {
-                    let OwnedName { local_name, .. } = name;
-                    if schema.root == local_name {
-                        state = ParserState::StartElementOrEndRoot;
-                    } else {
-                        return Err(anyhow!(
-                            "Expected root element {}, got {}",
-                            schema.root,
-                            local_name
-                        ));
-                    }
-                }
-                (ParserState::StartElementOrEndRoot, Ok(XmlEvent::StartElement { name, .. })) => {
-                    let OwnedName { local_name, .. } = name;
-                    if schema.element != local_name {
-                        return Err(anyhow!("Unknown element {}", local_name));
-                    }
-                    state = ParserState::StartAttrOrEndElement
-                }
-                (ParserState::StartAttrOrEndElement, Ok(XmlEvent::StartElement { name, .. })) => {
-                    let OwnedName { local_name, .. } = name;
-                    let idx = fields
-                        .find(&local_name)
-                        .ok_or_else(|| anyhow!("Unknown attribute {}", local_name))?
-                        .0;
-                    state = ParserState::AttrCdataOrEndAttr(idx)
-                }
-                (ParserState::AttrCdataOrEndAttr(idx), Ok(XmlEvent::Characters(content))) => {
-                    // TODO: String concatenation can be expensive - consider using a more efficient buffer
-                    // Accumulate content for this element
-                    if let Some(existing_content) = current_values.get_mut(*idx) {
-                        existing_content.push_str(&content);
-                    } else {
-                        return Err(anyhow!("Element {} not found in schema", idx));
-                    }
-                }
-                (ParserState::AttrCdataOrEndAttr(_idx), Ok(XmlEvent::EndElement { .. })) => {
-                    // TODO(leo): Bring this check back
-                    // let OwnedName { local_name, .. } = name;
-                    // if &local_name != element {
-                    //     return Err(anyhow!(
-                    //         "Expected closing of tag {}, got {}",
-                    //         element,
-                    //         local_name
-                    //     ));
-                    // }
-                    state = ParserState::StartAttrOrEndElement
-                }
-                (ParserState::StartAttrOrEndElement, Ok(XmlEvent::EndElement { name })) => {
-                    let OwnedName { local_name, .. } = name;
-                    if schema.element != local_name {
-                        return Err(anyhow!(
-                            "Expected closing of tag {}, got {}",
-                            schema.element,
-                            local_name
-                        ));
-                    }
-
-                    // Append accumulated values to builders
-                    Self::flush_current_values(&fields, &mut current_values, &mut builders)?;
-                    state = ParserState::StartElementOrEndRoot
-                }
-                (ParserState::StartElementOrEndRoot, Ok(XmlEvent::EndElement { name })) => {
-                    let OwnedName { local_name, .. } = name;
-                    if schema.root != local_name {
-                        return Err(anyhow!(
-                            "Expected closing of root tag {}, got {}",
-                            schema.root,
-                            local_name
-                        ));
-                    }
-                    state = ParserState::Done
-                }
-                (ParserState::Done, Ok(XmlEvent::EndDocument)) => {
-                    // Done
-                }
-                (
-                    _,
-                    Ok(XmlEvent::Comment(_))
-                    | Ok(XmlEvent::CData(_))
-                    | Ok(XmlEvent::Doctype { .. })
-                    | Ok(XmlEvent::ProcessingInstruction { .. }),
-                ) => {
-                    // Ignore
-                }
-                (state, event) => {
-                    return Err(anyhow!("Unexpected event {:?} in state {:?}", event, state));
-                }
             }
+
+            buf.clear();
         }
 
         Self::build_record_batch(schema, builders)
-    }
-
-    /// Create an XML parser with configuration
-    pub fn create_reader<R>(reader: R) -> EventReader<R>
-    where
-        R: std::io::BufRead,
-    {
-        ParserConfig::new()
-            .trim_whitespace(true)
-            .ignore_comments(true)
-            .override_encoding(Some(xml::Encoding::Utf8))
-            .create_reader(reader)
     }
 
     /// Flush current accumulated values to the string builders

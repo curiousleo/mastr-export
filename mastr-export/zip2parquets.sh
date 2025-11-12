@@ -17,8 +17,7 @@ extract_as_utf8() {
     local xml_file="$2"
 
     unzip -p "$zip_file" "$xml_file" |
-    iconv -f UTF-16 -t UTF-8 |
-    sed "s@encoding='UTF-16'@encoding='UTF-8'@"
+    iconv -f UTF-16 -t UTF-8 # | sed "s@encoding='UTF-16'@encoding='UTF-8'@"
 }
 
 table_name_of_file_name() {

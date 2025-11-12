@@ -30,8 +30,7 @@ fn main() -> Result<()> {
     let schema = load_schema_from_file(&args.schema, None)?;
 
     let buf_reader = std::io::BufReader::with_capacity(64 * 1024, std::io::stdin());
-    let xml_reader = XmlParser::create_reader(buf_reader);
-    let record_batch = XmlParser::parse(&schema, xml_reader).context("Failed to parse XML file")?;
+    let record_batch = XmlParser::parse(&schema, buf_reader).context("Failed to parse XML file")?;
 
     let writer = BufWriter::new(File::create(args.output)?);
 

@@ -1,7 +1,7 @@
 use anyhow::{Result, anyhow};
 use arrow::datatypes::{DataType, TimeUnit};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, ffi::OsString, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf};
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 pub enum XsdType {
@@ -110,18 +110,6 @@ impl From<&Schema> for arrow::datatypes::Schema {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct SchemaEntry {
-    schema: PathBuf,
-    primary: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(transparent)]
-struct Schemas {
-    schemas: Vec<SchemaEntry>,
-}
-
 pub fn load_schema_from_file(path: &PathBuf, primary: Option<String>) -> Result<Schema> {
     let schema_file = std::fs::File::open(path)
         .map_err(|e| anyhow!("Failed to open schema file {:?}: {}", path, e))?;
@@ -129,29 +117,4 @@ pub fn load_schema_from_file(path: &PathBuf, primary: Option<String>) -> Result<
         .map_err(|e| anyhow!("Failed to parse schema JSON: {}", e))?;
     schema.primary = primary;
     Ok(schema)
-}
-
-pub fn load_schemas_from_file(path: &std::path::Path) -> Result<HashMap<OsString, Schema>> {
-    let schema_file = std::fs::File::open(path)
-        .map_err(|e| anyhow!("Failed to open schemas file {:?}: {}", path, e))?;
-    let schemas: Schemas = serde_json::from_reader(schema_file)
-        .map_err(|e| anyhow!("Failed to parse schemas JSON: {}", e))?;
-    let parent_path = path
-        .canonicalize()
-        .map_err(|e| anyhow!("Failed to canonicalize path {:?}: {}", path, e))?
-        .parent()
-        .ok_or_else(|| anyhow!("Not a directory: {:?}", path))?
-        .to_owned();
-    schemas
-        .schemas
-        .iter()
-        .map(|entry| {
-            let schema_path = parent_path.join(&entry.schema);
-            let schema = load_schema_from_file(&schema_path, entry.primary.clone())?;
-            let prefix = schema_path
-                .file_stem()
-                .ok_or_else(|| anyhow!("Not a file name: {:?}", entry.schema))?;
-            Ok((prefix.to_owned(), schema))
-        })
-        .collect::<Result<HashMap<_, _>>>()
 }
