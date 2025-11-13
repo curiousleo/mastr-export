@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-shopt -s extglob
 
 list_xml_files() {
     local zip_file="$1"
@@ -15,26 +14,37 @@ extract_as_utf8() {
     local xml_file="$2"
 
     unzip -p "$zip_file" "$xml_file" |
-    iconv -f UTF-16 -t UTF-8 # | sed "s@encoding='UTF-16'@encoding='UTF-8'@"
+    uconv -f UTF-16LE -t UTF-8 # | sed "s@encoding='UTF-16'@encoding='UTF-8'@"
 }
 
 table_name_of_file_name() {
     local file="$1"
 
+    shopt -s extglob
     echo "${file%%?(_*).*}"
 }
+
+process_xml_file() {
+    local zip_file="$1"
+    local schema_dir="$2"
+    local parquet_dir="$3"
+    local xml_file="$4"
+
+    local table_name=$(table_name_of_file_name "$xml_file")
+    extract_as_utf8 "$zip_file" "$xml_file" |
+    ./target/release/mastr-export --schema "$schema_dir/$table_name.json" --output "$parquet_dir/${xml_file%%.xml}.parquet"
+}
+
+export -f process_xml_file
+export -f extract_as_utf8
+export -f table_name_of_file_name
 
 main() {
     local zip_file="$1"
     local schema_dir="$2"
     local parquet_dir="$3"
 
-    list_xml_files "$zip_file" | while read -r xml_file; do
-        local table_name=$(table_name_of_file_name "$xml_file")
-        echo -n "$xml_file "
-        extract_as_utf8 "$zip_file" "$xml_file" |
-        ./target/release/mastr-export.exe --schema "$schema_dir/$table_name.json" --output "$parquet_dir/${xml_file%%.xml}.parquet"
-    done
+    list_xml_files "$zip_file" | parallel --eta --progress process_xml_file "$zip_file" "$schema_dir" "$parquet_dir" {}
 }
 
 main "$@"

@@ -49,10 +49,10 @@ fn main() -> Result<()> {
         ArrowWriter::try_new(writer, record_batch.schema(), Some(parquet_writer_props))?;
     arrow_writer.write(&record_batch)?;
     arrow_writer.close()?;
-    println!(
-        "{} x {}",
-        record_batch.num_rows(),
-        record_batch.num_columns(),
-    );
+    // println!(
+    //     "{} x {}",
+    //     record_batch.num_rows(),
+    //     record_batch.num_columns(),
+    // );
     Ok(())
 }
