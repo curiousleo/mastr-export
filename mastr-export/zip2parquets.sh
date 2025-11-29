@@ -46,6 +46,7 @@ main() {
     local schema_dir="$2"
     local parquet_dir="$3"
 
+    mkdir -p "$parquet_dir"
     list_xml_files "$zip_file" | parallel --eta --progress process_xml_file "$zip_file" "$schema_dir" "$parquet_dir" {}
 }
 
