@@ -30,11 +30,13 @@ process_xml_file() {
     local parquet_dir="$3"
     local xml_file="$4"
 
-    local table_name=$(table_name_of_file_name "$xml_file")
+    local table_name
+    table_name=$(table_name_of_file_name "$xml_file")
     extract_as_utf8 "$zip_file" "$xml_file" |
     ./target/release/mastr-export --schema "$schema_dir/$table_name.json" --output "$parquet_dir/${xml_file%%.xml}.parquet"
 }
 
+# Required so `parallel` can run these functions.
 export -f process_xml_file
 export -f extract_as_utf8
 export -f table_name_of_file_name
