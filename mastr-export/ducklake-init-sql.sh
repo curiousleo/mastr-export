@@ -80,6 +80,10 @@ main() {
         esac
     done
 
+    # Normalise paths by removing trailing slashes
+    parquet_dir="${parquet_dir%/}"
+    data_url="${data_url%/}"
+
     cat <<-.
 .bail on
 .echo on
@@ -104,7 +108,7 @@ ATTACH 'ducklake:sqlite:catalog.sqlite3' AS $db_name (DATA_PATH 'tmp_always_empt
 DETACH $db_name;
 ATTACH 'catalog.sqlite3' AS catalog (TYPE sqlite);
 UPDATE catalog.ducklake_data_file
-   SET path = replace(path, '$parquet_dir', '$data_url')
+   SET path = replace(path, '$parquet_dir'', '$data_url')
  WHERE path LIKE '$parquet_dir/%';
 DETACH catalog;
 .
