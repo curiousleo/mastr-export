@@ -34,16 +34,15 @@ add_data_statement() {
 }
 
 usage() {
-    echo "Usage: $(basename "$0") --db-name <db_name> --parquet-dir <parquet_dir>"
+    echo "Usage: $(basename "$0") --db-name <db_name> --parquet-dir <parquet_dir> --data-url <data_url>"
 }
 
 main() {
-    local db_name
-    local parquet_dir
+    local db_name parquet_dir data_url
 
     local args
     local valid
-    args=$(getopt -n "$(basename "$0")" -o h --long help,db-name:,parquet-dir: -- "$@")
+    args=$(getopt -n "$(basename "$0")" -o h --long help,db-name:,parquet-dir:,data-url: -- "$@")
     valid=$?
 
     if [ $valid -ne 0 ]; then
@@ -60,6 +59,10 @@ main() {
                 ;;
             --parquet-dir)
                 parquet_dir="$2"
+                shift 2
+                ;;
+            --data-url)
+                data_url="$2"
                 shift 2
                 ;;
             -h|--help)
@@ -81,7 +84,7 @@ main() {
 .bail on
 .echo on
 LOAD ducklake;
-ATTACH 'ducklake:$db_name.ducklake' AS $db_name (DATA_PATH 'tmp_always_empty');
+ATTACH 'ducklake:sqlite:catalog.sqlite3' AS $db_name (DATA_PATH 'tmp_always_empty');
 .
 
     local tables
@@ -96,6 +99,15 @@ ATTACH 'ducklake:$db_name.ducklake' AS $db_name (DATA_PATH 'tmp_always_empty');
             add_data_statement "$db_name" "$table" "$parquet_file"
         done
     done
+
+    cat <<-.
+DETACH $db_name;
+ATTACH 'catalog.sqlite3' AS catalog (TYPE sqlite);
+UPDATE catalog.ducklake_data_file
+   SET path = replace('$parquet_dir', '$data_url', '')
+ WHERE path LIKE '$parquet_dir/%';
+DETACH catalog;
+.
 }
 
 main "$@"
