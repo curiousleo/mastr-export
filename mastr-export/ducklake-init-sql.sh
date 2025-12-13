@@ -34,15 +34,15 @@ add_data_statement() {
 }
 
 usage() {
-    echo "Usage: $(basename "$0") --db-name <db_name> --parquet-dir <parquet_dir> --data-url <data_url>"
+    echo "Usage: $(basename "$0") --db-name <db_name> --parquet-dir <parquet_dir> --parquet-dir-override <parquet_dir_override>"
 }
 
 main() {
-    local db_name parquet_dir data_url
+    local db_name parquet_dir parquet_dir_override
 
     local args
     local valid
-    args=$(getopt -n "$(basename "$0")" -o h --long help,db-name:,parquet-dir:,data-url: -- "$@")
+    args=$(getopt -n "$(basename "$0")" -o h --long help,db-name:,parquet-dir:,parquet-dir-override -- "$@")
     valid=$?
 
     if [ $valid -ne 0 ]; then
@@ -59,10 +59,12 @@ main() {
                 ;;
             --parquet-dir)
                 parquet_dir="$2"
+                parquet_dir="${parquet_dir%/}"
                 shift 2
                 ;;
-            --data-url)
-                data_url="$2"
+            --parquet-dir-override)
+                parquet_dir_override="$2"
+                parquet_dir_override="${parquet_dir_override%/}"
                 shift 2
                 ;;
             -h|--help)
@@ -79,10 +81,6 @@ main() {
                 ;;
         esac
     done
-
-    # Normalise paths by removing trailing slashes
-    parquet_dir="${parquet_dir%/}"
-    data_url="${data_url%/}"
 
     cat <<-.
 .bail on
@@ -104,14 +102,17 @@ ATTACH 'ducklake:catalog.ducklake' AS $db_name (DATA_PATH 'tmp_always_empty');
         done
     done
 
-    cat <<-.
-DETACH $db_name;
+    echo "DETACH $db_name;"
+
+    if [[ -v parquet_dir_override ]]; then
+        cat <<-.
 ATTACH 'catalog.ducklake' AS catalog;
 UPDATE catalog.ducklake_data_file
-   SET path = replace(path, '$parquet_dir', '$data_url')
+   SET path = replace(path, '$parquet_dir', '$parquet_dir_override')
  WHERE path LIKE '$parquet_dir/%';
 DETACH catalog;
 .
+    fi
 }
 
 main "$@"
