@@ -88,7 +88,7 @@ main() {
 .bail on
 .echo on
 LOAD ducklake;
-ATTACH 'ducklake:sqlite:catalog.sqlite3' AS $db_name (DATA_PATH 'tmp_always_empty');
+ATTACH 'ducklake:catalog.ducklake' AS $db_name (DATA_PATH 'tmp_always_empty');
 .
 
     local tables
@@ -106,7 +106,7 @@ ATTACH 'ducklake:sqlite:catalog.sqlite3' AS $db_name (DATA_PATH 'tmp_always_empt
 
     cat <<-.
 DETACH $db_name;
-ATTACH 'catalog.sqlite3' AS catalog (TYPE sqlite);
+ATTACH 'catalog.ducklake' AS catalog;
 UPDATE catalog.ducklake_data_file
    SET path = replace(path, '$parquet_dir', '$data_url')
  WHERE path LIKE '$parquet_dir/%';
