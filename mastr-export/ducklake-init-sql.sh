@@ -42,7 +42,7 @@ main() {
 
     local args
     local valid
-    args=$(getopt -n "$(basename "$0")" -o h --long help,db-name:,parquet-dir:,parquet-dir-override -- "$@")
+    args=$(getopt -n "$(basename "$0")" -o h --long help,db-name:,parquet-dir:,parquet-dir-override: -- "$@")
     valid=$?
 
     if [ $valid -ne 0 ]; then
