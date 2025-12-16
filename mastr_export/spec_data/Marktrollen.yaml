@@ -1,6 +1,0 @@
-root: Marktrollen
-element: Marktrolle
-fields:
-- name: Id
-  xsd: byte
-- name: Wert

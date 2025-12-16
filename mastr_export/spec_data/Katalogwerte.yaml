@@ -1,8 +1,0 @@
-root: Katalogwerte
-element: Katalogwert
-fields:
-- name: Id
-  xsd: int
-- name: Wert
-- name: KatalogKategorieId
-  xsd: short

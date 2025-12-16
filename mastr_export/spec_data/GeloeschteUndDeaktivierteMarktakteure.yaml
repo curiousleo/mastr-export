@@ -1,6 +1,0 @@
-root: GeloeschteUndDeaktivierteMarktakteure
-element: GeloeschterUndDeaktivierterMarktakteur
-fields:
-- name: MarktakteurMastrNummer
-- name: MarktakteurStatus
-- name: DatumLetzteAktualisierung

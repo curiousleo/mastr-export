@@ -1,6 +1,0 @@
-root: Katalogkategorien
-element: Katalogkategorie
-fields:
-- name: Id
-  xsd: short
-- name: Name

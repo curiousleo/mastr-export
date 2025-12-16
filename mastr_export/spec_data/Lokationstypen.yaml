@@ -1,6 +1,0 @@
-root: Lokationstypen
-element: Lokationstyp
-fields:
-- name: Id
-  xsd: byte
-- name: Wert
