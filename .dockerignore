@@ -1,5 +1,13 @@
 *
-!/schema/
-!/src/
+
+# Rust
 !/Cargo.lock
 !/Cargo.toml
+!/schema/
+!/src/
+
+# Entrypoint scripts
+!/contrib/getoptions
+!/download
+!/extract
+!/initdb

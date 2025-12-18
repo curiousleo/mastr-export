@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+URL="https://www.marktstammdatenregister.de/MaStR/Datendownload"
+
+get_download_url() {
+    local download_url
+    download_url=$(curl -s "$URL" | \
+        grep -oP 'https://download\.marktstammdatenregister\.de/Gesamtdatenexport_\d{8}_\d+\.\d+\.zip' | \
+        head -n 1)
+    echo "$download_url"
+}
+
+options() {
+    setup REST help:usage -- "Usage: $(basename "$0") [options]..."
+    msg -- 'Options:'
+    param IF_NEWER_THAN --if-newer-than -- '(input) name of previously downloaded zip file'
+    param ZIP_FILE      --zip-file      -- '(output) path for download'
+    disp  :usage        --help
+}
+
+main() {
+    eval "$(getoptions options) exit 1"
+    local if_newer_than="${IF_NEWER_THAN:-}"
+    local zip_file="${ZIP_FILE:-/mnt/mastr.zip}"
+
+    local url
+    url=$(get_download_url)
+
+    if [[ -z "$if_newer_than" || "$if_newer_than" -ot "$zip_file" ]]
+    then
+        axel --num-connections=5 --output="$zip_file" "$url"
+    fi
+}
+
+main "$@"
