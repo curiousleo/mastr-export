@@ -22,7 +22,7 @@ options() {
 main() {
     eval "$(getoptions options) exit 1"
     local if_newer_than="${IF_NEWER_THAN:-}"
-    local zip_file="${ZIP_FILE:-/mnt/mastr.zip}"
+    local zip_file="${ZIP_FILE:-/mnt/out/mastr.zip}"
 
     local url
     url=$(get_download_url)

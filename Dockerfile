@@ -1,8 +1,9 @@
 # Run with:
 #   podman run --rm --network=none --transient-store \
-#     --volume /path/to/Gesamtdatenexport_YYYYMMDD_XX.Y.zip:/mnt/mastr.zip:ro,Z,U \
-#     --volume ./schema/:/mnt/schema:ro,Z,U \
-#     --volume ./parquet/:/mnt/parquet:rw,Z,U \
+#     --userns=keep-id:uid=65535,gid=65535 \
+#     --volume /path/to/Gesamtdatenexport_YYYYMMDD_XX.Y.zip:/mnt/in/mastr.zip:ro,Z,U \
+#     --volume ./schema/:/mnt/in/schema:ro,Z,U \
+#     --volume ./out/:/mnt/out/:rw,Z,U \
 #     mastr-export:latest <download|extract|initdb> [options]...
 
 FROM ghcr.io/rust-cross/rust-musl-cross:x86_64-musl as build-env
@@ -28,7 +29,13 @@ COPY initdb /usr/bin/initdb
 VOLUME /mnt/mastr.zip
 VOLUME /mnt/schema
 VOLUME /mnt/parquet
-RUN mkdir -p /home/guest && chown -R guest /home/guest
-USER guest
-ENV HOME=/home/guest
+
+ENV USER_ID=65535
+ENV GROUP_ID=65535
+ENV USER_NAME=u
+ENV GROUP_NAME=u
+RUN addgroup -g $GROUP_ID $GROUP_NAME \
+    && adduser --shell /sbin/nologin --disabled-password \
+    --uid $USER_ID --ingroup $GROUP_NAME $USER_NAME
+USER $USER_NAME
 RUN duckdb -c 'INSTALL ducklake;'

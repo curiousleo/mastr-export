@@ -39,6 +39,9 @@ initdb_sql() {
     local parquet_dir_override="$3"
     local db_dir="$4"
     local db_file="${db_dir}/catalog.ducklake"
+
+    # TODO(leo): I think this can go to /tmp if we just make
+    # `--parquet-dir-override` mandatory.
     local data_path="${db_dir}/tmp_always_empty"
 
     cat <<-.
@@ -87,9 +90,9 @@ options() {
 main() {
     eval "$(getoptions options) exit 1"
     local db_name="${DB_NAME:-mastr}"
-    local parquet_dir="${PARQUET_DIR:-/mnt/parquet}"
+    local parquet_dir="${PARQUET_DIR:-/mnt/out/parquet}"
     local parquet_dir_override="${PARQUET_DIR_OVERRIDE:-}"
-    local db_dir="${DB_DIR:-/mnt/db}"
+    local db_dir="${DB_DIR:-/mnt/out}"
     local db_dir="${db_dir%/}"
 
     parquet_dir="${parquet_dir%/}"

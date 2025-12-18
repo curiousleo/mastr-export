@@ -52,9 +52,9 @@ options() {
 
 main() {
     eval "$(getoptions options) exit 1"
-    local zip_file="${ZIP_FILE:-/mnt/mastr.zip}"
-    local schema_dir="${SCHEMA_DIR:-/mnt/schema}"
-    local parquet_dir="${PARQUET_DIR:-/mnt/parquet}"
+    local zip_file="${ZIP_FILE:-/mnt/in/mastr.zip}"
+    local schema_dir="${SCHEMA_DIR:-/mnt/in/schema}"
+    local parquet_dir="${PARQUET_DIR:-/mnt/out/data}"
 
     mkdir -p "$parquet_dir"
     list_xml_files "$zip_file" | parallel --jobs 50% -v process_xml_file "$zip_file" "$schema_dir" "$parquet_dir" {}
