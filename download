@@ -6,7 +6,7 @@ URL="https://www.marktstammdatenregister.de/MaStR/Datendownload"
 get_download_url() {
     local download_url
     download_url=$(curl -s "$URL" | \
-        grep -oP 'https://download\.marktstammdatenregister\.de/Gesamtdatenexport_\d{8}_\d+\.\d+\.zip' | \
+        grep -oE 'https://download\.marktstammdatenregister\.de/Gesamtdatenexport_[0-9]{8}_[0-9]+\.[0-9]+\.zip' | \
         head -n 1)
     echo "$download_url"
 }
