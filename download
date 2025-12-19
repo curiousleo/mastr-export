@@ -15,21 +15,27 @@ options() {
     setup REST help:usage -- "Usage: $(basename "$0") [options]..."
     msg -- 'Options:'
     param IF_NEWER_THAN --if-newer-than -- '(input) name of previously downloaded zip file'
-    param ZIP_FILE      --zip-file      -- '(output) path for download'
+    param DOWNLOAD_DIR  --download-dir  -- '(output) directory for download'
     disp  :usage        --help
 }
 
 main() {
     eval "$(getoptions options) exit 1"
     local if_newer_than="${IF_NEWER_THAN:-}"
-    local zip_file="${ZIP_FILE:-/mnt/out/mastr.zip}"
+    local download_dir="${DOWNLOAD_DIR:-/mnt/out}"
 
-    local url
+    local url filename
     url=$(get_download_url)
+    filename=$(basename "$url")
 
-    if [[ -z "$if_newer_than" || "$if_newer_than" -ot "$zip_file" ]]
+    if [[ -z "$if_newer_than" || "$filename" > $(basename "$if_newer_than") ]]
     then
-        axel --num-connections=5 --output="$zip_file" "$url"
+        echo "Downloading $filename to $download_dir"
+        mkdir -p "$download_dir"
+        axel --num-connections=5 --output="$download_dir/$filename" "$url"
+    else
+        if_newer_than=$(basename "$if_newer_than")
+        echo "$if_newer_than is as recent or more recent than $filename"
     fi
 }
 
