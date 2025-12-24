@@ -47,12 +47,6 @@
       "name": "Strasse"
     },
     {
-      "name": "Gemarkung"
-    },
-    {
-      "name": "FlurFlurstuecknummern"
-    },
-    {
       "name": "StrasseNichtGefunden",
       "xsd": "boolean"
     },
@@ -92,27 +86,12 @@
       "xsd": "date"
     },
     {
-      "name": "DatumBeginnVoruebergehendeStilllegung",
-      "xsd": "date"
-    },
-    {
-      "name": "DatumWiederaufnahmeBetrieb",
-      "xsd": "date"
-    },
-    {
-      "name": "GeplantesInbetriebnahmedatum",
-      "xsd": "date"
-    },
-    {
       "name": "EinheitSystemstatus",
       "xsd": "short"
     },
     {
       "name": "EinheitBetriebsstatus",
       "xsd": "byte"
-    },
-    {
-      "name": "BestandsanlageMastrNummer"
     },
     {
       "name": "NichtVorhandenInMigriertenEinheiten",
@@ -166,14 +145,7 @@
       "xsd": "boolean"
     },
     {
-      "name": "Einsatzverantwortlicher"
-    },
-    {
       "name": "FernsteuerbarkeitNb",
-      "xsd": "boolean"
-    },
-    {
-      "name": "FernsteuerbarkeitDv",
       "xsd": "boolean"
     },
     {
@@ -192,26 +164,6 @@
     {
       "name": "Technologie",
       "xsd": "short"
-    },
-    {
-      "name": "NetzreserveZugeordnet",
-      "xsd": "boolean"
-    },
-    {
-      "name": "DatumNetzreserve",
-      "xsd": "date"
-    },
-    {
-      "name": "KapazitaetsreserveZugeordnet",
-      "xsd": "boolean"
-    },
-    {
-      "name": "DatumKapazitaetsreserve",
-      "xsd": "date"
-    },
-    {
-      "name": "InbetriebnahmedatumAmAktuellenStandort",
-      "xsd": "date"
     }
   ]
 }

@@ -114,9 +114,6 @@
       "xsd": "byte"
     },
     {
-      "name": "BestandsanlageMastrNummer"
-    },
-    {
       "name": "NichtVorhandenInMigriertenEinheiten",
       "xsd": "boolean"
     },
@@ -208,16 +205,8 @@
       "xsd": "boolean"
     },
     {
-      "name": "DatumNetzreserve",
-      "xsd": "date"
-    },
-    {
       "name": "KapazitaetsreserveZugeordnet",
       "xsd": "boolean"
-    },
-    {
-      "name": "DatumKapazitaetsreserve",
-      "xsd": "date"
     },
     {
       "name": "InbetriebnahmedatumAmAktuellenStandort",

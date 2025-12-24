@@ -90,19 +90,11 @@
       "xsd": "date"
     },
     {
-      "name": "GeplantesInbetriebnahmedatum",
-      "xsd": "date"
-    },
-    {
       "name": "DatumEndgueltigeStilllegung",
       "xsd": "date"
     },
     {
       "name": "DatumBeginnVoruebergehendeStilllegung",
-      "xsd": "date"
-    },
-    {
-      "name": "DatumWiederaufnahmeBetrieb",
       "xsd": "date"
     },
     {
@@ -112,9 +104,6 @@
     {
       "name": "EinheitBetriebsstatus",
       "xsd": "byte"
-    },
-    {
-      "name": "BestandsanlageMastrNummer"
     },
     {
       "name": "NichtVorhandenInMigriertenEinheiten",
@@ -163,10 +152,6 @@
     },
     {
       "name": "SpeicherMaStRNummer"
-    },
-    {
-      "name": "InbetriebnahmedatumAmAktuellenStandort",
-      "xsd": "date"
     }
   ]
 }

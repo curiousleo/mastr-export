@@ -98,10 +98,6 @@
       "xsd": "date"
     },
     {
-      "name": "DatumWiederaufnahmeBetrieb",
-      "xsd": "date"
-    },
-    {
       "name": "GeplantesInbetriebnahmedatum",
       "xsd": "date"
     },
@@ -112,9 +108,6 @@
     {
       "name": "EinheitBetriebsstatus",
       "xsd": "byte"
-    },
-    {
-      "name": "BestandsanlageMastrNummer"
     },
     {
       "name": "NichtVorhandenInMigriertenEinheiten",
@@ -144,13 +137,6 @@
     {
       "name": "PraequalifiziertGemaessAblav",
       "xsd": "boolean"
-    },
-    {
-      "name": "GemeinsamRegistrierteSolareinheitMastrNummer"
-    },
-    {
-      "name": "InbetriebnahmedatumAmAktuellenStandort",
-      "xsd": "date"
     }
   ]
 }

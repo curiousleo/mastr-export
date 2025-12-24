@@ -102,19 +102,12 @@
       "xsd": "date"
     },
     {
-      "name": "DatumWiederaufnahmeBetrieb",
-      "xsd": "date"
-    },
-    {
       "name": "EinheitSystemstatus",
       "xsd": "short"
     },
     {
       "name": "EinheitBetriebsstatus",
       "xsd": "byte"
-    },
-    {
-      "name": "BestandsanlageMastrNummer"
     },
     {
       "name": "NichtVorhandenInMigriertenEinheiten",
@@ -144,10 +137,6 @@
     {
       "name": "Erzeugungsleistung",
       "xsd": "float"
-    },
-    {
-      "name": "InbetriebnahmedatumAmAktuellenStandort",
-      "xsd": "date"
     }
   ]
 }

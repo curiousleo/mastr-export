@@ -111,9 +111,6 @@
       "xsd": "byte"
     },
     {
-      "name": "BestandsanlageMastrNummer"
-    },
-    {
       "name": "NichtVorhandenInMigriertenEinheiten",
       "xsd": "boolean"
     },
@@ -234,10 +231,6 @@
     },
     {
       "name": "DatumBaubeginn",
-      "xsd": "date"
-    },
-    {
-      "name": "NetzreserveAbDatum",
       "xsd": "date"
     },
     {

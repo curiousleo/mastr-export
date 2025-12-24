@@ -114,9 +114,6 @@
       "xsd": "byte"
     },
     {
-      "name": "BestandsanlageMastrNummer"
-    },
-    {
       "name": "NichtVorhandenInMigriertenEinheiten",
       "xsd": "boolean"
     },

@@ -38,10 +38,6 @@
       "name": "Messlokation"
     },
     {
-      "name": "Marktgebiet",
-      "xsd": "int"
-    },
-    {
       "name": "Spannungsebene",
       "xsd": "short"
     },

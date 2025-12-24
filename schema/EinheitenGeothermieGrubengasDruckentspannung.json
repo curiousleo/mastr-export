@@ -98,10 +98,6 @@
       "xsd": "date"
     },
     {
-      "name": "DatumWiederaufnahmeBetrieb",
-      "xsd": "date"
-    },
-    {
       "name": "GeplantesInbetriebnahmedatum",
       "xsd": "date"
     },
@@ -112,9 +108,6 @@
     {
       "name": "EinheitBetriebsstatus",
       "xsd": "byte"
-    },
-    {
-      "name": "BestandsanlageMastrNummer"
     },
     {
       "name": "NichtVorhandenInMigriertenEinheiten",
@@ -135,17 +128,8 @@
       "name": "NameStromerzeugungseinheit"
     },
     {
-      "name": "Weic"
-    },
-    {
       "name": "Weic_nv",
       "xsd": "boolean"
-    },
-    {
-      "name": "WeicDisplayName"
-    },
-    {
-      "name": "Kraftwerksnummer"
     },
     {
       "name": "Kraftwerksnummer_nv",
@@ -166,9 +150,6 @@
     {
       "name": "AnschlussAnHoechstOderHochSpannung",
       "xsd": "boolean"
-    },
-    {
-      "name": "Einsatzverantwortlicher"
     },
     {
       "name": "FernsteuerbarkeitNb",
@@ -200,20 +181,8 @@
       "xsd": "boolean"
     },
     {
-      "name": "DatumNetzreserve",
-      "xsd": "date"
-    },
-    {
       "name": "KapazitaetsreserveZugeordnet",
       "xsd": "boolean"
-    },
-    {
-      "name": "DatumKapazitaetsreserve",
-      "xsd": "date"
-    },
-    {
-      "name": "InbetriebnahmedatumAmAktuellenStandort",
-      "xsd": "date"
     }
   ]
 }
