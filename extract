@@ -45,18 +45,19 @@ options() {
     setup REST help:usage -- "Usage: $(basename "$0") [options]..."
     msg -- 'Options:'
     param ZIP_FILE    --zip-file    -- '(input) Markstammdatenregister zip file'
-    param SCHEMA_DIR  --schema-dir  -- '(input) Directory containing JSON schemas'
     param PARQUET_DIR --parquet-dir -- '(output) Directory for Parquet files'
     disp  :usage      --help
 }
 
 main() {
     eval "$(getoptions options) exit 1"
-    local zip_file="${ZIP_FILE:-/mnt/in/mastr.zip}"
-    local schema_dir="${SCHEMA_DIR:-/mnt/in/schema}"
-    local parquet_dir="${PARQUET_DIR:-/mnt/out/data}"
+    local zip_file schema_dir parquet_dir
+    zip_file="${ZIP_FILE}"
+    schema_dir="${SCHEMA_DIR}"
+    parquet_dir="${PARQUET_DIR}"
 
     mkdir -p "$parquet_dir"
+    echo "Extracting files from $zip_file to $parquet_dir using schemas from $schema_dir ..."
     list_xml_files "$zip_file" | parallel --jobs 50% -v process_xml_file "$zip_file" "$schema_dir" "$parquet_dir" {}
 }
 

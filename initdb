@@ -47,6 +47,7 @@ initdb_sql() {
     cat <<-.
 .bail on
 .echo on
+.mode list
 LOAD ducklake;
 ATTACH 'ducklake:$db_file' AS $db_name (DATA_PATH '$data_path');
 .
@@ -90,11 +91,11 @@ options() {
 main() {
     eval "$(getoptions options) exit 1"
     local db_name="${DB_NAME:-mastr}"
-    local parquet_dir="${PARQUET_DIR:-/mnt/out/parquet}"
+    local db_dir="${DB_DIR:-${WORKDIR}}"
+    local parquet_dir="${PARQUET_DIR:-${WORKDIR}/data}"
     local parquet_dir_override="${PARQUET_DIR_OVERRIDE:-}"
-    local db_dir="${DB_DIR:-/mnt/out}"
-    local db_dir="${db_dir%/}"
 
+    db_dir="${db_dir%/}"
     parquet_dir="${parquet_dir%/}"
     parquet_dir_override="${parquet_dir_override%/}"
 
