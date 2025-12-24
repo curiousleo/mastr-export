@@ -30,10 +30,10 @@ COPY initdb             ${BIN_DIR}/
 ENV SCHEMA_DIR=/opt/mastr-export/schema
 COPY schema/            ${SCHEMA_DIR}/
 
-ENV USER_ID=65535
-ENV GROUP_ID=65535
-ENV USER_NAME=u
-ENV GROUP_NAME=u
+ARG USER_ID=65535
+ARG GROUP_ID=65535
+ARG USER_NAME=u
+ARG GROUP_NAME=u
 RUN addgroup -g $GROUP_ID $GROUP_NAME \
     && adduser --shell /sbin/nologin --disabled-password \
     --uid $USER_ID --ingroup $GROUP_NAME $USER_NAME
