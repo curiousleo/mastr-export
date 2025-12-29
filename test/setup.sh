@@ -29,7 +29,7 @@ build_image() {
 
 mastr-export() {
     mkdir -p work
-    podman run --rm --transient-store \
+    podman run --quiet --rm --transient-store \
         --userns=keep-id:uid=65535,gid=65535 \
         --volume ./work/:/mnt/work/:rw,Z,U \
         "${MASTR_EXPORT_TAG}" "$@"
