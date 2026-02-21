@@ -1,0 +1,24 @@
+[Unit]
+Description=MaStR data export pipeline
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+
+# Adjust /opt/mastr-export to the actual install path.
+ExecStart=deno run \
+    --allow-net=www.marktstammdatenregister.de,download.marktstammdatenregister.de \
+    --allow-read=/opt/mastr-export,%S,%C,/home/as-mastr-export/data \
+    --allow-write=%S,%C,/home/as-mastr-export/data \
+    --allow-run=axel,unzip,bash,duckdb \
+    /opt/mastr-export/mastr-export.ts \
+    --state-dir=%S \
+    --scratch-dir=%C \
+    --output-dir=/home/as-mastr-export/data
+
+StateDirectory=mastr-export
+CacheDirectory=mastr-export
+
+[Install]
+WantedBy=default.target

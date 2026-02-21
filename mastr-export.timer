@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily MaStR data export
+
+[Timer]
+OnCalendar=*-*-* 05:00:00 Europe/Berlin
+Persistent=true
+
+[Install]
+WantedBy=timers.target
