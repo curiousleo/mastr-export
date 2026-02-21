@@ -181,8 +181,8 @@ async function listXmlFiles(
   return files;
 }
 
-function tableNameOf(xmlFile: string): string {
-  return xmlFile.replace(/(_\d+)?\.xml$/, "");
+function tableNameOf(file: string): string {
+  return file.replace(/(_\d+)?\.(xml|parquet)$/, "");
 }
 
 async function extractAll(
@@ -234,13 +234,14 @@ async function extractAll(
 // ---------------------------------------------------------------------------
 
 function getParquetFiles(
-  parquetDir: string,
+  dir: string,
   table: string,
   allFiles: string[],
 ): string[] {
+  const re = new RegExp(`^${table}(_\\d+)?\\.parquet$`);
   return allFiles
-    .filter((f) => f === `${table}.parquet` || f.startsWith(`${table}_`))
-    .map((f) => join(parquetDir, f))
+    .filter((f) => re.test(f))
+    .map((f) => join(dir, f))
     .sort();
 }
 
@@ -277,15 +278,14 @@ async function buildInitSql(
   );
 
   for (const table of tables) {
-    const files = getParquetFiles(dataDir, table, allFiles);
+    const schemaFile = getParquetFiles(parquetDir, table, allFiles)[0];
     lines.push(
-      `CREATE TABLE ${dbName}.${table} AS SELECT * FROM read_parquet('${files[0]}') WITH NO DATA;`,
+      `CREATE TABLE ${dbName}.${table} AS SELECT * FROM read_parquet('${schemaFile}') WITH NO DATA;`,
     );
   }
 
   for (const table of tables) {
-    const files = getParquetFiles(dataDir, table, allFiles);
-    for (const f of files) {
+    for (const f of getParquetFiles(dataDir, table, allFiles)) {
       lines.push(
         `CALL ducklake_add_data_files('${dbName}', '${table}', '${f}');`,
       );
