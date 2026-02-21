@@ -215,6 +215,10 @@
     {
       "name": "KapazitaetsreserveZugeordnet",
       "xsd": "boolean"
+    },
+    {
+      "name": "InbetriebnahmedatumAmAktuellenStandort",
+      "xsd": "date"
     }
   ]
 }
