@@ -8,9 +8,9 @@ import { join, basename } from "jsr:@std/path@1";
 // ---------------------------------------------------------------------------
 
 const args = parseArgs(Deno.args, {
-  string: ["state-dir", "scratch-dir", "output-dir"],
+  string: ["state-dir", "scratch-dir", "output-dir", "format"],
   boolean: ["dry-run", "help"],
-  default: { "dry-run": false },
+  default: { "dry-run": false, format: "duckdb" },
 });
 
 if (
@@ -20,7 +20,7 @@ if (
   !args["output-dir"]
 ) {
   console.log(
-    `Usage: mastr-export.ts --state-dir DIR --scratch-dir DIR --output-dir DIR [--dry-run]`,
+    `Usage: mastr-export.ts --state-dir DIR --scratch-dir DIR --output-dir DIR [--format duckdb|ducklake] [--dry-run]`,
   );
   Deno.exit(args.help ? 0 : 1);
 }
@@ -28,7 +28,13 @@ if (
 const STATE_DIR = args["state-dir"];
 const SCRATCH_DIR = args["scratch-dir"];
 const OUTPUT_DIR = args["output-dir"];
+const FORMAT = args["format"] as "duckdb" | "ducklake";
 const DRY_RUN = args["dry-run"];
+
+if (FORMAT !== "duckdb" && FORMAT !== "ducklake") {
+  console.error(`Invalid format: ${FORMAT}. Must be "duckdb" or "ducklake".`);
+  Deno.exit(1);
+}
 const SCHEMA_DIR = join(import.meta.dirname!, "schema");
 
 // ---------------------------------------------------------------------------
@@ -230,7 +236,7 @@ async function extractAll(
 }
 
 // ---------------------------------------------------------------------------
-// Step 4: Init Ducklake DB
+// Step 4: Assemble database
 // ---------------------------------------------------------------------------
 
 function getParquetFiles(
@@ -245,7 +251,7 @@ function getParquetFiles(
     .sort();
 }
 
-async function buildInitSql(
+async function buildDucklakeSql(
   dbName: string,
   parquetDir: string,
   dataDir: string,
@@ -253,18 +259,7 @@ async function buildInitSql(
 ): Promise<string> {
   const dbFile = join(dbDir, "catalog.ducklake");
   const dataPath = join(dbDir, "tmp_always_empty");
-
-  const allFiles: string[] = [];
-  try {
-    for await (const entry of Deno.readDir(parquetDir)) {
-      if (entry.isFile && entry.name.endsWith(".parquet")) {
-        allFiles.push(entry.name);
-      }
-    }
-  } catch (e) {
-    if (!DRY_RUN) throw e;
-  }
-  allFiles.sort();
+  const allFiles = await listParquetFiles(parquetDir);
 
   const tables = [...new Set(allFiles.map((f) => tableNameOf(f)))].sort();
   const lines: string[] = [];
@@ -296,7 +291,21 @@ async function buildInitSql(
   return lines.join("\n") + "\n";
 }
 
-async function initDb(
+async function listParquetFiles(parquetDir: string): Promise<string[]> {
+  const files: string[] = [];
+  try {
+    for await (const entry of Deno.readDir(parquetDir)) {
+      if (entry.isFile && entry.name.endsWith(".parquet")) {
+        files.push(entry.name);
+      }
+    }
+  } catch (e) {
+    if (!DRY_RUN) throw e;
+  }
+  return files.sort();
+}
+
+async function initDucklake(
   runner: Runner,
   parquetDir: string,
   outputDir: string,
@@ -305,7 +314,7 @@ async function initDb(
   await runner.mkdir(dbDir);
 
   const dataDir = join(outputDir, "data");
-  const sql = await buildInitSql("mastr", parquetDir, dataDir, dbDir);
+  const sql = await buildDucklakeSql("mastr", parquetDir, dataDir, dbDir);
 
   if (DRY_RUN) {
     console.log("[dry-run] duckdb <<SQL");
@@ -315,6 +324,41 @@ async function initDb(
   }
 
   await runner.exec(["duckdb"], { stdin: sql });
+}
+
+async function buildDuckdbSql(parquetDir: string): Promise<string> {
+  const allFiles = await listParquetFiles(parquetDir);
+  const tables = [...new Set(allFiles.map((f) => tableNameOf(f)))].sort();
+  const lines: string[] = [];
+
+  lines.push(".bail on");
+  lines.push(".echo on");
+
+  for (const table of tables) {
+    const files = getParquetFiles(parquetDir, table, allFiles);
+    const fileList = files.map((f) => `'${f}'`).join(", ");
+    lines.push(
+      `CREATE TABLE ${table} AS SELECT * FROM read_parquet([${fileList}]);`,
+    );
+  }
+
+  return lines.join("\n") + "\n";
+}
+
+async function initDuckdb(runner: Runner, parquetDir: string): Promise<void> {
+  const dbFile = join(SCRATCH_DIR, "db", "mastr.duckdb");
+  await runner.mkdir(join(SCRATCH_DIR, "db"));
+
+  const sql = await buildDuckdbSql(parquetDir);
+
+  if (DRY_RUN) {
+    console.log(`[dry-run] duckdb ${dbFile} <<SQL`);
+    console.log(sql);
+    console.log("SQL");
+    return;
+  }
+
+  await runner.exec(["duckdb", dbFile], { stdin: sql });
 }
 
 // ---------------------------------------------------------------------------
@@ -355,17 +399,27 @@ async function main() {
   console.log("Extraction complete.");
 
   // 5. Init DB
-  console.log("Building Ducklake database...");
-  await initDb(runner, parquetDir, OUTPUT_DIR);
+  console.log(`Building ${FORMAT} database...`);
+  if (FORMAT === "ducklake") {
+    await initDucklake(runner, parquetDir, OUTPUT_DIR);
+  } else {
+    await initDuckdb(runner, parquetDir);
+  }
   console.log("Database ready.");
 
   // 6. Assemble output
-  const outputDataDir = join(OUTPUT_DIR, "data");
-  await runner.moveDir(parquetDir, outputDataDir);
-  await runner.moveDir(
-    join(SCRATCH_DIR, "db", "catalog.ducklake"),
-    join(OUTPUT_DIR, "catalog.ducklake"),
-  );
+  if (FORMAT === "ducklake") {
+    await runner.moveDir(parquetDir, join(OUTPUT_DIR, "data"));
+    await runner.moveDir(
+      join(SCRATCH_DIR, "db", "catalog.ducklake"),
+      join(OUTPUT_DIR, "catalog.ducklake"),
+    );
+  } else {
+    await runner.moveDir(
+      join(SCRATCH_DIR, "db", "mastr.duckdb"),
+      join(OUTPUT_DIR, "mastr.duckdb"),
+    );
+  }
   console.log("Output assembled.");
 
   // 7. Clean up scratch
