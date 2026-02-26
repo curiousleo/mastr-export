@@ -408,6 +408,7 @@ async function main() {
   console.log("Database ready.");
 
   // 6. Assemble output
+  await runner.mkdir(OUTPUT_DIR);
   if (FORMAT === "ducklake") {
     await runner.moveDir(parquetDir, join(OUTPUT_DIR, "data"));
     await runner.moveDir(
