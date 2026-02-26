@@ -36,6 +36,11 @@ impl Default for XsdType {
 impl From<XsdType> for DataType {
     fn from(xsd_type: XsdType) -> Self {
         match xsd_type {
+            // FIXME(leo): Clickhouse interprets `DataType:Date32` as a 16-bit
+            // date, and that's too small (the database contains typos and
+            // 1900-01-01 as a sort of placeholder).
+            // But `DataType::Date64` is interpreted by DuckDB and Clickhouse as
+            // an int64 rather than a date.
             XsdType::Date => DataType::Date32,
             XsdType::DateTime => DataType::Timestamp(TimeUnit::Second, None),
             XsdType::Float => DataType::Float32,
