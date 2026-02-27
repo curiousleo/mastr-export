@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-net=www.marktstammdatenregister.de,download.marktstammdatenregister.de --allow-read --allow-write --allow-run --allow-env
+#!/usr/bin/env -S deno run --allow-net --allow-read --allow-write --allow-run --allow-env
 
 import { parseArgs } from "jsr:@std/cli@1/parse-args";
 import { join, basename } from "jsr:@std/path@1";
@@ -8,33 +8,47 @@ import { join, basename } from "jsr:@std/path@1";
 // ---------------------------------------------------------------------------
 
 const args = parseArgs(Deno.args, {
-  string: ["state-dir", "scratch-dir", "output-dir", "format"],
+  string: [
+    "state-dir",
+    "scratch-dir",
+    "rclone-dest",
+    "s3-url",
+    "clickhouse-url",
+    "clickhouse-db",
+  ],
   boolean: ["dry-run", "help"],
-  default: { "dry-run": false, format: "duckdb" },
+  default: { "dry-run": false, "clickhouse-db": "mastr" },
 });
 
 if (
   args.help ||
   !args["state-dir"] ||
   !args["scratch-dir"] ||
-  !args["output-dir"]
+  !args["rclone-dest"] ||
+  !args["s3-url"] ||
+  !args["clickhouse-url"]
 ) {
   console.log(
-    `Usage: mastr-export.ts --state-dir DIR --scratch-dir DIR --output-dir DIR [--format duckdb|ducklake] [--dry-run]`,
+    `Usage: mastr-export.ts
+  --state-dir DIR        State directory for tracking processed exports
+  --scratch-dir DIR      Temporary working directory
+  --rclone-dest DEST     rclone destination (e.g. myremote:bucket/mastr)
+  --s3-url URL           S3 URL prefix for ClickHouse (e.g. https://s3.example.com/bucket/mastr)
+  --clickhouse-url URL   ClickHouse HTTP endpoint (e.g. http://localhost:8123)
+  [--clickhouse-db NAME] Database name (default: mastr)
+  [--dry-run]`,
   );
   Deno.exit(args.help ? 0 : 1);
 }
 
 const STATE_DIR = args["state-dir"];
 const SCRATCH_DIR = args["scratch-dir"];
-const OUTPUT_DIR = args["output-dir"];
-const FORMAT = args["format"] as "duckdb" | "ducklake";
+const RCLONE_DEST = args["rclone-dest"];
+const S3_URL = args["s3-url"].replace(/\/$/, "");
+const CLICKHOUSE_URL = args["clickhouse-url"];
+const CLICKHOUSE_DB = args["clickhouse-db"]!;
 const DRY_RUN = args["dry-run"];
 
-if (FORMAT !== "duckdb" && FORMAT !== "ducklake") {
-  console.error(`Invalid format: ${FORMAT}. Must be "duckdb" or "ducklake".`);
-  Deno.exit(1);
-}
 const SCHEMA_DIR = join(import.meta.dirname!, "schema");
 
 // ---------------------------------------------------------------------------
@@ -103,16 +117,6 @@ class Runner {
       return;
     }
     await Deno.mkdir(dir, { recursive: true });
-  }
-
-  async moveDir(src: string, dst: string): Promise<void> {
-    if (this.dryRun) {
-      console.log(`[dry-run] mv ${src} ${dst}`);
-      return;
-    }
-    // Remove destination if it exists, then rename.
-    await Deno.remove(dst, { recursive: true }).catch(() => {});
-    await Deno.rename(src, dst);
   }
 
   async writeText(path: string, content: string): Promise<void> {
@@ -211,7 +215,10 @@ async function extractAll(
         const xmlFile = xmlFiles[idx++];
         const table = tableNameOf(xmlFile);
         const schema = join(SCHEMA_DIR, `${table}.json`);
-        const parquet = join(parquetDir, xmlFile.replace(/\.xml$/, ".parquet"));
+        const parquet = join(
+          parquetDir,
+          xmlFile.replace(/\.xml$/, ".parquet"),
+        );
         const script =
           `unzip -p '${zipFile}' '${xmlFile}'` +
           ` | uconv -f UTF-16LE -t UTF-8` +
@@ -236,59 +243,42 @@ async function extractAll(
 }
 
 // ---------------------------------------------------------------------------
-// Step 4: Assemble database
+// Step 4: Upload to S3
 // ---------------------------------------------------------------------------
 
-function getParquetFiles(
-  dir: string,
-  table: string,
-  allFiles: string[],
-): string[] {
-  const re = new RegExp(`^${table}(_\\d+)?\\.parquet$`);
-  return allFiles
-    .filter((f) => re.test(f))
-    .map((f) => join(dir, f))
-    .sort();
+async function uploadToS3(
+  runner: Runner,
+  parquetDir: string,
+  rcloneDest: string,
+  zipName: string,
+): Promise<void> {
+  const dest = `${rcloneDest}/${zipName}/`;
+  console.log(`Uploading parquet files to ${dest}...`);
+  const result = await runner.exec(["rclone", "copy", parquetDir, dest]);
+  if (!result.success) {
+    throw new Error("rclone upload failed");
+  }
 }
 
-async function buildDucklakeSql(
-  dbName: string,
-  parquetDir: string,
-  dataDir: string,
-  dbDir: string,
-): Promise<string> {
-  const dbFile = join(dbDir, "catalog.ducklake");
-  const dataPath = join(dbDir, "tmp_always_empty");
-  const allFiles = await listParquetFiles(parquetDir);
+// ---------------------------------------------------------------------------
+// Step 5: ClickHouse
+// ---------------------------------------------------------------------------
 
-  const tables = [...new Set(allFiles.map((f) => tableNameOf(f)))].sort();
-  const lines: string[] = [];
-
-  lines.push(".bail on");
-  lines.push(".echo on");
-  lines.push(".mode list");
-  lines.push("LOAD ducklake;");
-  lines.push(
-    `ATTACH 'ducklake:${dbFile}' AS ${dbName} (DATA_PATH '${dataPath}');`,
-  );
-
-  for (const table of tables) {
-    const schemaFile = getParquetFiles(parquetDir, table, allFiles)[0];
-    lines.push(
-      `CREATE TABLE ${dbName}.${table} AS SELECT * FROM read_parquet('${schemaFile}') WITH NO DATA;`,
-    );
+async function clickhouseQuery(
+  url: string,
+  query: string,
+  dryRun: boolean,
+): Promise<void> {
+  if (dryRun) {
+    console.log(`[dry-run] clickhouse: ${query}`);
+    return;
   }
-
-  for (const table of tables) {
-    for (const f of getParquetFiles(dataDir, table, allFiles)) {
-      lines.push(
-        `CALL ducklake_add_data_files('${dbName}', '${table}', '${f}');`,
-      );
-    }
+  const resp = await fetch(url, { method: "POST", body: query });
+  if (!resp.ok) {
+    const body = await resp.text();
+    throw new Error(`ClickHouse error: ${body.trim()}`);
   }
-
-  lines.push(`DETACH ${dbName};`);
-  return lines.join("\n") + "\n";
+  await resp.body?.cancel();
 }
 
 async function listParquetFiles(parquetDir: string): Promise<string[]> {
@@ -305,60 +295,55 @@ async function listParquetFiles(parquetDir: string): Promise<string[]> {
   return files.sort();
 }
 
-async function initDucklake(
-  runner: Runner,
+async function initClickHouse(
   parquetDir: string,
-  outputDir: string,
+  s3Url: string,
+  zipName: string,
+  chUrl: string,
+  db: string,
 ): Promise<void> {
-  const dbDir = join(SCRATCH_DIR, "db");
-  await runner.mkdir(dbDir);
+  const staging = `${db}_staging`;
+  const old = `${db}_old`;
+  const s3Base = `${s3Url}/${zipName}`;
 
-  const dataDir = join(outputDir, "data");
-  const sql = await buildDucklakeSql("mastr", parquetDir, dataDir, dbDir);
+  const ch = (query: string) => clickhouseQuery(chUrl, query, DRY_RUN);
 
-  if (DRY_RUN) {
-    console.log("[dry-run] duckdb <<SQL");
-    console.log(sql);
-    console.log("SQL");
-    return;
-  }
+  // Clean up any previous failed staging
+  await ch(`DROP DATABASE IF EXISTS ${staging}`);
+  await ch(`CREATE DATABASE ${staging}`);
 
-  await runner.exec(["duckdb"], { stdin: sql });
-}
-
-async function buildDuckdbSql(parquetDir: string): Promise<string> {
+  // Derive table names from parquet files
   const allFiles = await listParquetFiles(parquetDir);
   const tables = [...new Set(allFiles.map((f) => tableNameOf(f)))].sort();
-  const lines: string[] = [];
 
-  lines.push(".bail on");
-  lines.push(".echo on");
-
+  // Create each table from S3 wildcard
   for (const table of tables) {
-    const files = getParquetFiles(parquetDir, table, allFiles);
-    const fileList = files.map((f) => `'${f}'`).join(", ");
-    lines.push(
-      `CREATE TABLE ${table} AS SELECT * FROM read_parquet([${fileList}]);`,
+    const s3Pattern = `${s3Base}/${table}_*.parquet`;
+    console.log(`  Creating ${staging}.${table}...`);
+    await ch(
+      `CREATE TABLE ${staging}.${table}` +
+        ` ENGINE = MergeTree ORDER BY tuple()` +
+        ` AS SELECT * FROM s3('${s3Pattern}')` +
+        ` SETTINGS date_time_overflow_behavior = 'saturate'`,
     );
   }
 
-  return lines.join("\n") + "\n";
-}
+  // Atomic swap
+  await ch(`DROP DATABASE IF EXISTS ${old}`);
 
-async function initDuckdb(runner: Runner, parquetDir: string): Promise<void> {
-  const dbFile = join(SCRATCH_DIR, "db", "mastr.duckdb");
-  await runner.mkdir(join(SCRATCH_DIR, "db"));
+  // Check if main db exists (first run won't have it)
+  const checkResp = await (DRY_RUN
+    ? Promise.resolve("1")
+    : fetch(chUrl, {
+        method: "POST",
+        body: `SELECT count() FROM system.databases WHERE name = '${db}'`,
+      }).then((r) => r.text()));
 
-  const sql = await buildDuckdbSql(parquetDir);
-
-  if (DRY_RUN) {
-    console.log(`[dry-run] duckdb ${dbFile} <<SQL`);
-    console.log(sql);
-    console.log("SQL");
-    return;
+  if (checkResp.trim() === "1") {
+    await ch(`RENAME DATABASE ${db} TO ${old}`);
   }
-
-  await runner.exec(["duckdb", dbFile], { stdin: sql });
+  await ch(`RENAME DATABASE ${staging} TO ${db}`);
+  await ch(`DROP DATABASE IF EXISTS ${old}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -370,7 +355,7 @@ async function main() {
 
   // 1. Discover URL
   const url = await getDownloadUrl();
-  const zipName = basename(url);
+  const zipName = basename(url, ".zip");
   console.log(`Latest export: ${zipName} (${url})`);
 
   // 2. Check state
@@ -382,7 +367,7 @@ async function main() {
 
   // 3. Download
   const downloadDir = join(SCRATCH_DIR, "download");
-  const zipFile = join(downloadDir, zipName);
+  const zipFile = join(downloadDir, `${zipName}.zip`);
   await runner.mkdir(downloadDir);
   await runner.exec([
     "axel",
@@ -392,36 +377,26 @@ async function main() {
   ]);
   console.log(`Downloaded ${zipName}`);
 
-  // 4. Extract
+  // 4. Extract XML → Parquet
   const parquetDir = join(SCRATCH_DIR, "parquet");
   console.log("Extracting XML files to Parquet...");
   await extractAll(runner, zipFile, parquetDir);
   console.log("Extraction complete.");
 
-  // 5. Init DB
-  console.log(`Building ${FORMAT} database...`);
-  if (FORMAT === "ducklake") {
-    await initDucklake(runner, parquetDir, OUTPUT_DIR);
-  } else {
-    await initDuckdb(runner, parquetDir);
-  }
-  console.log("Database ready.");
+  // 5. Upload to S3
+  await uploadToS3(runner, parquetDir, RCLONE_DEST, zipName);
+  console.log("S3 upload complete.");
 
-  // 6. Assemble output
-  await runner.mkdir(OUTPUT_DIR);
-  if (FORMAT === "ducklake") {
-    await runner.moveDir(parquetDir, join(OUTPUT_DIR, "data"));
-    await runner.moveDir(
-      join(SCRATCH_DIR, "db", "catalog.ducklake"),
-      join(OUTPUT_DIR, "catalog.ducklake"),
-    );
-  } else {
-    await runner.moveDir(
-      join(SCRATCH_DIR, "db", "mastr.duckdb"),
-      join(OUTPUT_DIR, "mastr.duckdb"),
-    );
-  }
-  console.log("Output assembled.");
+  // 6. Create ClickHouse tables + atomic swap
+  console.log("Creating ClickHouse tables...");
+  await initClickHouse(
+    parquetDir,
+    S3_URL,
+    zipName,
+    CLICKHOUSE_URL,
+    CLICKHOUSE_DB,
+  );
+  console.log("ClickHouse database ready.");
 
   // 7. Clean up scratch
   await runner.removeDir(SCRATCH_DIR);
