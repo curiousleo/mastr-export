@@ -1,5 +1,4 @@
 use anyhow::{Result, anyhow};
-use arrow::datatypes::{DataType, TimeUnit};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, path::PathBuf};
 
@@ -33,24 +32,22 @@ impl Default for XsdType {
     }
 }
 
-impl From<XsdType> for DataType {
-    fn from(xsd_type: XsdType) -> Self {
-        match xsd_type {
-            // FIXME(leo): Clickhouse interprets `DataType:Date32` as a 16-bit
-            // date, and that's too small (the database contains typos and
-            // 1900-01-01 as a sort of placeholder).
-            // But `DataType::Date64` is interpreted by DuckDB and Clickhouse as
-            // an int64 rather than a date.
-            XsdType::Date => DataType::Date32,
-            XsdType::DateTime => DataType::Timestamp(TimeUnit::Second, None),
-            XsdType::Float => DataType::Float32,
-            XsdType::Double => DataType::Float64,
-            XsdType::Byte => DataType::Int8,
-            XsdType::Short => DataType::Int16,
-            XsdType::Int => DataType::Int32,
-            XsdType::NonNegativeInteger => DataType::UInt64,
-            XsdType::Boolean => DataType::Boolean,
-            XsdType::String => DataType::Utf8,
+impl XsdType {
+    /// Returns a parquet message type field definition line.
+    pub fn parquet_type_str(&self, name: &str) -> String {
+        match self {
+            XsdType::Date => format!("  OPTIONAL INT32 {} (DATE);", name),
+            XsdType::DateTime => format!("  OPTIONAL INT64 {} (TIMESTAMP(MICROS,false));", name),
+            XsdType::Float => format!("  OPTIONAL FLOAT {};", name),
+            XsdType::Double => format!("  OPTIONAL DOUBLE {};", name),
+            XsdType::Byte => format!("  OPTIONAL INT32 {} (INTEGER(8,true));", name),
+            XsdType::Short => format!("  OPTIONAL INT32 {} (INTEGER(16,true));", name),
+            XsdType::Int => format!("  OPTIONAL INT32 {};", name),
+            XsdType::NonNegativeInteger => {
+                format!("  OPTIONAL INT64 {} (INTEGER(64,false));", name)
+            }
+            XsdType::Boolean => format!("  OPTIONAL BOOLEAN {};", name),
+            XsdType::String => format!("  OPTIONAL BINARY {} (UTF8);", name),
         }
     }
 }
@@ -60,13 +57,6 @@ pub struct Field {
     pub name: String,
     #[serde(default)]
     pub xsd: XsdType,
-}
-
-impl From<&Field> for arrow::datatypes::Field {
-    fn from(field: &Field) -> Self {
-        let data_type = DataType::from(field.xsd);
-        arrow::datatypes::Field::new(&field.name, data_type, true)
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -94,25 +84,23 @@ impl Schema {
         map
     }
 
-    pub fn load_from_file(path: &std::path::Path) -> Result<Self> {
-        let schema_file = std::fs::File::open(path)
-            .map_err(|e| anyhow!("Failed to open schema file {:?}: {}", path, e))?;
-        let schema: Schema = serde_json::from_reader(schema_file)
-            .map_err(|e| anyhow!("Failed to parse schema JSON: {}", e))?;
-        Ok(schema)
+    pub fn to_parquet_message_type(&self) -> String {
+        let mut msg = "message schema {\n".to_string();
+        for field in &self.fields {
+            msg.push_str(&field.xsd.parquet_type_str(&field.name));
+            msg.push('\n');
+        }
+        msg.push('}');
+        msg
     }
-}
 
-impl From<&Schema> for arrow::datatypes::Schema {
-    fn from(schema: &Schema) -> Self {
-        let fields = schema
-            .fields
-            .iter()
-            .map(|field| arrow::datatypes::Field::from(field))
-            .collect::<Vec<_>>();
-        let fields = arrow::datatypes::Fields::from(fields);
-        arrow::datatypes::Schema::new(fields).with_metadata(schema.get_metadata())
-    }
+    // pub fn load_from_file(path: &std::path::Path) -> Result<Self> {
+    //     let schema_file = std::fs::File::open(path)
+    //         .map_err(|e| anyhow!("Failed to open schema file {:?}: {}", path, e))?;
+    //     let schema: Schema = serde_json::from_reader(schema_file)
+    //         .map_err(|e| anyhow!("Failed to parse schema JSON: {}", e))?;
+    //     Ok(schema)
+    // }
 }
 
 pub fn load_schema_from_file(path: &PathBuf, primary: Option<String>) -> Result<Schema> {
