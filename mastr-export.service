@@ -7,16 +7,38 @@ After=network-online.target
 Type=oneshot
 
 # Adjust /opt/mastr-export to the actual install path.
-ExecStart=deno run \
-    --allow-net=www.marktstammdatenregister.de,download.marktstammdatenregister.de \
-    --allow-read=/opt/mastr-export,%S,%C,/home/as-mastr-export/data \
-    --allow-write=%S,%C,/home/as-mastr-export/data \
-    --allow-run=axel,unzip,bash,duckdb \
-    /opt/mastr-export/mastr-export.ts \
-    --state-dir=%S \
-    --scratch-dir=%C \
-    --output-dir=/home/as-mastr-export/data
+#
+# Configuration is read from an environment file. Create it with:
+#
+#   install -m 600 /dev/null /etc/mastr-export/environment
+#   # then populate it:
+#   cat > /etc/mastr-export/environment << EOF
+#   RCLONE_DEST=myremote:bucket/mastr
+#   S3_URL=https://s3.example.com/bucket/mastr
+#   CLICKHOUSE_URL=http://clickhouse-host:8123
+#   CLICKHOUSE_DB=mastr
+#   CLICKHOUSE_USER=mastr_import
+#   CLICKHOUSE_PASSWORD=secret
+#   EOF
 
+EnvironmentFile="${CONFIGURATION_DIRECTORY}"/env
+
+ExecStart=deno run \
+    --allow-net \
+    --allow-read=/opt/mastr-export,"${STATE_DIRECTORY}","${CACHE_DIRECTORY}" \
+    --allow-write="${STATE_DIRECTORY}","${CACHE_DIRECTORY}" \
+    --allow-run=axel,unzip,uconv,bash,rclone,mastr-export \
+    /opt/mastr-export/mastr-export.ts \
+    --state-dir="${STATE_DIRECTORY}" \
+    --scratch-dir="${CACHE_DIRECTORY}" \
+    --rclone-dest="${RCLONE_DEST}" \
+    --s3-url="${S3_URL}" \
+    --clickhouse-url="${CLICKHOUSE_URL}" \
+    --clickhouse-db="${CLICKHOUSE_DB}" \
+    --clickhouse-user="${CLICKHOUSE_USER}" \
+    --clickhouse-password="${CLICKHOUSE_PASSWORD}"
+
+ConfigurationDirectory=mastr-export
 StateDirectory=mastr-export
 CacheDirectory=mastr-export
 
