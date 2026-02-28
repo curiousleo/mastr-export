@@ -15,6 +15,8 @@ const args = parseArgs(Deno.args, {
     "s3-url",
     "clickhouse-url",
     "clickhouse-db",
+    "clickhouse-user",
+    "clickhouse-password",
   ],
   boolean: ["dry-run", "help"],
   default: { "dry-run": false, "clickhouse-db": "mastr" },
@@ -30,12 +32,14 @@ if (
 ) {
   console.log(
     `Usage: mastr-export.ts
-  --state-dir DIR        State directory for tracking processed exports
-  --scratch-dir DIR      Temporary working directory
-  --rclone-dest DEST     rclone destination (e.g. myremote:bucket/mastr)
-  --s3-url URL           S3 URL prefix for ClickHouse (e.g. https://s3.example.com/bucket/mastr)
-  --clickhouse-url URL   ClickHouse HTTP endpoint (e.g. http://localhost:8123)
-  [--clickhouse-db NAME] Database name (default: mastr)
+  --state-dir DIR             State directory for tracking processed exports
+  --scratch-dir DIR           Temporary working directory
+  --rclone-dest DEST          rclone destination (e.g. myremote:bucket/mastr)
+  --s3-url URL                S3 URL prefix for ClickHouse (e.g. https://s3.example.com/bucket/mastr)
+  --clickhouse-url URL        ClickHouse HTTP endpoint (e.g. http://localhost:8123)
+  [--clickhouse-db NAME]      Database name (default: mastr)
+  [--clickhouse-user USER]    ClickHouse username
+  [--clickhouse-password PWD] ClickHouse password
   [--dry-run]`,
   );
   Deno.exit(args.help ? 0 : 1);
@@ -47,7 +51,16 @@ const RCLONE_DEST = args["rclone-dest"];
 const S3_URL = args["s3-url"].replace(/\/$/, "");
 const CLICKHOUSE_URL = args["clickhouse-url"];
 const CLICKHOUSE_DB = args["clickhouse-db"]!;
+const CLICKHOUSE_USER = args["clickhouse-user"];
+const CLICKHOUSE_PASSWORD = args["clickhouse-password"];
 const DRY_RUN = args["dry-run"];
+
+function clickhouseHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (CLICKHOUSE_USER) headers["X-ClickHouse-User"] = CLICKHOUSE_USER;
+  if (CLICKHOUSE_PASSWORD) headers["X-ClickHouse-Key"] = CLICKHOUSE_PASSWORD;
+  return headers;
+}
 
 const SCHEMA_DIR = join(import.meta.dirname!, "schema");
 
@@ -273,7 +286,11 @@ async function clickhouseQuery(
     console.log(`[dry-run] clickhouse: ${query}`);
     return;
   }
-  const resp = await fetch(url, { method: "POST", body: query });
+  const resp = await fetch(url, {
+    method: "POST",
+    body: query,
+    headers: clickhouseHeaders(),
+  });
   if (!resp.ok) {
     const body = await resp.text();
     throw new Error(`ClickHouse error: ${body.trim()}`);
@@ -337,6 +354,7 @@ async function initClickHouse(
     : fetch(chUrl, {
         method: "POST",
         body: `SELECT count() FROM system.databases WHERE name = '${db}'`,
+        headers: clickhouseHeaders(),
       }).then((r) => r.text()));
 
   if (checkResp.trim() === "1") {
