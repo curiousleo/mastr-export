@@ -228,10 +228,7 @@ async function extractAll(
         const xmlFile = xmlFiles[idx++];
         const table = tableNameOf(xmlFile);
         const schema = join(SCHEMA_DIR, `${table}.json`);
-        const parquet = join(
-          parquetDir,
-          xmlFile.replace(/\.xml$/, ".parquet"),
-        );
+        const parquet = join(parquetDir, xmlFile.replace(/\.xml$/, ".parquet"));
         const script =
           `unzip -p '${zipFile}' '${xmlFile}'` +
           ` | uconv -f UTF-16LE -t UTF-8` +
