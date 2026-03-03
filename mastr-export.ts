@@ -234,7 +234,7 @@ async function extractAll(
         const script =
           `unzip -p '${zipFile}' '${xmlFile}'` +
           ` | uconv -f UTF-16LE -t UTF-8` +
-          ` | mastr-export --schema '${schema}' --output '${parquet}'`;
+          ` | mastr-extract --schema '${schema}' --output '${parquet}'`;
         running++;
         runner
           .shell(script)
