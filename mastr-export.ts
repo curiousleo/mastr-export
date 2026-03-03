@@ -263,8 +263,8 @@ async function clickhouseQuery(
   query: string,
   dryRun: boolean,
 ): Promise<void> {
+  console.log(`    ${query}`);
   if (dryRun) {
-    console.log(`[dry-run] clickhouse: ${query}`);
     return;
   }
   const resp = await fetch(url, {
@@ -315,7 +315,7 @@ async function initClickHouse(
 
   // Create each table from local files
   for (const table of tables) {
-    const filePattern = `${chPath}/${zipName}/${table}_*.parquet`;
+    const filePattern = `${chPath}/${zipName}/${table}*.parquet`;
     console.log(`  Creating ${staging}.${table}...`);
     await ch(
       `CREATE TABLE ${staging}.${table}` +
