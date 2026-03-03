@@ -6,31 +6,22 @@ After=network-online.target
 [Service]
 Type=oneshot
 
-# Adjust /opt/mastr-export to the actual install path.
-#
-# Configuration is read from an environment file. Create it with:
-#
-#   install -m 600 /dev/null /etc/mastr-export/environment
-#   # then populate it:
-#   cat > /etc/mastr-export/environment << EOF
-#   OUTPUT_DIR=/var/lib/mastr-export/parquet
-#   CLICKHOUSE_PATH=/data/mastr  # path as seen inside the ClickHouse container
-#   CLICKHOUSE_URL=http://clickhouse-host:8123
-#   CLICKHOUSE_DB=mastr
-#   CLICKHOUSE_USER=mastr_import
-#   CLICKHOUSE_PASSWORD=secret
-#   EOF
+Environment=OUTPUT_DIR=%h/data/clickhouse/user_files/mastr
+Environment=CLICKHOUSE_PATH=mastr
+Environment=CLICKHOUSE_URL=http://localhost:8123/
+Environment=CLICKHOUSE_DB=mastr
+Environment=CLICKHOUSE_USER=mastr_import
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin
+EnvironmentFile=%h/mastr-export.env
 
-EnvironmentFile="${CONFIGURATION_DIRECTORY}"/env
-
-ExecStart=deno run \
+ExecStart=%h/.local/bin/deno run \
     --allow-net \
-    --allow-read=/opt/mastr-export,"${STATE_DIRECTORY}","${CACHE_DIRECTORY}","${OUTPUT_DIR}" \
-    --allow-write="${STATE_DIRECTORY}","${CACHE_DIRECTORY}","${OUTPUT_DIR}" \
+    --allow-read="%S/mastr-export","%C/mastr-export","${OUTPUT_DIR}" \
+    --allow-write="%S/mastr-export","%C/mastr-export","${OUTPUT_DIR}" \
     --allow-run=axel,unzip,uconv,bash,mastr-export \
-    /opt/mastr-export/mastr-export.ts \
-    --state-dir="${STATE_DIRECTORY}" \
-    --scratch-dir="${CACHE_DIRECTORY}" \
+    %h/.local/bin/mastr-export \
+    --state-dir="%S/mastr-export" \
+    --scratch-dir="%C/mastr-export" \
     --output-dir="${OUTPUT_DIR}" \
     --clickhouse-path="${CLICKHOUSE_PATH}" \
     --clickhouse-url="${CLICKHOUSE_URL}" \
@@ -38,7 +29,6 @@ ExecStart=deno run \
     --clickhouse-user="${CLICKHOUSE_USER}" \
     --clickhouse-password="${CLICKHOUSE_PASSWORD}"
 
-ConfigurationDirectory=mastr-export
 StateDirectory=mastr-export
 CacheDirectory=mastr-export
 
