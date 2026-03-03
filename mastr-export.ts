@@ -72,6 +72,7 @@ const SCHEMA_DIR = join(import.meta.dirname!, "schema");
 
 interface ExecResult {
   stdout: string;
+  stderr: string;
   success: boolean;
 }
 
@@ -85,14 +86,14 @@ class Runner {
   ): Promise<ExecResult> {
     if (this.dryRun) {
       console.log(`[dry-run] ${cmd.join(" ")}`);
-      return { stdout: "", success: true };
+      return { stdout: "", stderr: "", success: true };
     }
     const p = new Deno.Command(cmd[0], {
       args: cmd.slice(1),
       cwd: opts?.cwd,
       stdin: opts?.stdin !== undefined ? "piped" : "null",
       stdout: "piped",
-      stderr: "inherit",
+      stderr: "piped",
     });
     const child = p.spawn();
     if (opts?.stdin !== undefined) {
@@ -103,6 +104,7 @@ class Runner {
     const out = await child.output();
     return {
       stdout: new TextDecoder().decode(out.stdout),
+      stderr: new TextDecoder().decode(out.stderr),
       success: out.success,
     };
   }
@@ -117,11 +119,12 @@ class Runner {
     const p = new Deno.Command(cmd[0], {
       args: cmd.slice(1),
       stdout: "piped",
-      stderr: "inherit",
+      stderr: "piped",
     });
     const out = await p.output();
     return {
       stdout: new TextDecoder().decode(out.stdout),
+      stderr: new TextDecoder().decode(out.stderr),
       success: out.success,
     };
   }
@@ -240,7 +243,8 @@ async function extractAll(
           .shell(script)
           .then((r) => {
             if (!r.success && !runner["dryRun"]) {
-              reject(new Error(`Failed to process ${xmlFile}`));
+              const detail = [r.stdout, r.stderr].filter(Boolean).join("\n");
+              reject(new Error(`Failed to process ${xmlFile}${detail ? `: ${detail}` : ""}`));
               return;
             }
             running--;
