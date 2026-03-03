@@ -13,8 +13,8 @@ Type=oneshot
 #   install -m 600 /dev/null /etc/mastr-export/environment
 #   # then populate it:
 #   cat > /etc/mastr-export/environment << EOF
-#   RCLONE_DEST=myremote:bucket/mastr
-#   S3_URL=https://s3.example.com/bucket/mastr
+#   OUTPUT_DIR=/var/lib/mastr-export/parquet
+#   CLICKHOUSE_PATH=/data/mastr  # path as seen inside the ClickHouse container
 #   CLICKHOUSE_URL=http://clickhouse-host:8123
 #   CLICKHOUSE_DB=mastr
 #   CLICKHOUSE_USER=mastr_import
@@ -25,14 +25,14 @@ EnvironmentFile="${CONFIGURATION_DIRECTORY}"/env
 
 ExecStart=deno run \
     --allow-net \
-    --allow-read=/opt/mastr-export,"${STATE_DIRECTORY}","${CACHE_DIRECTORY}" \
-    --allow-write="${STATE_DIRECTORY}","${CACHE_DIRECTORY}" \
-    --allow-run=axel,unzip,uconv,bash,rclone,mastr-export \
+    --allow-read=/opt/mastr-export,"${STATE_DIRECTORY}","${CACHE_DIRECTORY}","${OUTPUT_DIR}" \
+    --allow-write="${STATE_DIRECTORY}","${CACHE_DIRECTORY}","${OUTPUT_DIR}" \
+    --allow-run=axel,unzip,uconv,bash,mastr-export \
     /opt/mastr-export/mastr-export.ts \
     --state-dir="${STATE_DIRECTORY}" \
     --scratch-dir="${CACHE_DIRECTORY}" \
-    --rclone-dest="${RCLONE_DEST}" \
-    --s3-url="${S3_URL}" \
+    --output-dir="${OUTPUT_DIR}" \
+    --clickhouse-path="${CLICKHOUSE_PATH}" \
     --clickhouse-url="${CLICKHOUSE_URL}" \
     --clickhouse-db="${CLICKHOUSE_DB}" \
     --clickhouse-user="${CLICKHOUSE_USER}" \

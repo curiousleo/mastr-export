@@ -11,8 +11,8 @@ const args = parseArgs(Deno.args, {
   string: [
     "state-dir",
     "scratch-dir",
-    "rclone-dest",
-    "s3-url",
+    "output-dir",
+    "clickhouse-path",
     "clickhouse-url",
     "clickhouse-db",
     "clickhouse-user",
@@ -26,17 +26,16 @@ if (
   args.help ||
   !args["state-dir"] ||
   !args["scratch-dir"] ||
-  !args["rclone-dest"] ||
-  !args["s3-url"] ||
+  !args["output-dir"] ||
   !args["clickhouse-url"]
 ) {
   console.log(
     `Usage: mastr-export.ts
   --state-dir DIR             State directory for tracking processed exports
   --scratch-dir DIR           Temporary working directory
-  --rclone-dest DEST          rclone destination (e.g. myremote:bucket/mastr)
-  --s3-url URL                S3 URL prefix for ClickHouse (e.g. https://s3.example.com/bucket/mastr)
+  --output-dir DIR            Output directory for Parquet files (mounted into ClickHouse)
   --clickhouse-url URL        ClickHouse HTTP endpoint (e.g. http://localhost:8123)
+  [--clickhouse-path PATH]    Path to output-dir as seen by ClickHouse (default: output-dir)
   [--clickhouse-db NAME]      Database name (default: mastr)
   [--clickhouse-user USER]    ClickHouse username
   [--clickhouse-password PWD] ClickHouse password
@@ -47,9 +46,12 @@ if (
 
 const STATE_DIR = args["state-dir"];
 const SCRATCH_DIR = args["scratch-dir"];
-const RCLONE_DEST = args["rclone-dest"];
-const S3_URL = args["s3-url"].replace(/\/$/, "");
+const OUTPUT_DIR = args["output-dir"]!;
 const CLICKHOUSE_URL = args["clickhouse-url"];
+const CLICKHOUSE_PATH = (args["clickhouse-path"] ?? OUTPUT_DIR).replace(
+  /\/$/,
+  "",
+);
 const CLICKHOUSE_DB = args["clickhouse-db"]!;
 const CLICKHOUSE_USER = args["clickhouse-user"];
 const CLICKHOUSE_PASSWORD = args["clickhouse-password"];
@@ -253,24 +255,6 @@ async function extractAll(
 }
 
 // ---------------------------------------------------------------------------
-// Step 4: Upload to S3
-// ---------------------------------------------------------------------------
-
-async function uploadToS3(
-  runner: Runner,
-  parquetDir: string,
-  rcloneDest: string,
-  zipName: string,
-): Promise<void> {
-  const dest = `${rcloneDest}/${zipName}/`;
-  console.log(`Uploading parquet files to ${dest}...`);
-  const result = await runner.exec(["rclone", "copy", parquetDir, dest]);
-  if (!result.success) {
-    throw new Error("rclone upload failed");
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Step 5: ClickHouse
 // ---------------------------------------------------------------------------
 
@@ -311,14 +295,13 @@ async function listParquetFiles(parquetDir: string): Promise<string[]> {
 
 async function initClickHouse(
   parquetDir: string,
-  s3Url: string,
+  chPath: string,
   zipName: string,
   chUrl: string,
   db: string,
 ): Promise<void> {
   const staging = `${db}_staging`;
   const old = `${db}_old`;
-  const s3Base = `${s3Url}/${zipName}`;
 
   const ch = (query: string) => clickhouseQuery(chUrl, query, DRY_RUN);
 
@@ -330,14 +313,14 @@ async function initClickHouse(
   const allFiles = await listParquetFiles(parquetDir);
   const tables = [...new Set(allFiles.map((f) => tableNameOf(f)))].sort();
 
-  // Create each table from S3 wildcard
+  // Create each table from local files
   for (const table of tables) {
-    const s3Pattern = `${s3Base}/${table}_*.parquet`;
+    const filePattern = `${chPath}/${zipName}/${table}_*.parquet`;
     console.log(`  Creating ${staging}.${table}...`);
     await ch(
       `CREATE TABLE ${staging}.${table}` +
         ` ENGINE = MergeTree ORDER BY tuple()` +
-        ` AS SELECT * FROM s3('${s3Pattern}')` +
+        ` AS SELECT * FROM file('${filePattern}', Parquet)` +
         ` SETTINGS date_time_overflow_behavior = 'saturate'`,
     );
   }
@@ -393,20 +376,16 @@ async function main() {
   console.log(`Downloaded ${zipName}`);
 
   // 4. Extract XML → Parquet
-  const parquetDir = join(SCRATCH_DIR, "parquet");
-  console.log("Extracting XML files to Parquet...");
+  const parquetDir = join(OUTPUT_DIR, zipName);
+  console.log(`Extracting XML files to Parquet in ${parquetDir}...`);
   await extractAll(runner, zipFile, parquetDir);
   console.log("Extraction complete.");
 
-  // 5. Upload to S3
-  await uploadToS3(runner, parquetDir, RCLONE_DEST, zipName);
-  console.log("S3 upload complete.");
-
-  // 6. Create ClickHouse tables + atomic swap
+  // 5. Create ClickHouse tables + atomic swap
   console.log("Creating ClickHouse tables...");
   await initClickHouse(
     parquetDir,
-    S3_URL,
+    CLICKHOUSE_PATH,
     zipName,
     CLICKHOUSE_URL,
     CLICKHOUSE_DB,
