@@ -54,7 +54,8 @@ const CLICKHOUSE_PATH = (args["clickhouse-path"] ?? OUTPUT_DIR).replace(
 );
 const CLICKHOUSE_DB = args["clickhouse-db"]!;
 const CLICKHOUSE_USER = args["clickhouse-user"];
-const CLICKHOUSE_PASSWORD = args["clickhouse-password"];
+const CLICKHOUSE_PASSWORD =
+  args["clickhouse-password"] ?? Deno.env.get("CLICKHOUSE_PASSWORD");
 const DRY_RUN = args["dry-run"];
 
 function clickhouseHeaders(): Record<string, string> {
@@ -244,7 +245,11 @@ async function extractAll(
           .then((r) => {
             if (!r.success && !runner["dryRun"]) {
               const detail = [r.stdout, r.stderr].filter(Boolean).join("\n");
-              reject(new Error(`Failed to process ${xmlFile}${detail ? `: ${detail}` : ""}`));
+              reject(
+                new Error(
+                  `Failed to process ${xmlFile}${detail ? `: ${detail}` : ""}`,
+                ),
+              );
               return;
             }
             running--;
