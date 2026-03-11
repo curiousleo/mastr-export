@@ -10,22 +10,34 @@ Daten aus dem Marktstammdatenregister (MaStR) der Bundesnetzagentur.
 <!-- HERO KPIs                                                     -->
 <!-- ============================================================ -->
 
-```sql renewable_total
-SELECT round(sum(Kapazitaet_GW), 1) AS GW
-FROM mastr.einheiten_operating
+```sql renewable_spark
+SELECT
+    epoch_ms(CAST(Monat_ts AS BIGINT) * 1000) AS Monat,
+    round(sum(Brutto_MW) / 1000, 2) AS GW
+FROM mastr.monthly_cumulative
 WHERE Quelle IN ('Solar', 'Wind', 'Biomasse', 'Wasser', 'GeothermieGrubengasDruckentspannung')
+GROUP BY Monat_ts
+ORDER BY Monat_ts
 ```
 
-```sql solar_total
-SELECT Kapazitaet_GW AS GW FROM mastr.einheiten_operating WHERE Quelle = 'Solar'
+```sql solar_spark
+SELECT epoch_ms(CAST(Monat_ts AS BIGINT) * 1000) AS Monat, round(Brutto_MW / 1000, 3) AS GW
+FROM mastr.monthly_cumulative
+WHERE Quelle = 'Solar'
+ORDER BY Monat_ts
 ```
 
-```sql wind_total
-SELECT Kapazitaet_GW AS GW FROM mastr.einheiten_operating WHERE Quelle = 'Wind'
+```sql wind_spark
+SELECT epoch_ms(CAST(Monat_ts AS BIGINT) * 1000) AS Monat, round(Brutto_MW / 1000, 3) AS GW
+FROM mastr.monthly_cumulative
+WHERE Quelle = 'Wind'
+ORDER BY Monat_ts
 ```
 
-```sql storage_total
-SELECT Kapazitaet_GW AS GW, Anzahl FROM mastr.speicher_operating
+```sql storage_spark
+SELECT epoch_ms(CAST(Monat_ts AS BIGINT) * 1000) AS Monat, round(Brutto_MW / 1000, 3) AS GW
+FROM mastr.speicher_monthly
+ORDER BY Monat_ts
 ```
 
 ```sql additions_total
@@ -35,27 +47,35 @@ WHERE Quelle IN ('Solar', 'Wind', 'Biomasse', 'Wasser', 'GeothermieGrubengasDruc
 ```
 
 <BigValue
-  data={renewable_total}
+  data={renewable_spark}
   value=GW
-  title="Erneuerbare Kapazität (GW)"
+  title="Erneuerbare Zubau/Monat (GW)"
+  sparkline=Monat
+  sparklineType=area
 />
 
 <BigValue
-  data={solar_total}
+  data={solar_spark}
   value=GW
-  title="Solar (GW)"
+  title="Solar Zubau/Monat (GW)"
+  sparkline=Monat
+  sparklineType=area
 />
 
 <BigValue
-  data={wind_total}
+  data={wind_spark}
   value=GW
-  title="Wind (GW)"
+  title="Wind Zubau/Monat (GW)"
+  sparkline=Monat
+  sparklineType=area
 />
 
 <BigValue
-  data={storage_total}
+  data={storage_spark}
   value=GW
-  title="Batteriespeicher (GW)"
+  title="Speicher Zubau/Monat (GW)"
+  sparkline=Monat
+  sparklineType=area
 />
 
 <BigValue
