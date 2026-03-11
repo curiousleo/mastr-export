@@ -221,6 +221,9 @@ async function extractAll(
 ): Promise<void> {
   await runner.mkdir(parquetDir);
   const xmlFiles = await listXmlFiles(runner, zipFile);
+  if (xmlFiles.length === 0) {
+    throw new Error(`No XML files found in ${zipFile}`);
+  }
   const concurrency = Math.max(
     1,
     Math.floor(navigator.hardwareConcurrency / 2),
