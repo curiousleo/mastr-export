@@ -85,8 +85,8 @@ class Runner {
     cmd: string[],
     opts?: { stdin?: string; cwd?: string },
   ): Promise<ExecResult> {
+    console.log(`$ ${cmd.join(" ")}`);
     if (this.dryRun) {
-      console.log(`[dry-run] ${cmd.join(" ")}`);
       return { stdout: "", stderr: "", success: true };
     }
     const p = new Deno.Command(cmd[0], {
@@ -103,11 +103,15 @@ class Runner {
       await w.close();
     }
     const out = await child.output();
-    return {
-      stdout: new TextDecoder().decode(out.stdout),
-      stderr: new TextDecoder().decode(out.stderr),
-      success: out.success,
-    };
+    const stdout = new TextDecoder().decode(out.stdout);
+    const stderr = new TextDecoder().decode(out.stderr);
+    if (!out.success) {
+      const detail = [stdout, stderr].filter(Boolean).join("\n");
+      throw new Error(
+        `Command failed: ${cmd.join(" ")}${detail ? `\n${detail}` : ""}`,
+      );
+    }
+    return { stdout, stderr, success: true };
   }
 
   /** Run a shell pipeline via bash -c. */
