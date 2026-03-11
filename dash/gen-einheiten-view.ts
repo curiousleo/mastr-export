@@ -27,10 +27,12 @@ const SCHEMA_DIR = join(SCRIPT_DIR, "..", "schema");
 // Quelle label -> table name (schema file is schema/${table}.json)
 const tables: [string, string][] = [
   ["Biomasse", "EinheitenBiomasse"],
-  ["GeothermieGrubengasDruckentspannung", "EinheitenGeothermieGrubengasDruckentspannung"],
+  [
+    "GeothermieGrubengasDruckentspannung",
+    "EinheitenGeothermieGrubengasDruckentspannung",
+  ],
   ["Kernkraft", "EinheitenKernkraft"],
   ["Solar", "EinheitenSolar"],
-  ["StromSpeicher", "EinheitenStromSpeicher"],
   ["Verbrennung", "EinheitenVerbrennung"],
   ["Wasser", "EinheitenWasser"],
   ["Wind", "EinheitenWind"],
@@ -62,7 +64,10 @@ const columns = [...fieldCounts.entries()]
 const catalogColumns = new Set<string>();
 const firstSchema = schemas[0];
 for (const field of firstSchema.fields) {
-  if (columns.includes(field.name) && (field.xsd === "short" || field.xsd === "byte")) {
+  if (
+    columns.includes(field.name) &&
+    (field.xsd === "short" || field.xsd === "byte")
+  ) {
     catalogColumns.add(field.name);
   }
 }
@@ -77,7 +82,7 @@ function buildColList(): string {
     .map((col, i) => {
       const comma = i < columns.length - 1 ? "," : "";
       if (catalogColumns.has(col)) {
-        return `    dictGet('KatalogwerteDict', 'Wert', toUInt64(${col})) AS ${col}${comma}`;
+        return `    IF(${col} IS NULL, NULL, dictGet('KatalogwerteDict', 'Wert', toUInt64(${col}))) AS ${col}${comma}`;
       }
       return `    ${col}${comma}`;
     })
@@ -89,14 +94,15 @@ const colList = buildColList();
 // Emit SQL.
 const lines: string[] = [];
 
+// TODO(leo): Use LAYOUT(FLAT()), this requires importing Katalogwerte with non-nullable Id.
 lines.push(`CREATE OR REPLACE DICTIONARY KatalogwerteDict
 (
-    Id UInt64,
-    Wert String
+    Id Nullable(UInt64),
+    Wert Nullable(String)
 )
 PRIMARY KEY Id
-SOURCE(CLICKHOUSE(TABLE 'Katalogwerte'))
-LAYOUT(FLAT())
+SOURCE(CLICKHOUSE(TABLE 'Katalogwerte' USER 'mastr' PASSWORD 'mastr'))
+LAYOUT(HASHED())
 LIFETIME(0);
 `);
 
