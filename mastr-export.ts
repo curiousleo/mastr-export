@@ -85,8 +85,8 @@ class Runner {
     cmd: string[],
     opts?: { stdin?: string; cwd?: string },
   ): Promise<ExecResult> {
-    console.log(`$ ${cmd.join(" ")}`);
     if (this.dryRun) {
+      console.log(`[dry-run] ${cmd.join(" ")}`);
       return { stdout: "", stderr: "", success: true };
     }
     const p = new Deno.Command(cmd[0], {
