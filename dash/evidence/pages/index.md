@@ -113,6 +113,8 @@ ORDER BY e.Jahr, e.Quelle_Label
     title="Kumulierte erneuerbare Kapazität (GW)"
     xAxisTitle="Jahr"
     yAxisTitle="GW"
+    xFmt=#
+    yFmt=num0
 />
 
 _Summe aller jemals in Betrieb genommenen Anlagen nach Inbetriebnahmedatum. Stilllegungen und Rückbauten sind nicht abgezogen — die tatsächlich aktive Kapazität ist niedriger._
@@ -144,6 +146,8 @@ ORDER BY Jahr, Quelle_Label
     title="Jährlicher Zubau erneuerbare Energien (GW)"
     xAxisTitle="Jahr"
     yAxisTitle="GW"
+    xFmt=#
+    yFmt=num0
     type=grouped
 />
 
@@ -205,6 +209,7 @@ ORDER BY Bundesland, Quelle_Label
     series=Quelle_Label
     title="Erneuerbare Kapazität nach Bundesland (GW)"
     yAxisTitle="GW"
+    yFmt=num0
     type=stacked
     swapXY=true
 />
