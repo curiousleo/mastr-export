@@ -1,0 +1,8 @@
+name: mastr
+type: clickhouse
+options:
+  #url: http://localhost:8123
+  url: https://clickhouse.p01d.net
+  database: mastr
+  username: mastr
+  password: mastr
