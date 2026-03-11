@@ -1,5 +1,5 @@
 [package]
-name = "mastr-export"
+name = "mastr-extract"
 version = "0.1.0"
 edition = "2024"
 
