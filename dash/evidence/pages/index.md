@@ -93,7 +93,6 @@ ORDER BY e.Jahr, e.Quelle_Label
     title="Kumulierte erneuerbare Kapazität (GW)"
     xAxisTitle="Jahr"
     yAxisTitle="GW"
-    colorPalette={['#FFB800', '#2563EB', '#16A34A', '#06B6D4', '#D97706']}
 />
 
 _Basierend auf Inbetriebnahmedatum. Stilllegungen sind noch nicht berücksichtigt._
@@ -126,7 +125,6 @@ ORDER BY Jahr, Quelle_Label
     xAxisTitle="Jahr"
     yAxisTitle="GW"
     type=grouped
-    colorPalette={['#FFB800', '#2563EB', '#16A34A', '#06B6D4', '#D97706']}
 />
 
 ---
@@ -185,7 +183,6 @@ ORDER BY Bundesland, Quelle_Label
     yAxisTitle="GW"
     type=stacked
     swapXY=true
-    colorPalette={['#FFB800', '#2563EB', '#16A34A', '#06B6D4', '#D97706']}
 />
 
 ---
