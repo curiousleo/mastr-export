@@ -2,9 +2,7 @@
 title: Deutschland Übersicht
 ---
 
-# Energiewende Dashboard
-
-Daten aus dem Marktstammdatenregister (MaStR) der Bundesnetzagentur.
+Daten aus dem [Marktstammdatenregister (MaStR)](https://www.marktstammdatenregister.de/) der Bundesnetzagentur. Alle Angaben beziehen sich auf die installierte Bruttoleistung (Nennleistung) laut Registermeldung — nicht auf die tatsächliche Einspeisung oder den aktuellen Betriebszustand.
 
 <!-- ============================================================ -->
 <!-- HERO KPIs                                                     -->
@@ -84,6 +82,8 @@ WHERE Quelle IN ('Solar', 'Wind', 'Biomasse', 'Wasser', 'GeothermieGrubengasDruc
   title="Zubau letzte 12 Monate (GW)"
 />
 
+_Neu in Betrieb genommene Leistung pro Monat (Bruttoleistung). Zeigt das Tempo des Ausbaus, nicht den Gesamtbestand._
+
 ---
 
 <!-- ============================================================ -->
@@ -115,7 +115,7 @@ ORDER BY e.Jahr, e.Quelle_Label
     yAxisTitle="GW"
 />
 
-_Basierend auf Inbetriebnahmedatum. Stilllegungen sind noch nicht berücksichtigt._
+_Summe aller jemals in Betrieb genommenen Anlagen nach Inbetriebnahmedatum. Stilllegungen und Rückbauten sind nicht abgezogen — die tatsächlich aktive Kapazität ist niedriger._
 
 ---
 
@@ -147,13 +147,15 @@ ORDER BY Jahr, Quelle_Label
     type=grouped
 />
 
+_Neu installierte Bruttoleistung pro Jahr nach Energieträger. Dies ist der jährliche Zubau, nicht der Gesamtbestand oder die tatsächliche Stromerzeugung._
+
 ---
 
 <!-- ============================================================ -->
 <!-- CHART 3: Current Energy Mix (Donut)                           -->
 <!-- ============================================================ -->
 
-## Aktueller Erzeugungsmix
+## Installierte Leistung nach Energieträger
 
 ```sql energy_mix
 SELECT
@@ -175,6 +177,8 @@ ORDER BY Kapazitaet_GW DESC
         }]
     }
 } />
+
+_Anteil der aktuell als „In Betrieb" gemeldeten Bruttoleistung je Energieträger. Die installierte Leistung sagt nichts über die tatsächlich erzeugte Strommenge aus — z.B. liefert Solar nur bei Sonnenschein._
 
 ---
 
@@ -205,6 +209,8 @@ ORDER BY Bundesland, Quelle_Label
     swapXY=true
 />
 
+_Aktuell als „In Betrieb" gemeldete Bruttoleistung je Bundesland und Energieträger._
+
 ---
 
 <!-- ============================================================ -->
@@ -228,4 +234,4 @@ ORDER BY Kapazitaet_GW DESC
     <Column id=Anzahl title="Anzahl Einheiten" fmt=num0 />
 </DataTable>
 
-_Einheiten mit Inbetriebnahmedatum in den letzten 12 Monaten und Status „In Betrieb"._
+_Anlagen mit Inbetriebnahmedatum in den letzten 12 Monaten und Status „In Betrieb". Bruttoleistung (Nennleistung), nicht tatsächliche Einspeisung._
