@@ -225,7 +225,7 @@ async function extractAll(
 ): Promise<void> {
   await runner.mkdir(parquetDir);
   const xmlFiles = await listXmlFiles(runner, zipFile);
-  if (xmlFiles.length === 0) {
+  if (xmlFiles.length === 0 && !DRY_RUN) {
     throw new Error(`No XML files found in ${zipFile}`);
   }
   const concurrency = Math.max(
@@ -309,6 +309,112 @@ async function listParquetFiles(parquetDir: string): Promise<string[]> {
   return files.sort();
 }
 
+async function initDictsAndViewsSql(schema_dir: string): Promise<string> {
+  interface Field {
+    name: string;
+    xsd?: string;
+  }
+
+  interface Schema {
+    root: string;
+    element: string;
+    fields: Field[];
+  }
+
+  // Quelle label -> table name (schema file is schema/${table}.json)
+  const tables: [string, string][] = [
+    ["Biomasse", "EinheitenBiomasse"],
+    [
+      "GeothermieGrubengasDruckentspannung",
+      "EinheitenGeothermieGrubengasDruckentspannung",
+    ],
+    ["Kernkraft", "EinheitenKernkraft"],
+    ["Solar", "EinheitenSolar"],
+    ["Verbrennung", "EinheitenVerbrennung"],
+    ["Wasser", "EinheitenWasser"],
+    ["Wind", "EinheitenWind"],
+  ];
+
+  // Load all schemas.
+  const schemas: Schema[] = await Promise.all(
+    tables.map(async ([, table]) => {
+      const text = await Deno.readTextFile(join(schema_dir, `${table}.json`));
+      return JSON.parse(text) as Schema;
+    }),
+  );
+
+  // Find columns common to all schemas (name appears in every file).
+  const fieldCounts = new Map<string, number>();
+  for (const schema of schemas) {
+    for (const field of schema.fields) {
+      fieldCounts.set(field.name, (fieldCounts.get(field.name) ?? 0) + 1);
+    }
+  }
+
+  const n = schemas.length;
+  const columns = [...fieldCounts.entries()]
+    .filter(([, count]) => count === n)
+    .map(([name]) => name)
+    .sort();
+
+  // Identify catalog-valued columns (xsd: short or byte) from the first schema.
+  const catalogColumns = new Set<string>();
+  const firstSchema = schemas[0];
+  for (const field of firstSchema.fields) {
+    if (
+      columns.includes(field.name) &&
+      (field.xsd === "short" || field.xsd === "byte")
+    ) {
+      catalogColumns.add(field.name);
+    }
+  }
+
+  // Emit SQL.
+  const lines: string[] = [];
+
+  lines.push(
+    `-- Common columns (${columns.length}) across ${n} tables, ${catalogColumns.size} catalog-resolved`,
+  );
+
+  // Build the column list for a SELECT.
+  function buildColList(): string {
+    return columns
+      .map((col, i) => {
+        const comma = i < columns.length - 1 ? "," : "";
+        if (catalogColumns.has(col)) {
+          return `    IF(${col} IS NULL, NULL, dictGet('KatalogwerteDict', 'Wert', toUInt64(${col}))) AS ${col}${comma}`;
+        }
+        return `    ${col}${comma}`;
+      })
+      .join("\n");
+  }
+
+  const colList = buildColList();
+
+  // TODO(leo): Use LAYOUT(FLAT()), this requires importing Katalogwerte with non-nullable Id.
+  lines.push(`CREATE OR REPLACE DICTIONARY KatalogwerteDict
+  (
+      Id Nullable(UInt64),
+      Wert Nullable(String)
+  )
+  PRIMARY KEY Id
+  SOURCE(CLICKHOUSE(TABLE 'Katalogwerte' USER 'mastr' PASSWORD 'mastr'))
+  LAYOUT(HASHED())
+  LIFETIME(0);
+  `);
+
+  lines.push("CREATE OR REPLACE VIEW Einheiten AS");
+
+  for (let i = 0; i < tables.length; i++) {
+    const [quelle, table] = tables[i];
+    if (i > 0) lines.push("UNION ALL");
+    lines.push(`SELECT '${quelle}' AS Quelle,\n${colList}\nFROM ${table}`);
+  }
+
+  lines.push(";");
+  return lines.join("\n");
+}
+
 async function initClickHouse(
   parquetDir: string,
   chPath: string,
@@ -353,6 +459,8 @@ async function initClickHouse(
         headers: clickhouseHeaders(),
       }).then((r) => r.text()));
 
+  const initDictsAndViews = await initDictsAndViewsSql(SCHEMA_DIR);
+
   if (checkResp.trim() === "1") {
     // ClickHouse doesn't seem to support renaming databases atomically, so we
     // drop all dictionaries and views before renaming.
@@ -361,6 +469,7 @@ async function initClickHouse(
     await ch(`RENAME DATABASE ${db} TO ${old}`);
   }
   await ch(`RENAME DATABASE ${staging} TO ${db}`);
+  await ch(initDictsAndViews);
   await ch(`DROP DATABASE IF EXISTS ${old}`);
 }
 
