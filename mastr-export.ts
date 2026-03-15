@@ -464,8 +464,8 @@ async function initClickHouse(
   if (checkResp.trim() === "1") {
     // ClickHouse doesn't seem to support renaming databases atomically, so we
     // drop all dictionaries and views before renaming.
-    await ch(`DROP VIEW ${db}.Einheiten`);
-    await ch(`DROP DICTIONARY ${db}.KatalogwerteDict`);
+    await ch(`DROP VIEW IF EXISTS ${db}.Einheiten`);
+    await ch(`DROP DICTIONARY IF EXISTS ${db}.KatalogwerteDict`);
     await ch(`RENAME DATABASE ${db} TO ${old}`);
   }
   await ch(`RENAME DATABASE ${staging} TO ${db}`);
