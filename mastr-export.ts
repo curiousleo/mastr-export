@@ -309,7 +309,7 @@ async function listParquetFiles(parquetDir: string): Promise<string[]> {
   return files.sort();
 }
 
-async function initDictsAndViewsSql(schema_dir: string): Promise<string> {
+async function initDictsAndViewsSql(schema_dir: string): Promise<string[]> {
   interface Field {
     name: string;
     xsd?: string;
@@ -370,11 +370,18 @@ async function initDictsAndViewsSql(schema_dir: string): Promise<string> {
   }
 
   // Emit SQL.
-  const lines: string[] = [];
+  const statements: string[] = [];
 
-  lines.push(
-    `-- Common columns (${columns.length}) across ${n} tables, ${catalogColumns.size} catalog-resolved`,
-  );
+  // TODO(leo): Use LAYOUT(FLAT()), this requires importing Katalogwerte with non-nullable Id.
+  statements.push(`CREATE OR REPLACE DICTIONARY KatalogwerteDict
+  (
+      Id Nullable(UInt64),
+      Wert Nullable(String)
+  )
+  PRIMARY KEY Id
+  SOURCE(CLICKHOUSE(TABLE 'Katalogwerte' USER 'mastr' PASSWORD 'mastr'))
+  LAYOUT(HASHED())
+  LIFETIME(0)`);
 
   // Build the column list for a SELECT.
   function buildColList(): string {
@@ -391,28 +398,17 @@ async function initDictsAndViewsSql(schema_dir: string): Promise<string> {
 
   const colList = buildColList();
 
-  // TODO(leo): Use LAYOUT(FLAT()), this requires importing Katalogwerte with non-nullable Id.
-  lines.push(`CREATE OR REPLACE DICTIONARY KatalogwerteDict
-  (
-      Id Nullable(UInt64),
-      Wert Nullable(String)
-  )
-  PRIMARY KEY Id
-  SOURCE(CLICKHOUSE(TABLE 'Katalogwerte' USER 'mastr' PASSWORD 'mastr'))
-  LAYOUT(HASHED())
-  LIFETIME(0);
-  `);
-
-  lines.push("CREATE OR REPLACE VIEW Einheiten AS");
+  const createView: string[] = [];
+  createView.push("CREATE OR REPLACE VIEW Einheiten AS");
 
   for (let i = 0; i < tables.length; i++) {
     const [quelle, table] = tables[i];
-    if (i > 0) lines.push("UNION ALL");
-    lines.push(`SELECT '${quelle}' AS Quelle,\n${colList}\nFROM ${table}`);
+    if (i > 0) createView.push("UNION ALL");
+    createView.push(`SELECT '${quelle}' AS Quelle,\n${colList}\nFROM ${table}`);
   }
 
-  lines.push(";");
-  return lines.join("\n");
+  statements.push(createView.join("\n"));
+  return statements;
 }
 
 async function initClickHouse(
@@ -469,7 +465,9 @@ async function initClickHouse(
     await ch(`RENAME DATABASE ${db} TO ${old}`);
   }
   await ch(`RENAME DATABASE ${staging} TO ${db}`);
-  await ch(initDictsAndViews);
+  for (const statement of initDictsAndViews) {
+    await ch(statement);
+  }
   await ch(`DROP DATABASE IF EXISTS ${old}`);
 }
 
