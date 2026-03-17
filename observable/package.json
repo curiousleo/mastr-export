@@ -1,0 +1,15 @@
+{
+  "name": "mastr-dashboard",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "observable preview",
+    "build": "observable build",
+    "clean": "observable clean"
+  },
+  "dependencies": {
+    "@observablehq/framework": "^1.13",
+    "@observablehq/plot": "^0.6",
+    "@clickhouse/client-web": "^1.18"
+  }
+}
