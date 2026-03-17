@@ -241,12 +241,12 @@ _Aktuell als „In Betrieb" gemeldete Bruttoleistung je Bundesland und Energietr
 const recentData = additions12m.filter(d => renewableQuellen.includes(d.Quelle));
 ```
 
-<div class="card" style="padding: 0;">
-
-| Quelle | Kapazität (MW) | Anzahl Einheiten |
-|--------|---------------:|-----------------:|
-${recentData.map(d => `| ${d.Quelle_Label} | ${de.format(d.Kapazitaet_MW)} | ${de.format(d.Anzahl)} |`).join("\n")}
-
-</div>
+```js
+Inputs.table(recentData.map(d => ({
+  Quelle: d.Quelle_Label,
+  "Kapazität (MW)": de.format(d.Kapazitaet_MW),
+  "Anzahl Einheiten": de.format(d.Anzahl)
+})))
+```
 
 _Anlagen mit Inbetriebnahmedatum in den letzten 12 Monaten und Status „In Betrieb". Bruttoleistung (Nennleistung), nicht tatsächliche Einspeisung._
