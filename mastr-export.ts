@@ -309,7 +309,10 @@ async function listParquetFiles(parquetDir: string): Promise<string[]> {
   return files.sort();
 }
 
-async function initDictsAndViewsSql(schema_dir: string): Promise<string[]> {
+async function initDictsAndViewsSql(
+  schema_dir: string,
+  db: string,
+): Promise<string[]> {
   interface Field {
     name: string;
     xsd?: string;
@@ -373,7 +376,7 @@ async function initDictsAndViewsSql(schema_dir: string): Promise<string[]> {
   const statements: string[] = [];
 
   // TODO(leo): Use LAYOUT(FLAT()), this requires importing Katalogwerte with non-nullable Id.
-  statements.push(`CREATE OR REPLACE DICTIONARY KatalogwerteDict
+  statements.push(`CREATE OR REPLACE DICTIONARY ${db}.KatalogwerteDict
   (
       Id Nullable(UInt64),
       Wert Nullable(String)
@@ -389,7 +392,7 @@ async function initDictsAndViewsSql(schema_dir: string): Promise<string[]> {
       .map((col, i) => {
         const comma = i < columns.length - 1 ? "," : "";
         if (catalogColumns.has(col)) {
-          return `    IF(${col} IS NULL, NULL, dictGet('KatalogwerteDict', 'Wert', toUInt64(${col}))) AS ${col}${comma}`;
+          return `    IF(${col} IS NULL, NULL, dictGet('${db}.KatalogwerteDict', 'Wert', toUInt64(${col}))) AS ${col}${comma}`;
         }
         return `    ${col}${comma}`;
       })
@@ -399,7 +402,7 @@ async function initDictsAndViewsSql(schema_dir: string): Promise<string[]> {
   const colList = buildColList();
 
   const createView: string[] = [];
-  createView.push("CREATE OR REPLACE VIEW Einheiten AS");
+  createView.push(`CREATE OR REPLACE VIEW ${db}.Einheiten AS`);
 
   for (let i = 0; i < tables.length; i++) {
     const [quelle, table] = tables[i];
@@ -455,7 +458,7 @@ async function initClickHouse(
         headers: clickhouseHeaders(),
       }).then((r) => r.text()));
 
-  const initDictsAndViews = await initDictsAndViewsSql(SCHEMA_DIR);
+  const initDictsAndViews = await initDictsAndViewsSql(SCHEMA_DIR, db);
 
   if (checkResp.trim() === "1") {
     // ClickHouse doesn't seem to support renaming databases atomically, so we
