@@ -1,5 +1,5 @@
 -- Common columns (39) across 7 tables, 7 catalog-resolved
-CREATE OR REPLACE DICTIONARY KatalogwerteDict
+CREATE OR REPLACE DICTIONARY mastr.KatalogwerteDict
 (
     Id Nullable(UInt64),
     Wert Nullable(String)
@@ -9,7 +9,7 @@ SOURCE(CLICKHOUSE(TABLE 'Katalogwerte' USER 'mastr' PASSWORD 'mastr'))
 LAYOUT(HASHED())
 LIFETIME(0);
 
-CREATE OR REPLACE VIEW Einheiten AS
+CREATE OR REPLACE VIEW mastr.Einheiten AS
 SELECT 'Biomasse' AS Quelle,
     AltAnlagenbetreiberMastrNummer,
     AnlagenbetreiberMastrNummer,
