@@ -50,7 +50,7 @@ const additionsTotal = additions12m
 
 ## Zubau der letzten 24 Monate
 
-<div class="grid grid-cols-5">
+<div class="grid grid-cols-4">
   <div class="card">
     <h2>Erneuerbare / Monat</h2>
     <span class="big">${de.format(renewableSpark.at(-1)?.MW ?? 0)} MW</span>
@@ -136,6 +136,11 @@ Plot.plot({
       x: "Jahr", y: "Kumulativ_MW", fill: "Quelle_Label",
       curve: "basis", order: "sum"
     }),
+    Plot.tip(cumulativeData, Plot.pointerX(Plot.stackY({
+      x: "Jahr", y: "Kumulativ_MW", fill: "Quelle_Label",
+      order: "sum",
+      title: d => `${d.Quelle_Label}\n${de.format(d.Kumulativ_MW)} MW`
+    }))),
     Plot.ruleY([0])
   ]
 })
@@ -164,6 +169,10 @@ Plot.plot({
       x: "Jahr", y: "Brutto_MW", fill: "Quelle_Label",
       offset: null
     }),
+    Plot.tip(annualData, Plot.pointerX(Plot.stackY({
+      x: "Jahr", y: "Brutto_MW", fill: "Quelle_Label",
+      title: d => `${d.Quelle_Label}\n${de.format(d.Brutto_MW)} MW`
+    }))),
     Plot.ruleY([0])
   ]
 })
@@ -181,13 +190,18 @@ const mixData = operating.map(d => ({ name: d.Quelle_Label, value: +d.Kapazitaet
 
 ```js
 Plot.plot({
-  width: 500,
-  height: 500,
+  width: 928,
+  marginLeft: 100,
+  marginRight: 80,
   marks: [
     Plot.barX(mixData, {
       x: "value", y: "name", fill: "name",
       sort: { y: "-x" }
     }),
+    Plot.tip(mixData, Plot.pointer({
+      x: "value", y: "name",
+      title: d => `${d.name}\n${de.format(d.value)} MW`
+    })),
     Plot.text(mixData, {
       x: "value", y: "name",
       text: d => `${de.format(d.value)} MW`,
@@ -216,7 +230,6 @@ const bundeslandData = byBundesland
 ```js
 Plot.plot({
   width: 928,
-  height: 600,
   marginLeft: 160,
   x: { label: "MW", tickFormat: (d) => de.format(d) },
   y: { label: null },
@@ -224,8 +237,15 @@ Plot.plot({
   marks: [
     Plot.barX(bundeslandData, Plot.stackX({
       x: "Kapazitaet_MW", y: "Bundesland", fill: "Quelle_Label",
-      sort: { y: "-x", reduce: "sum" }
+      sort: { y: "-x", reduce: "sum" },
+      order: "-sum"
     })),
+    Plot.tip(bundeslandData, Plot.pointer(Plot.stackX({
+      x: "Kapazitaet_MW", y: "Bundesland", fill: "Quelle_Label",
+      sort: { y: "-x", reduce: "sum" },
+      order: "-sum",
+      title: d => `${d.Quelle_Label}\n${de.format(d.Kapazitaet_MW)} MW`
+    }))),
     Plot.ruleX([0])
   ]
 })
@@ -246,7 +266,7 @@ Inputs.table(recentData.map(d => ({
   Quelle: d.Quelle_Label,
   "Kapazität (MW)": de.format(d.Kapazitaet_MW),
   "Anzahl Einheiten": de.format(d.Anzahl)
-})))
+})), { select: false })
 ```
 
 _Anlagen mit Inbetriebnahmedatum in den letzten 12 Monaten und Status „In Betrieb". Bruttoleistung (Nennleistung), nicht tatsächliche Einspeisung._
