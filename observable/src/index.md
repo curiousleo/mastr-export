@@ -10,7 +10,6 @@ Daten aus dem [Marktstammdatenregister (MaStR)](https://www.marktstammdatenregis
 ```js
 const fmtMW = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
 const renewableQuellen = new Set(["Solar", "Wind", "Biomasse", "Wasser", "GeothermieGrubengasDruckentspannung"]);
-const excludeQuellen = new Set(["Verbrennung", "Kernkraft"]);
 
 const monthly = FileAttachment("data/monthly_cumulative.json").json();
 const speicherMonthly = FileAttachment("data/speicher_monthly.json").json();
@@ -18,6 +17,7 @@ const additions12m = FileAttachment("data/additions_12m.json").json();
 const byYear = FileAttachment("data/einheiten_by_year.json").json();
 const operating = FileAttachment("data/einheiten_operating.json").json();
 const byBundesland = FileAttachment("data/einheiten_by_bundesland.json").json();
+const rolling12m = FileAttachment("data/rolling_12m.json").json();
 const stilllegungen = FileAttachment("data/stilllegungen_by_year.json").json();
 ```
 
@@ -44,7 +44,18 @@ function toMonthly(rows) {
   return rows.map(d => ({ Monat: new Date(d.Monat), MW: d.Brutto_MW }));
 }
 
-const plotDefaults = { width: 928, height: 500, marginLeft: 60 };
+const quelleColor = new Map([
+  ["Solar", "#FFB800"],
+  ["Wind", "#2563EB"],
+  ["Biomasse", "#16a34a"],
+  ["Wasser", "#06b6d4"],
+  ["Geothermie u.a.", "#8b5cf6"],
+  ["Verbrennung", "#ef4444"],
+  ["Kernkraft", "#f97316"]
+]);
+const colorScale = { domain: [...quelleColor.keys()], range: [...quelleColor.values()] };
+
+const plotDefaults = { width: 928, height: 500, marginLeft: 60, color: colorScale };
 const yearAxis = { label: "Jahr", tickFormat: "d" };
 const mwAxis = { label: "MW", tickFormat: (d) => fmtMW.format(d) };
 ```
@@ -70,7 +81,6 @@ const additionsTotal = additions12m
   .reduce((sum, d) => sum + d.Kapazitaet_MW, 0);
 
 const byYearClean = byYear
-  .filter(d => !excludeQuellen.has(d.Quelle_Label))
   .map(d => ({ ...d, Jahr: +d.Jahr, Brutto_MW: +d.Brutto_MW }));
 
 const cumulativeData = [];
@@ -84,16 +94,14 @@ for (const quelle of new Set(byYearClean.map(d => d.Quelle_Label))) {
 
 const annualData = byYearClean.filter(d => d.Jahr >= 2000);
 
-const mixData = operating.map(d => ({ name: d.Quelle_Label, value: +d.Kapazitaet_MW }));
+const mixData = operating.map(d => ({ Quelle_Label: d.Quelle_Label, value: +d.Kapazitaet_MW }));
 
 const bundeslandData = byBundesland
-  .filter(d => !excludeQuellen.has(d.Quelle_Label))
   .map(d => ({ ...d, Kapazitaet_MW: +d.Kapazitaet_MW }));
 
 const recentData = additions12m.filter(d => renewableQuellen.has(d.Quelle));
 
 const stilllegungenClean = stilllegungen
-  .filter(d => !excludeQuellen.has(d.Quelle_Label))
   .map(d => ({ ...d, Jahr: +d.Jahr, Brutto_MW: +d.Brutto_MW }));
 
 const cumulativeStilllegungen = [];
@@ -106,20 +114,71 @@ for (const quelle of new Set(stilllegungenClean.map(d => d.Quelle_Label))) {
 }
 ```
 
-## Zubau der letzten 24 Monate
+## Zubau letzte 12 Monate
 
-<div class="grid grid-cols-4">
-  ${sparkcard("Erneuerbare / Monat", renewableSpark, "#2563eb")}
-  ${sparkcard("Solar / Monat", solarSpark, "#FFB800")}
-  ${sparkcard("Wind / Monat", windSpark, "#2563EB")}
-  ${sparkcard("Speicher / Monat", storageSpark, "#7C3AED")}
-  <div class="card">
-    <h2>Zubau 12 Monate</h2>
-    <span class="big">${fmtMW.format(additionsTotal)} MW</span>
-  </div>
-</div>
+```js
+const maxKap = Math.max(...recentData.map(d => d.Kapazitaet_MW));
 
-_Neu in Betrieb genommene Leistung pro Monat (Bruttoleistung). Zeigt das Tempo des Ausbaus, nicht den Gesamtbestand._
+function miniSparkline(quelleLabel) {
+  const data = rolling12m
+    .filter(d => d.Quelle_Label === quelleLabel)
+    .map(d => ({Monat: new Date(d.Monat), MW: +d.Rolling_MW}));
+  if (data.length === 0) return html``;
+  const color = quelleColor.get(quelleLabel) ?? "#888";
+  return Plot.plot({
+    width: 180, height: 28, axis: null, margin: 0,
+    marks: [
+      Plot.areaY(data, {x: "Monat", y: "MW", fill: color, fillOpacity: 0.3, curve: "basis"}),
+      Plot.lineY(data, {x: "Monat", y: "MW", stroke: color, strokeWidth: 1.5, curve: "basis"})
+    ]
+  });
+}
+```
+
+```js
+{
+  const sorted = recentData.sort((a, b) => b.Kapazitaet_MW - a.Kapazitaet_MW);
+  const totalMW = sorted.reduce((s, d) => s + d.Kapazitaet_MW, 0);
+  const totalAnzahl = sorted.reduce((s, d) => s + +d.Anzahl, 0);
+
+  const rows = sorted.map(d => {
+    const pct = (d.Kapazitaet_MW / maxKap) * 100;
+    const color = quelleColor.get(d.Quelle_Label) ?? "#888";
+    const barBg = color + "33";
+    return html`<tr style="border-bottom: 1px solid var(--theme-foreground-faintest, #eee);">
+      <td style="padding: 8px; font-weight: 500;">${d.Quelle_Label}</td>
+      <td style="padding: 8px;">${miniSparkline(d.Quelle_Label)}</td>
+      <td style="padding: 8px; text-align: right; position: relative;">
+        <div style=${{position: "absolute", inset: "4px 0", width: `${pct}%`, background: barBg, borderRadius: "3px"}}></div>
+        <span style="position: relative;">${fmtMW.format(d.Kapazitaet_MW)}</span>
+      </td>
+      <td style="padding: 8px; text-align: right;">${fmtMW.format(d.Anzahl)}</td>
+    </tr>`;
+  });
+
+  display(html`<table style="width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums;">
+    <thead>
+      <tr style="border-bottom: 2px solid var(--theme-foreground-faintest, #ddd); text-align: left;">
+        <th style="padding: 8px;">Quelle</th>
+        <th style="padding: 8px; width: 200px;">Kapazität Zubau/Jahr seit 1990</th>
+        <th style="padding: 8px; text-align: right;">Kapazität (MW)</th>
+        <th style="padding: 8px; text-align: right;">Anzahl</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows}
+      <tr style="border-top: 2px solid var(--theme-foreground-faintest, #ddd); font-weight: 600;">
+        <td style="padding: 8px;">Gesamt</td>
+        <td style="padding: 8px;"></td>
+        <td style="padding: 8px; text-align: right;">${fmtMW.format(totalMW)}</td>
+        <td style="padding: 8px; text-align: right;">${fmtMW.format(totalAnzahl)}</td>
+      </tr>
+    </tbody>
+  </table>`);
+}
+```
+
+_Anlagen mit Inbetriebnahmedatum in den letzten 12 Monaten und Status „In Betrieb”. Bruttoleistung (Nennleistung), nicht tatsächliche Einspeisung._
 
 ---
 
@@ -130,7 +189,7 @@ Plot.plot({
   ...plotDefaults,
   x: yearAxis,
   y: mwAxis,
-  color: { legend: true },
+  color: { ...colorScale, legend: true },
   marks: [
     Plot.areaY(cumulativeData, {
       x: "Jahr", y: "Kumulativ_MW", fill: "Quelle_Label",
@@ -166,7 +225,7 @@ Plot.plot({
   ...plotDefaults,
   x: yearAxis,
   y: mwAxis,
-  color: { legend: true },
+  color: { ...colorScale, legend: true },
   marks: [
     Plot.barY(annualData, {
       x: "Jahr", y: "Brutto_MW", fill: "Quelle_Label",
@@ -194,15 +253,15 @@ Plot.plot({
   marginRight: 80,
   marks: [
     Plot.barX(mixData, {
-      x: "value", y: "name", fill: "name",
+      x: "value", y: "Quelle_Label", fill: "Quelle_Label",
       sort: { y: "-x" }
     }),
     Plot.tip(mixData, Plot.pointer({
-      x: "value", y: "name",
-      title: d => `${d.name}\n${fmtMW.format(d.value)} MW`
+      x: "value", y: "Quelle_Label",
+      title: d => `${d.Quelle_Label}\n${fmtMW.format(d.value)} MW`
     })),
     Plot.text(mixData, {
-      x: "value", y: "name",
+      x: "value", y: "Quelle_Label",
       text: d => `${fmtMW.format(d.value)} MW`,
       dx: 5, textAnchor: "start"
     }),
@@ -210,7 +269,7 @@ Plot.plot({
   ],
   x: { ...mwAxis },
   y: { label: null },
-  color: { legend: false }
+  color: { ...colorScale, legend: false }
 })
 ```
 
@@ -226,7 +285,7 @@ Plot.plot({
   marginLeft: 160,
   x: { ...mwAxis },
   y: { label: null },
-  color: { legend: true },
+  color: { ...colorScale, legend: true },
   marks: [
     Plot.barX(bundeslandData, Plot.stackX({
       x: "Kapazitaet_MW", y: "Bundesland", fill: "Quelle_Label",
@@ -244,24 +303,4 @@ Plot.plot({
 })
 ```
 
-_Aktuell als „In Betrieb“ gemeldete Bruttoleistung je Bundesland und Energieträger._
-
----
-
-## Zubau letzte 12 Monate
-
-```js
-Inputs.table(recentData.map(d => ({
-  Quelle: d.Quelle_Label,
-  "Kapazität (MW)": d.Kapazitaet_MW,
-  "Anzahl Einheiten": d.Anzahl
-})), {
-  select: false,
-  format: {
-    "Kapazität (MW)": d => fmtMW.format(d),
-    "Anzahl Einheiten": d => fmtMW.format(d)
-  }
-})
-```
-
-_Anlagen mit Inbetriebnahmedatum in den letzten 12 Monaten und Status „In Betrieb“. Bruttoleistung (Nennleistung), nicht tatsächliche Einspeisung._
+_Aktuell als „In Betrieb” gemeldete Bruttoleistung je Bundesland und Energieträger._

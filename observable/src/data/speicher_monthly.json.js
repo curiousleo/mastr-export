@@ -6,7 +6,7 @@ const rows = await query(`
     round(sum(Bruttoleistung) / 1000, 1) AS Brutto_MW
   FROM EinheitenStromSpeicher
   WHERE Inbetriebnahmedatum IS NOT NULL
-    AND Inbetriebnahmedatum >= today() - INTERVAL 24 MONTH
+    AND Inbetriebnahmedatum >= today() - INTERVAL 12 MONTH
   GROUP BY Monat
   ORDER BY Monat
 `);
