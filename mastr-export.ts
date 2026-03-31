@@ -407,7 +407,9 @@ async function initDictsAndViewsSql(
   for (let i = 0; i < tables.length; i++) {
     const [quelle, table] = tables[i];
     if (i > 0) createView.push("UNION ALL");
-    createView.push(`SELECT '${quelle}' AS Quelle,\n${colList}\nFROM ${table}`);
+    createView.push(
+      `SELECT '${quelle}' AS Quelle,\n${colList}\nFROM ${db}.${table}`,
+    );
   }
 
   statements.push(createView.join("\n"));
