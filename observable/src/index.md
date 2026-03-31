@@ -8,8 +8,9 @@ toc: true
 Daten aus dem [Marktstammdatenregister (MaStR)](https://www.marktstammdatenregister.de/) der Bundesnetzagentur. Alle Angaben beziehen sich auf die installierte Bruttoleistung (Nennleistung) laut Registermeldung — nicht auf die tatsächliche Einspeisung oder den aktuellen Betriebszustand.
 
 ```js
-const de = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
-const de1 = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 });
+const fmtMW = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
+const renewableQuellen = new Set(["Solar", "Wind", "Biomasse", "Wasser", "GeothermieGrubengasDruckentspannung"]);
+const excludeQuellen = new Set(["Verbrennung", "Kernkraft"]);
 
 const monthly = FileAttachment("data/monthly_cumulative.json").json();
 const speicherMonthly = FileAttachment("data/speicher_monthly.json").json();
@@ -20,80 +21,87 @@ const byBundesland = FileAttachment("data/einheiten_by_bundesland.json").json();
 ```
 
 ```js
-const renewableQuellen = ["Solar", "Wind", "Biomasse", "Wasser", "GeothermieGrubengasDruckentspannung"];
+function sparkcard(title, data, color) {
+  const latest = data.at(-1)?.MW ?? 0;
+  return html`<div class="card">
+    <h2>${title}</h2>
+    <span class="big">${fmtMW.format(latest)} MW</span>
+    ${resize((width) => Plot.plot({
+      width, height: 40, axis: null, margin: 0, marks: [
+        Plot.areaY(data, {x: "Monat", y: "MW", fill: color, fillOpacity: 0.3, curve: "basis"}),
+        Plot.lineY(data, {x: "Monat", y: "MW", stroke: color, strokeWidth: 1.5, curve: "basis"})
+      ]
+    }))}
+  </div>`;
+}
+
+function tipTitle(d, valueField) {
+  return `${d.Quelle_Label}\n${fmtMW.format(d[valueField])} MW`;
+}
+
+function toMonthly(rows) {
+  return rows.map(d => ({ Monat: new Date(d.Monat), MW: d.Brutto_MW }));
+}
+
+const plotDefaults = { width: 928, height: 500, marginLeft: 60 };
+const yearAxis = { label: "Jahr", tickFormat: "d" };
+const mwAxis = { label: "MW", tickFormat: (d) => fmtMW.format(d) };
+```
+
+```js
+const solarSpark = toMonthly(monthly.filter(d => d.Quelle === "Solar"));
+const windSpark = toMonthly(monthly.filter(d => d.Quelle === "Wind"));
+const storageSpark = toMonthly(speicherMonthly);
 
 const renewableSpark = monthly
-  .filter(d => renewableQuellen.includes(d.Quelle))
+  .filter(d => renewableQuellen.has(d.Quelle))
   .reduce((acc, d) => {
     const existing = acc.find(r => r.Monat === d.Monat);
     if (existing) existing.MW += d.Brutto_MW;
-    else acc.push({ Monat: new Date(d.Monat), MW: d.Brutto_MW });
+    else acc.push({ Monat: d.Monat, MW: d.Brutto_MW });
     return acc;
   }, [])
-  .sort((a, b) => a.Monat - b.Monat);
-
-const solarSpark = monthly
-  .filter(d => d.Quelle === "Solar")
-  .map(d => ({ Monat: new Date(d.Monat), MW: d.Brutto_MW }));
-
-const windSpark = monthly
-  .filter(d => d.Quelle === "Wind")
-  .map(d => ({ Monat: new Date(d.Monat), MW: d.Brutto_MW }));
-
-const storageSpark = speicherMonthly
-  .map(d => ({ Monat: new Date(d.Monat), MW: d.Brutto_MW }));
+  .sort((a, b) => a.Monat < b.Monat ? -1 : 1)
+  .map(d => ({ Monat: new Date(d.Monat), MW: d.MW }));
 
 const additionsTotal = additions12m
-  .filter(d => renewableQuellen.includes(d.Quelle))
+  .filter(d => renewableQuellen.has(d.Quelle))
   .reduce((sum, d) => sum + d.Kapazitaet_MW, 0);
+
+const byYearClean = byYear
+  .filter(d => !excludeQuellen.has(d.Quelle_Label))
+  .map(d => ({ ...d, Jahr: +d.Jahr, Brutto_MW: +d.Brutto_MW }));
+
+const cumulativeData = [];
+for (const quelle of new Set(byYearClean.map(d => d.Quelle_Label))) {
+  let cumSum = 0;
+  for (const row of byYearClean.filter(d => d.Quelle_Label === quelle).sort((a, b) => a.Jahr - b.Jahr)) {
+    cumSum += row.Brutto_MW;
+    cumulativeData.push({ Jahr: row.Jahr, Quelle_Label: quelle, Kumulativ_MW: Math.round(cumSum) });
+  }
+}
+
+const annualData = byYearClean.filter(d => d.Jahr >= 2000);
+
+const mixData = operating.map(d => ({ name: d.Quelle_Label, value: +d.Kapazitaet_MW }));
+
+const bundeslandData = byBundesland
+  .filter(d => !excludeQuellen.has(d.Quelle_Label))
+  .map(d => ({ ...d, Kapazitaet_MW: +d.Kapazitaet_MW }));
+
+const recentData = additions12m.filter(d => renewableQuellen.has(d.Quelle));
 ```
 
 ## Zubau der letzten 24 Monate
 
 <div class="grid grid-cols-4">
-  <div class="card">
-    <h2>Erneuerbare / Monat</h2>
-    <span class="big">${de.format(renewableSpark.at(-1)?.MW ?? 0)} MW</span>
-    ${resize((width) => Plot.plot({
-      width, height: 40, axis: null, margin: 0, marks: [
-        Plot.areaY(renewableSpark, {x: "Monat", y: "MW", fill: "#2563eb", fillOpacity: 0.3, curve: "basis"}),
-        Plot.lineY(renewableSpark, {x: "Monat", y: "MW", stroke: "#2563eb", strokeWidth: 1.5, curve: "basis"})
-      ]
-    }))}
-  </div>
-  <div class="card">
-    <h2>Solar / Monat</h2>
-    <span class="big">${de.format(solarSpark.at(-1)?.MW ?? 0)} MW</span>
-    ${resize((width) => Plot.plot({
-      width, height: 40, axis: null, margin: 0, marks: [
-        Plot.areaY(solarSpark, {x: "Monat", y: "MW", fill: "#FFB800", fillOpacity: 0.3, curve: "basis"}),
-        Plot.lineY(solarSpark, {x: "Monat", y: "MW", stroke: "#FFB800", strokeWidth: 1.5, curve: "basis"})
-      ]
-    }))}
-  </div>
-  <div class="card">
-    <h2>Wind / Monat</h2>
-    <span class="big">${de.format(windSpark.at(-1)?.MW ?? 0)} MW</span>
-    ${resize((width) => Plot.plot({
-      width, height: 40, axis: null, margin: 0, marks: [
-        Plot.areaY(windSpark, {x: "Monat", y: "MW", fill: "#2563EB", fillOpacity: 0.3, curve: "basis"}),
-        Plot.lineY(windSpark, {x: "Monat", y: "MW", stroke: "#2563EB", strokeWidth: 1.5, curve: "basis"})
-      ]
-    }))}
-  </div>
-  <div class="card">
-    <h2>Speicher / Monat</h2>
-    <span class="big">${de.format(storageSpark.at(-1)?.MW ?? 0)} MW</span>
-    ${resize((width) => Plot.plot({
-      width, height: 40, axis: null, margin: 0, marks: [
-        Plot.areaY(storageSpark, {x: "Monat", y: "MW", fill: "#7C3AED", fillOpacity: 0.3, curve: "basis"}),
-        Plot.lineY(storageSpark, {x: "Monat", y: "MW", stroke: "#7C3AED", strokeWidth: 1.5, curve: "basis"})
-      ]
-    }))}
-  </div>
+  ${sparkcard("Erneuerbare / Monat", renewableSpark, "#2563eb")}
+  ${sparkcard("Solar / Monat", solarSpark, "#FFB800")}
+  ${sparkcard("Wind / Monat", windSpark, "#2563EB")}
+  ${sparkcard("Speicher / Monat", storageSpark, "#7C3AED")}
   <div class="card">
     <h2>Zubau 12 Monate</h2>
-    <span class="big">${de.format(additionsTotal)} MW</span>
+    <span class="big">${fmtMW.format(additionsTotal)} MW</span>
   </div>
 </div>
 
@@ -104,32 +112,10 @@ _Neu in Betrieb genommene Leistung pro Monat (Bruttoleistung). Zeigt das Tempo d
 ## Kumulierte installierte Leistung
 
 ```js
-const excludeQuellen = ["Verbrennung", "Kernkraft"];
-
-const byYearClean = byYear
-  .filter(d => !excludeQuellen.includes(d.Quelle_Label))
-  .map(d => ({ ...d, Jahr: +d.Jahr, Brutto_MW: +d.Brutto_MW }));
-
-// compute cumulative MW per source
-const cumulativeData = [];
-const quellenSet = [...new Set(byYearClean.map(d => d.Quelle_Label))];
-for (const quelle of quellenSet) {
-  const rows = byYearClean.filter(d => d.Quelle_Label === quelle).sort((a, b) => a.Jahr - b.Jahr);
-  let cumSum = 0;
-  for (const row of rows) {
-    cumSum += row.Brutto_MW;
-    cumulativeData.push({ Jahr: row.Jahr, Quelle_Label: quelle, Kumulativ_MW: Math.round(cumSum) });
-  }
-}
-```
-
-```js
 Plot.plot({
-  width: 928,
-  height: 500,
-  marginLeft: 60,
-  x: { label: "Jahr", tickFormat: "d" },
-  y: { label: "MW", tickFormat: (d) => de.format(d) },
+  ...plotDefaults,
+  x: yearAxis,
+  y: mwAxis,
   color: { legend: true },
   marks: [
     Plot.areaY(cumulativeData, {
@@ -139,7 +125,7 @@ Plot.plot({
     Plot.tip(cumulativeData, Plot.pointerX(Plot.stackY({
       x: "Jahr", y: "Kumulativ_MW", fill: "Quelle_Label",
       order: "sum",
-      title: d => `${d.Quelle_Label}\n${de.format(d.Kumulativ_MW)} MW`
+      title: d => tipTitle(d, "Kumulativ_MW")
     }))),
     Plot.ruleY([0])
   ]
@@ -153,16 +139,10 @@ _Summe aller jemals in Betrieb genommenen Anlagen nach Inbetriebnahmedatum. Stil
 ## Jährlicher Zubau nach Quelle
 
 ```js
-const annualData = byYearClean.filter(d => d.Jahr >= 2000);
-```
-
-```js
 Plot.plot({
-  width: 928,
-  height: 500,
-  marginLeft: 60,
-  x: { label: "Jahr", tickFormat: "d" },
-  y: { label: "MW", tickFormat: (d) => de.format(d) },
+  ...plotDefaults,
+  x: yearAxis,
+  y: mwAxis,
   color: { legend: true },
   marks: [
     Plot.barY(annualData, {
@@ -171,7 +151,7 @@ Plot.plot({
     }),
     Plot.tip(annualData, Plot.pointerX(Plot.stackY({
       x: "Jahr", y: "Brutto_MW", fill: "Quelle_Label",
-      title: d => `${d.Quelle_Label}\n${de.format(d.Brutto_MW)} MW`
+      title: d => tipTitle(d, "Brutto_MW")
     }))),
     Plot.ruleY([0])
   ]
@@ -185,12 +165,8 @@ _Neu installierte Bruttoleistung pro Jahr nach Energieträger. Dies ist der jäh
 ## Installierte Leistung nach Energieträger
 
 ```js
-const mixData = operating.map(d => ({ name: d.Quelle_Label, value: +d.Kapazitaet_MW }));
-```
-
-```js
 Plot.plot({
-  width: 928,
+  ...plotDefaults,
   marginLeft: 100,
   marginRight: 80,
   marks: [
@@ -200,16 +176,16 @@ Plot.plot({
     }),
     Plot.tip(mixData, Plot.pointer({
       x: "value", y: "name",
-      title: d => `${d.name}\n${de.format(d.value)} MW`
+      title: d => `${d.name}\n${fmtMW.format(d.value)} MW`
     })),
     Plot.text(mixData, {
       x: "value", y: "name",
-      text: d => `${de.format(d.value)} MW`,
+      text: d => `${fmtMW.format(d.value)} MW`,
       dx: 5, textAnchor: "start"
     }),
     Plot.ruleX([0])
   ],
-  x: { label: "MW", tickFormat: (d) => de.format(d) },
+  x: { ...mwAxis },
   y: { label: null },
   color: { legend: false }
 })
@@ -222,16 +198,10 @@ _Anteil der aktuell als „In Betrieb" gemeldeten Bruttoleistung je Energieträg
 ## Kapazität nach Bundesland
 
 ```js
-const bundeslandData = byBundesland
-  .filter(d => !excludeQuellen.includes(d.Quelle_Label))
-  .map(d => ({ ...d, Kapazitaet_MW: +d.Kapazitaet_MW }));
-```
-
-```js
 Plot.plot({
-  width: 928,
+  ...plotDefaults,
   marginLeft: 160,
-  x: { label: "MW", tickFormat: (d) => de.format(d) },
+  x: { ...mwAxis },
   y: { label: null },
   color: { legend: true },
   marks: [
@@ -244,7 +214,7 @@ Plot.plot({
       x: "Kapazitaet_MW", y: "Bundesland", fill: "Quelle_Label",
       sort: { y: "-x", reduce: "sum" },
       order: "-sum",
-      title: d => `${d.Quelle_Label}\n${de.format(d.Kapazitaet_MW)} MW`
+      title: d => tipTitle(d, "Kapazitaet_MW")
     }))),
     Plot.ruleX([0])
   ]
@@ -258,14 +228,10 @@ _Aktuell als „In Betrieb" gemeldete Bruttoleistung je Bundesland und Energietr
 ## Zubau letzte 12 Monate
 
 ```js
-const recentData = additions12m.filter(d => renewableQuellen.includes(d.Quelle));
-```
-
-```js
 Inputs.table(recentData.map(d => ({
   Quelle: d.Quelle_Label,
-  "Kapazität (MW)": de.format(d.Kapazitaet_MW),
-  "Anzahl Einheiten": de.format(d.Anzahl)
+  "Kapazität (MW)": fmtMW.format(d.Kapazitaet_MW),
+  "Anzahl Einheiten": fmtMW.format(d.Anzahl)
 })), { select: false })
 ```
 
