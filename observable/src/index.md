@@ -18,6 +18,7 @@ const additions12m = FileAttachment("data/additions_12m.json").json();
 const byYear = FileAttachment("data/einheiten_by_year.json").json();
 const operating = FileAttachment("data/einheiten_operating.json").json();
 const byBundesland = FileAttachment("data/einheiten_by_bundesland.json").json();
+const stilllegungen = FileAttachment("data/stilllegungen_by_year.json").json();
 ```
 
 ```js
@@ -90,6 +91,19 @@ const bundeslandData = byBundesland
   .map(d => ({ ...d, Kapazitaet_MW: +d.Kapazitaet_MW }));
 
 const recentData = additions12m.filter(d => renewableQuellen.has(d.Quelle));
+
+const stilllegungenClean = stilllegungen
+  .filter(d => !excludeQuellen.has(d.Quelle_Label))
+  .map(d => ({ ...d, Jahr: +d.Jahr, Brutto_MW: +d.Brutto_MW }));
+
+const cumulativeStilllegungen = [];
+for (const quelle of new Set(stilllegungenClean.map(d => d.Quelle_Label))) {
+  let cumSum = 0;
+  for (const row of stilllegungenClean.filter(d => d.Quelle_Label === quelle).sort((a, b) => a.Jahr - b.Jahr)) {
+    cumSum += row.Brutto_MW;
+    cumulativeStilllegungen.push({ Jahr: row.Jahr, Quelle_Label: quelle, Kumulativ_MW: Math.round(cumSum) });
+  }
+}
 ```
 
 ## Zubau der letzten 24 Monate
@@ -127,12 +141,21 @@ Plot.plot({
       order: "sum",
       title: d => tipTitle(d, "Kumulativ_MW")
     }))),
+    Plot.areaY(cumulativeStilllegungen.map(d => ({...d, Kumulativ_MW: -d.Kumulativ_MW})), {
+      x: "Jahr", y: "Kumulativ_MW", fill: "Quelle_Label",
+      curve: "basis", order: "sum", fillOpacity: 0.5
+    }),
+    Plot.tip(cumulativeStilllegungen.map(d => ({...d, Kumulativ_MW: -d.Kumulativ_MW})), Plot.pointerX(Plot.stackY({
+      x: "Jahr", y: "Kumulativ_MW", fill: "Quelle_Label",
+      order: "sum",
+      title: d => `${d.Quelle_Label} (Stilllegung)\n${fmtMW.format(-d.Kumulativ_MW)} MW`
+    }))),
     Plot.ruleY([0])
   ]
 })
 ```
 
-_Summe aller jemals in Betrieb genommenen Anlagen nach Inbetriebnahmedatum. Stilllegungen und Rückbauten sind nicht abgezogen — die tatsächlich aktive Kapazität ist niedriger._
+_Obere Fläche: Summe aller jemals in Betrieb genommenen Anlagen (Bruttoleistung). Untere Fläche (negativ): kumulierte endgültige Stilllegungen._
 
 ---
 
@@ -221,7 +244,7 @@ Plot.plot({
 })
 ```
 
-_Aktuell als „In Betrieb" gemeldete Bruttoleistung je Bundesland und Energieträger._
+_Aktuell als „In Betrieb“ gemeldete Bruttoleistung je Bundesland und Energieträger._
 
 ---
 
@@ -230,9 +253,15 @@ _Aktuell als „In Betrieb" gemeldete Bruttoleistung je Bundesland und Energietr
 ```js
 Inputs.table(recentData.map(d => ({
   Quelle: d.Quelle_Label,
-  "Kapazität (MW)": fmtMW.format(d.Kapazitaet_MW),
-  "Anzahl Einheiten": fmtMW.format(d.Anzahl)
-})), { select: false })
+  "Kapazität (MW)": d.Kapazitaet_MW,
+  "Anzahl Einheiten": d.Anzahl
+})), {
+  select: false,
+  format: {
+    "Kapazität (MW)": d => fmtMW.format(d),
+    "Anzahl Einheiten": d => fmtMW.format(d)
+  }
+})
 ```
 
-_Anlagen mit Inbetriebnahmedatum in den letzten 12 Monaten und Status „In Betrieb". Bruttoleistung (Nennleistung), nicht tatsächliche Einspeisung._
+_Anlagen mit Inbetriebnahmedatum in den letzten 12 Monaten und Status „In Betrieb“. Bruttoleistung (Nennleistung), nicht tatsächliche Einspeisung._
