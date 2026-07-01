@@ -163,6 +163,10 @@
     },
     {
       "name": "SpeicherMaStRNummer"
+    },
+    {
+      "name": "InbetriebnahmedatumAmAktuellenStandort",
+      "xsd": "date"
     }
   ]
 }

@@ -46,10 +46,6 @@
       "xsd": "short"
     },
     {
-      "name": "RegelzoneNetzanschlusspunkt",
-      "xsd": "int"
-    },
-    {
       "name": "Nettoengpassleistung",
       "xsd": "float"
     },
@@ -62,11 +58,18 @@
       "xsd": "float"
     },
     {
+      "name": "RegelzoneNetzanschlusspunkt",
+      "xsd": "int"
+    },
+    {
       "name": "NetzMaStRNummer"
     },
     {
       "name": "NochInPlanung",
       "xsd": "boolean"
+    },
+    {
+      "name": "NetzbetreiberMaStRNummer"
     }
   ]
 }

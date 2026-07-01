@@ -7,7 +7,7 @@
           <xs:complexType>
             <xs:sequence>
               <xs:element type="xs:string" name="GenMastrNummer"/>
-              <xs:element type="xs:dateTime" name="DatumLetzteAktualisierung"/>
+              <xs:element type="xs:dateTime" name="DatumLetzteAktualisierung" minOccurs="0"/>
               <xs:element name="Art">
                 <xs:simpleType>
                   <xs:restriction base="xs:short">
@@ -37,7 +37,7 @@
               </xs:element>
               <xs:element type="xs:string" name="WasserrechtsNummer" minOccurs="0"/>
               <xs:element type="xs:date" name="WasserrechtAblaufdatum" minOccurs="0"/>
-              <xs:element name="WasserrechtAblaufdatum_nv">
+              <xs:element name="WasserrechtAblaufdatum_nv" minOccurs="0">
                 <xs:simpleType>
                   <xs:restriction base="xs:byte">
                     <xs:enumeration value="0"/>
@@ -45,8 +45,8 @@
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element type="xs:date" name="Registrierungsdatum"/>
-              <xs:element type="xs:string" name="VerknuepfteEinheitenMaStRNummern"/>
+              <xs:element type="xs:date" name="Registrierungsdatum" minOccurs="0"/>
+              <xs:element type="xs:string" name="VerknuepfteEinheitenMaStRNummern" minOccurs="0"/>
               <xs:element type="xs:date" name="DatumDerAntragstellung" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>

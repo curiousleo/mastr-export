@@ -3,34 +3,11 @@
   "element": "Marktrolle",
   "fields": [
     {
-      "name": "MarktakteurMastrNummer"
+      "name": "Id",
+      "xsd": "byte"
     },
     {
-      "name": "DatumLetzteAktualisierung",
-      "xsd": "dateTime"
-    },
-    {
-      "name": "MastrNummer"
-    },
-    {
-      "name": "Marktrolle"
-    },
-    {
-      "name": "BundesnetzagenturBetriebsnummer"
-    },
-    {
-      "name": "BundesnetzagenturBetriebsnummer_nv",
-      "xsd": "boolean"
-    },
-    {
-      "name": "Marktpartneridentifikationsnummer"
-    },
-    {
-      "name": "Marktpartneridentifikationsnummer_nv",
-      "xsd": "boolean"
-    },
-    {
-      "name": "KontaktdatenMarktrolle"
+      "name": "Wert"
     }
   ]
 }

@@ -6,11 +6,11 @@
         <xs:element name="AnlageEegSpeicher" maxOccurs="unbounded" minOccurs="0">
           <xs:complexType>
             <xs:sequence>
-              <xs:element type="xs:date" name="Registrierungsdatum"/>
+              <xs:element type="xs:date" name="Registrierungsdatum" minOccurs="0"/>
               <xs:element type="xs:dateTime" name="DatumLetzteAktualisierung"/>
-              <xs:element type="xs:date" name="EegInbetriebnahmedatum"/>
+              <xs:element type="xs:date" name="EegInbetriebnahmedatum" minOccurs="0"/>
               <xs:element type="xs:string" name="EegMaStRNummer"/>
-              <xs:element type="xs:string" name="AnlagenschluesselEeg"/>
+              <xs:element type="xs:string" name="AnlagenschluesselEeg" minOccurs="0"/>
               <xs:element name="AusschreibungZuschlag" minOccurs="0">
                 <xs:simpleType>
                   <xs:restriction base="xs:byte">
@@ -19,8 +19,8 @@
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element type="xs:string" name="Zuschlagsnummer"/>
-              <xs:element type="xs:string" name="VerknuepfteEinheitenMaStRNummern"/>
+              <xs:element type="xs:string" name="Zuschlagsnummer" minOccurs="0"/>
+              <xs:element type="xs:string" name="VerknuepfteEinheitenMaStRNummern" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>

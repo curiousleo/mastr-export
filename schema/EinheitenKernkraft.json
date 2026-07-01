@@ -57,8 +57,7 @@
       "xsd": "boolean"
     },
     {
-      "name": "Hausnummer",
-      "xsd": "byte"
+      "name": "Hausnummer"
     },
     {
       "name": "Hausnummer_nv",
@@ -192,6 +191,26 @@
     {
       "name": "Technologie",
       "xsd": "short"
+    },
+    {
+      "name": "NetzreserveZugeordnet",
+      "xsd": "boolean"
+    },
+    {
+      "name": "DatumNetzreserve",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "KapazitaetsreserveZugeordnet",
+      "xsd": "boolean"
+    },
+    {
+      "name": "DatumKapazitaetsreserve",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "InbetriebnahmedatumAmAktuellenStandort",
+      "xsd": "dateTime"
     }
   ]
 }

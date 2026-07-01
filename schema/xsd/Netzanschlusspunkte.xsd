@@ -8,7 +8,7 @@
             <xs:sequence>
               <xs:element type="xs:string" name="NetzanschlusspunktMastrNummer"/>
               <xs:element type="xs:string" name="NetzanschlusspunktBezeichnung" minOccurs="0"/>
-              <xs:element type="xs:dateTime" name="LetzteAenderung"/>
+              <xs:element type="xs:dateTime" name="LetzteAenderung" minOccurs="0"/>
               <xs:element type="xs:string" name="LokationMaStRNummer"/>
               <xs:element type="xs:string" name="NameDerTechnischenLokation" minOccurs="0"/>
               <xs:element name="Lokationtyp">
@@ -54,6 +54,9 @@
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
+              <xs:element type="xs:float" name="Nettoengpassleistung" minOccurs="0"/>
+              <xs:element type="xs:int" name="BilanzierungsgebietNetzanschlusspunktId" minOccurs="0"/>
+              <xs:element type="xs:float" name="Netzanschlusskapazitaet" minOccurs="0"/>
               <xs:element name="RegelzoneNetzanschlusspunkt" minOccurs="0">
                 <xs:simpleType>
                   <xs:restriction base="xs:int">
@@ -64,9 +67,6 @@
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element type="xs:float" name="Nettoengpassleistung" minOccurs="0"/>
-              <xs:element type="xs:int" name="BilanzierungsgebietNetzanschlusspunktId" minOccurs="0"/>
-              <xs:element type="xs:float" name="Netzanschlusskapazitaet" minOccurs="0"/>
               <xs:element type="xs:string" name="NetzMaStRNummer"/>
               <xs:element name="NochInPlanung">
                 <xs:simpleType>
@@ -76,6 +76,7 @@
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
+              <xs:element type="xs:string" name="NetzbetreiberMaStRNummer"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>

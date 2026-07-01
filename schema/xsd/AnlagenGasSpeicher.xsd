@@ -8,8 +8,8 @@
             <xs:sequence>
               <xs:element type="xs:string" name="MaStRNummer"/>
               <xs:element type="xs:dateTime" name="DatumLetzteAktualisierung"/>
-              <xs:element type="xs:string" name="Speichername"/>
-              <xs:element type="xs:date" name="Registrierungsdatum"/>
+              <xs:element type="xs:string" name="Speichername" minOccurs="0"/>
+              <xs:element type="xs:date" name="Registrierungsdatum" minOccurs="0"/>
               <xs:element name="AnlageBetriebsstatus">
                 <xs:simpleType>
                   <xs:restriction base="xs:byte">

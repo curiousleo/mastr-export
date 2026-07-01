@@ -30,6 +30,9 @@
     },
     {
       "name": "Bundesland"
+    },
+    {
+      "name": "Bilanzierungsgebiete"
     }
   ]
 }

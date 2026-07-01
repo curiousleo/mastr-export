@@ -19,7 +19,7 @@
                 </xs:simpleType>
               </xs:element>
               <xs:element type="xs:date" name="NetzbetreiberpruefungDatum" minOccurs="0"/>
-              <xs:element type="xs:string" name="AnlagenbetreiberMastrNummer"/>
+              <xs:element type="xs:string" name="AnlagenbetreiberMastrNummer" minOccurs="0"/>
               <xs:element name="Land">
                 <xs:simpleType>
                   <xs:restriction base="xs:short">
@@ -66,7 +66,7 @@
               <xs:element type="xs:string" name="Strasse" minOccurs="0"/>
               <xs:element type="xs:string" name="Gemarkung" minOccurs="0"/>
               <xs:element type="xs:string" name="FlurFlurstuecknummern" minOccurs="0"/>
-              <xs:element name="StrasseNichtGefunden">
+              <xs:element name="StrasseNichtGefunden" minOccurs="0">
                 <xs:simpleType>
                   <xs:restriction base="xs:byte">
                     <xs:enumeration value="0"/>
@@ -93,8 +93,8 @@
               </xs:element>
               <xs:element type="xs:string" name="Adresszusatz" minOccurs="0"/>
               <xs:element type="xs:string" name="Ort"/>
-              <xs:element type="xs:float" name="Laengengrad"/>
-              <xs:element type="xs:float" name="Breitengrad"/>
+              <xs:element type="xs:float" name="Laengengrad" minOccurs="0"/>
+              <xs:element type="xs:float" name="Breitengrad" minOccurs="0"/>
               <xs:element type="xs:date" name="Registrierungsdatum"/>
               <xs:element type="xs:date" name="Inbetriebnahmedatum" minOccurs="0"/>
               <xs:element type="xs:date" name="DatumEndgueltigeStilllegung" minOccurs="0"/>
@@ -123,7 +123,7 @@
                 </xs:simpleType>
               </xs:element>
               <xs:element type="xs:string" name="BestandsanlageMastrNummer" minOccurs="0"/>
-              <xs:element name="NichtVorhandenInMigriertenEinheiten">
+              <xs:element name="NichtVorhandenInMigriertenEinheiten" minOccurs="0">
                 <xs:simpleType>
                   <xs:restriction base="xs:byte">
                     <xs:enumeration value="0"/>
@@ -135,17 +135,9 @@
               <xs:element type="xs:date" name="DatumDesBetreiberwechsels" minOccurs="0"/>
               <xs:element type="xs:date" name="DatumRegistrierungDesBetreiberwechsels" minOccurs="0"/>
               <xs:element type="xs:string" name="Einsatzverantwortlicher" minOccurs="0"/>
-              <xs:element type="xs:string" name="NameStromverbrauchseinheit"/>
+              <xs:element type="xs:string" name="NameStromverbrauchseinheit" minOccurs="0"/>
               <xs:element type="xs:short" name="AnzahlStromverbrauchseinheitenGroesser50Mw" minOccurs="0"/>
-              <xs:element name="PraequalifiziertGemaessAblav" minOccurs="0">
-                <xs:simpleType>
-                  <xs:restriction base="xs:byte">
-                    <xs:enumeration value="0"/>
-                    <xs:enumeration value="1"/>
-                  </xs:restriction>
-                </xs:simpleType>
-              </xs:element>			  
-              <xs:element type="xs:string" name="GemeinsamRegistrierteSolareinheitMastrNummer" minOccurs="0"/>
+              <xs:element type="xs:dateTime" name="InbetriebnahmedatumAmAktuellenStandort" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>

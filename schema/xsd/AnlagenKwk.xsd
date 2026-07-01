@@ -21,6 +21,17 @@
               <xs:element type="xs:date" name="Registrierungsdatum" minOccurs="0"/>
               <xs:element type="xs:float" name="ThermischeNutzleistung" minOccurs="0"/>
               <xs:element type="xs:float" name="ElektrischeKwkLeistung" minOccurs="0"/>
+			  <xs:element name="AnlageBetriebsstatus">
+                <xs:simpleType>
+                  <xs:restriction base="xs:byte">
+                    <xs:enumeration value="35"/>
+                    <xs:enumeration value="31"/>
+                    <xs:enumeration value="38"/>
+                    <xs:enumeration value="37"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element type="xs:string" name="VerknuepfteEinheitenMaStRNummern" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>

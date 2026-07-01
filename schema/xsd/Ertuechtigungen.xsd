@@ -7,14 +7,14 @@
           <xs:complexType>
             <xs:sequence>
               <xs:element type="xs:int" name="Id"/>
-              <xs:element type="xs:dateTime" name="DatumLetzteAktualisierung"/>
+              <xs:element type="xs:dateTime" name="DatumLetzteAktualisierung" minOccurs="0"/>
               <xs:element name="EegMastrNummer">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element name="Ertuechtigungsart">
+              <xs:element name="Ertuechtigungsart" minOccurs="0">
                 <xs:simpleType>
                   <xs:restriction base="xs:short">
                   </xs:restriction>

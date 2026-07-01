@@ -183,14 +183,6 @@
       "name": "GenMastrNummer"
     },
     {
-      "name": "ReserveartNachDemEnWG",
-      "xsd": "short"
-    },
-    {
-      "name": "DatumUeberfuehrungInReserve",
-      "xsd": "date"
-    },
-    {
       "name": "NameKraftwerk"
     },
     {
@@ -245,10 +237,6 @@
       "xsd": "date"
     },
     {
-      "name": "NetzreserveAbDatum",
-      "xsd": "date"
-    },
-    {
       "name": "SicherheitsbereitschaftAbDatum",
       "xsd": "date"
     },
@@ -259,6 +247,26 @@
     {
       "name": "AusschliesslicheVerwendungImKombibetrieb",
       "xsd": "boolean"
+    },
+    {
+      "name": "NetzreserveZugeordnet",
+      "xsd": "boolean"
+    },
+    {
+      "name": "DatumNetzreserve",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "KapazitaetsreserveZugeordnet",
+      "xsd": "boolean"
+    },
+    {
+      "name": "DatumKapazitaetsreserve",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "InbetriebnahmedatumAmAktuellenStandort",
+      "xsd": "dateTime"
     }
   ]
 }

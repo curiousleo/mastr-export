@@ -142,11 +142,8 @@
       "xsd": "short"
     },
     {
-      "name": "PraequalifiziertGemaessAblav",
-      "xsd": "boolean"
-    },
-    {
-      "name": "GemeinsamRegistrierteSolareinheitMastrNummer"
+      "name": "InbetriebnahmedatumAmAktuellenStandort",
+      "xsd": "dateTime"
     }
   ]
 }

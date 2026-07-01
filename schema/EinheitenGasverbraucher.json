@@ -144,6 +144,10 @@
     },
     {
       "name": "VerknuepfteEinheitenMaStRNummern"
+    },
+    {
+      "name": "InbetriebnahmedatumAmAktuellenStandort",
+      "xsd": "dateTime"
     }
   ]
 }

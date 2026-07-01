@@ -19,7 +19,7 @@
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element type="xs:string" name="VerknuepfteEinheitenMaStRNummern"/>
+              <xs:element type="xs:string" name="VerknuepfteEinheitenMaStRNummern" minOccurs="0"/>
               <xs:element type="xs:string" name="NetzanschlusspunkteMaStRNummern" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>

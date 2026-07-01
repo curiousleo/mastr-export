@@ -6,9 +6,9 @@
         <xs:element name="AnlageEegGeothermieGrubengasDruckentspannung" maxOccurs="unbounded" minOccurs="0">
           <xs:complexType>
             <xs:sequence>
-              <xs:element type="xs:date" name="Registrierungsdatum"/>
+              <xs:element type="xs:date" name="Registrierungsdatum" minOccurs="0"/>
               <xs:element type="xs:dateTime" name="DatumLetzteAktualisierung"/>
-              <xs:element type="xs:date" name="EegInbetriebnahmedatum"/>
+              <xs:element type="xs:date" name="EegInbetriebnahmedatum" minOccurs="0"/>
               <xs:element type="xs:string" name="EegMaStRNummer"/>
               <xs:element type="xs:string" name="AnlagenschluesselEeg" minOccurs="0"/>
               <xs:element type="xs:string" name="AnlagenkennzifferAnlagenregister" minOccurs="0"/>
@@ -20,7 +20,7 @@
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element type="xs:float" name="InstallierteLeistung"/>
+              <xs:element type="xs:float" name="InstallierteLeistung" minOccurs="0"/>
               <xs:element name="AnlageBetriebsstatus">
                 <xs:simpleType>
                   <xs:restriction base="xs:byte">
@@ -31,7 +31,7 @@
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element type="xs:string" name="VerknuepfteEinheitenMaStRNummern"/>
+              <xs:element type="xs:string" name="VerknuepfteEinheitenMaStRNummern" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>

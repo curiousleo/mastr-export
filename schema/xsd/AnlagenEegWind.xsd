@@ -6,9 +6,9 @@
         <xs:element name="AnlageEegWind" maxOccurs="unbounded" minOccurs="0">
           <xs:complexType>
             <xs:sequence>
-              <xs:element type="xs:date" name="Registrierungsdatum"/>
+              <xs:element type="xs:date" name="Registrierungsdatum" minOccurs="0"/>
               <xs:element type="xs:dateTime" name="DatumLetzteAktualisierung"/>
-              <xs:element type="xs:date" name="EegInbetriebnahmedatum"/>
+              <xs:element type="xs:date" name="EegInbetriebnahmedatum" minOccurs="0"/>
               <xs:element type="xs:string" name="EegMaStRNummer"/>
               <xs:element type="xs:string" name="AnlagenkennzifferAnlagenregister" minOccurs="0"/>
               <xs:element name="AnlagenkennzifferAnlagenregister_nv">
@@ -36,7 +36,7 @@
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element type="xs:float" name="InstallierteLeistung"/>
+              <xs:element type="xs:float" name="InstallierteLeistung" minOccurs="0"/>
               <xs:element type="xs:float" name="VerhaeltnisErtragsschaetzungReferenzertrag" minOccurs="0"/>
               <xs:element name="VerhaeltnisErtragsschaetzungReferenzertrag_nv">
                 <xs:simpleType>

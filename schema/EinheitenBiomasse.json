@@ -186,14 +186,6 @@
       "name": "GenMastrNummer"
     },
     {
-      "name": "ReserveartNachDemEnWG",
-      "xsd": "short"
-    },
-    {
-      "name": "DatumUeberfuehrungInReserve",
-      "xsd": "date"
-    },
-    {
       "name": "Hauptbrennstoff",
       "xsd": "short"
     },
@@ -210,6 +202,26 @@
     },
     {
       "name": "KwkMaStRNummer"
+    },
+    {
+      "name": "NetzreserveZugeordnet",
+      "xsd": "boolean"
+    },
+    {
+      "name": "DatumNetzreserve",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "KapazitaetsreserveZugeordnet",
+      "xsd": "boolean"
+    },
+    {
+      "name": "DatumKapazitaetsreserve",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "InbetriebnahmedatumAmAktuellenStandort",
+      "xsd": "dateTime"
     }
   ]
 }

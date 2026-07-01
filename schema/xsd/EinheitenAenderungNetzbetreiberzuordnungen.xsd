@@ -10,7 +10,7 @@
               <xs:element type="xs:string" name="LokationMastrNummer" minOccurs="0"/>
               <xs:element type="xs:string" name="NetzanschlusspunktMastrNummer" minOccurs="0"/>
               <xs:element type="xs:string" name="NetzbetreiberMastrNummerAlt" minOccurs="0"/>
-              <xs:element type="xs:string" name="NetzbetreiberMastrNummerNeu"/>
+              <xs:element type="xs:string" name="NetzbetreiberMastrNummerNeu" minOccurs="0"/>
               <xs:element name="ArtDerAenderung" minOccurs="0">
                 <xs:simpleType>
                   <xs:restriction base="xs:short">

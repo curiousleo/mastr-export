@@ -227,15 +227,12 @@
       "name": "EegMaStRNummer"
     },
     {
-      "name": "InAnspruchGenommeneFlaeche",
+      "name": "GroesseDerInAnspruchGenommenenFlaecheInHektar",
       "xsd": "float"
     },
     {
-      "name": "ArtDerFlaecheIds"
-    },
-    {
-      "name": "InAnspruchGenommeneAckerflaeche",
-      "xsd": "float"
+      "name": "UeberwiegendeNutzungsartDerFlaecheVorErrichtung",
+      "xsd": "short"
     },
     {
       "name": "Einsatzverantwortlicher"
@@ -246,6 +243,25 @@
     {
       "name": "SpeicherAmGleichenOrt",
       "xsd": "boolean"
+    },
+    {
+      "name": "NameDesSolarparks"
+    },
+    {
+      "name": "VorherigerNutzungsartenbereichDerFlaeche",
+      "xsd": "short"
+    },
+    {
+      "name": "ZusaetzlicheMerkmaleDerFlaecheUndDerAktuellenFlaechennutzung",
+      "xsd": "short"
+    },
+    {
+      "name": "LichteHoehe",
+      "xsd": "float"
+    },
+    {
+      "name": "InbetriebnahmedatumAmAktuellenStandort",
+      "xsd": "dateTime"
     }
   ]
 }

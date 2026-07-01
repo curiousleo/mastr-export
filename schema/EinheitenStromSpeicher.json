@@ -183,19 +183,11 @@
       "xsd": "short"
     },
     {
-      "name": "Einsatzort",
-      "xsd": "short"
-    },
-    {
       "name": "GenMastrNummer"
     },
     {
-      "name": "ReserveartNachDemEnWG",
+      "name": "Einsatzort",
       "xsd": "short"
-    },
-    {
-      "name": "DatumUeberfuehrungInReserve",
-      "xsd": "date"
     },
     {
       "name": "AcDcKoppelung",
@@ -204,10 +196,6 @@
     {
       "name": "Batterietechnologie",
       "xsd": "short"
-    },
-    {
-      "name": "Notstromaggregat",
-      "xsd": "boolean"
     },
     {
       "name": "PumpbetriebLeistungsaufnahme",
@@ -220,6 +208,10 @@
     {
       "name": "Pumpspeichertechnologie",
       "xsd": "short"
+    },
+    {
+      "name": "Notstromaggregat",
+      "xsd": "boolean"
     },
     {
       "name": "BestandteilGrenzkraftwerk",
@@ -249,6 +241,26 @@
     },
     {
       "name": "GemeinsamRegistrierteSolareinheitMastrNummer"
+    },
+    {
+      "name": "NetzreserveZugeordnet",
+      "xsd": "boolean"
+    },
+    {
+      "name": "DatumNetzreserve",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "KapazitaetsreserveZugeordnet",
+      "xsd": "boolean"
+    },
+    {
+      "name": "DatumKapazitaetsreserve",
+      "xsd": "dateTime"
+    },
+    {
+      "name": "InbetriebnahmedatumAmAktuellenStandort",
+      "xsd": "dateTime"
     }
   ]
 }
