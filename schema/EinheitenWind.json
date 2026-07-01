@@ -114,6 +114,9 @@
       "xsd": "byte"
     },
     {
+      "name": "BestandsanlageMastrNummer"
+    },
+    {
       "name": "NichtVorhandenInMigriertenEinheiten",
       "xsd": "boolean"
     },
@@ -194,11 +197,11 @@
       "xsd": "short"
     },
     {
-      "name": "GebietNachDemFlaechenentwicklungsplanNordsee",
+      "name": "ClusterNordsee",
       "xsd": "short"
     },
     {
-      "name": "GebietNachDemFlaechenentwicklungsplanOstsee",
+      "name": "ClusterOstsee",
       "xsd": "short"
     },
     {
@@ -270,6 +273,18 @@
     },
     {
       "name": "EegMaStRNummer"
+    },
+    {
+      "name": "TechnologieFlugwindenergieanlage",
+      "xsd": "short"
+    },
+    {
+      "name": "Flughoehe",
+      "xsd": "float"
+    },
+    {
+      "name": "Flugradius",
+      "xsd": "float"
     }
   ]
 }

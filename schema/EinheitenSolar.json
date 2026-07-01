@@ -114,6 +114,9 @@
       "xsd": "byte"
     },
     {
+      "name": "BestandsanlageMastrNummer"
+    },
+    {
       "name": "NichtVorhandenInMigriertenEinheiten",
       "xsd": "boolean"
     },
@@ -224,11 +227,15 @@
       "name": "EegMaStRNummer"
     },
     {
-      "name": "GroesseDerInAnspruchGenommenenFlaecheInHektar",
+      "name": "InAnspruchGenommeneFlaeche",
       "xsd": "float"
     },
     {
-      "name": "UeberwiegendeNutzungsartDerFlaecheVorErrichtungDerSolaranlage"
+      "name": "ArtDerFlaecheIds"
+    },
+    {
+      "name": "InAnspruchGenommeneAckerflaeche",
+      "xsd": "float"
     },
     {
       "name": "Einsatzverantwortlicher"
@@ -239,23 +246,6 @@
     {
       "name": "SpeicherAmGleichenOrt",
       "xsd": "boolean"
-    },
-    {
-      "name": "NameDesSolarparks"
-    },
-    {
-      "name": "VorherigerNutzungsartenbereichDerFlaeche"
-    },
-    {
-      "name": "ZusaetzlicheMerkmaleDerFlaecheUndDerAktuellenFlaechennutzung"
-    },
-    {
-      "name": "LichteHoehe",
-      "xsd": "float"
-    },
-    {
-      "name": "InbetriebnahmedatumAmAktuellenStandort",
-      "xsd": "date"
     }
   ]
 }

@@ -31,13 +31,6 @@
     {
       "name": "ElektrischeKwkLeistung",
       "xsd": "float"
-    },
-    {
-      "name": "AnlageBetriebsstatus",
-      "xsd": "byte"
-    },
-    {
-      "name": "VerknuepfteEinheitenMaStRNummern"
     }
   ]
 }

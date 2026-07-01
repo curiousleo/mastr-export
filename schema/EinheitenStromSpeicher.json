@@ -114,6 +114,9 @@
       "xsd": "byte"
     },
     {
+      "name": "BestandsanlageMastrNummer"
+    },
+    {
       "name": "NichtVorhandenInMigriertenEinheiten",
       "xsd": "boolean"
     },
@@ -187,6 +190,14 @@
       "name": "GenMastrNummer"
     },
     {
+      "name": "ReserveartNachDemEnWG",
+      "xsd": "short"
+    },
+    {
+      "name": "DatumUeberfuehrungInReserve",
+      "xsd": "date"
+    },
+    {
       "name": "AcDcKoppelung",
       "xsd": "short"
     },
@@ -238,22 +249,6 @@
     },
     {
       "name": "GemeinsamRegistrierteSolareinheitMastrNummer"
-    },
-    {
-      "name": "NetzreserveZugeordnet",
-      "xsd": "boolean"
-    },
-    {
-      "name": "KapazitaetsreserveZugeordnet",
-      "xsd": "boolean"
-    },
-    {
-      "name": "DatumKapazitaetsreserve",
-      "xsd": "date"
-    },
-    {
-      "name": "InbetriebnahmedatumAmAktuellenStandort",
-      "xsd": "date"
     }
   ]
 }

@@ -114,6 +114,9 @@
       "xsd": "byte"
     },
     {
+      "name": "BestandsanlageMastrNummer"
+    },
+    {
       "name": "NichtVorhandenInMigriertenEinheiten",
       "xsd": "boolean"
     },
@@ -183,6 +186,14 @@
       "name": "GenMastrNummer"
     },
     {
+      "name": "ReserveartNachDemEnWG",
+      "xsd": "short"
+    },
+    {
+      "name": "DatumUeberfuehrungInReserve",
+      "xsd": "date"
+    },
+    {
       "name": "Hauptbrennstoff",
       "xsd": "short"
     },
@@ -199,18 +210,6 @@
     },
     {
       "name": "KwkMaStRNummer"
-    },
-    {
-      "name": "NetzreserveZugeordnet",
-      "xsd": "boolean"
-    },
-    {
-      "name": "KapazitaetsreserveZugeordnet",
-      "xsd": "boolean"
-    },
-    {
-      "name": "InbetriebnahmedatumAmAktuellenStandort",
-      "xsd": "date"
     }
   ]
 }

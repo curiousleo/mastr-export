@@ -18,6 +18,10 @@
       "xsd": "short"
     },
     {
+      "name": "MarktakteurTitel",
+      "xsd": "short"
+    },
+    {
       "name": "MarktakteurVorname"
     },
     {

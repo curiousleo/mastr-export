@@ -102,12 +102,19 @@
       "xsd": "date"
     },
     {
+      "name": "DatumWiederaufnahmeBetrieb",
+      "xsd": "date"
+    },
+    {
       "name": "EinheitSystemstatus",
       "xsd": "short"
     },
     {
       "name": "EinheitBetriebsstatus",
       "xsd": "byte"
+    },
+    {
+      "name": "BestandsanlageMastrNummer"
     },
     {
       "name": "NichtVorhandenInMigriertenEinheiten",

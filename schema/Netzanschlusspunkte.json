@@ -38,6 +38,10 @@
       "name": "Messlokation"
     },
     {
+      "name": "Marktgebiet",
+      "xsd": "int"
+    },
+    {
       "name": "Spannungsebene",
       "xsd": "short"
     },
@@ -63,9 +67,6 @@
     {
       "name": "NochInPlanung",
       "xsd": "boolean"
-    },
-    {
-      "name": "NetzbetreiberMaStRNummer"
     }
   ]
 }
