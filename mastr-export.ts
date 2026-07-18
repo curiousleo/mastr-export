@@ -349,6 +349,42 @@ async function initClickHouse(
 }
 
 // ---------------------------------------------------------------------------
+// Rclone S3 Upload
+// ---------------------------------------------------------------------------
+
+async function uploadToS3(runner: Runner, parquetDir: string, targetPath: string): Promise<void> {
+
+  // Create rclone config file
+  const rcloneConfig = `[garage]
+type = s3
+provider = Other
+env_auth = false
+access_key_id = ${Deno.env.get('AWS_ACCESS_KEY_ID')}
+secret_access_key = ${Deno.env.get('AWS_SECRET_ACCESS_KEY')}
+region = garage
+endpoint = http://localhost:3900`;
+
+  const configPath = join(SCRATCH_DIR, "rclone.conf");
+  await runner.writeText(configPath, rcloneConfig);
+
+  // Upload files
+  console.log(`Uploading Parquet files to S3 bucket 'mastr' under folder '${targetPath}'...`);
+  const result = await runner.exec([
+    "rclone",
+    "-v",
+    "--config", configPath,
+    "copy",
+    parquetDir,
+    `garage:${targetPath}`
+  ]);
+
+  if (!result.success && !DRY_RUN) {
+    throw new Error(`Failed to upload files to S3: ${result.stderr}`);
+  }
+  console.log("Upload complete.");
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -395,6 +431,16 @@ async function main() {
     CLICKHOUSE_DB,
   );
   console.log("ClickHouse database ready.");
+
+  // 6. Upload to S3
+  // Extract date from zipName (Gesamtdatenexport_YYYYMMDD_xxxxx.x.x.zip)
+  const dateMatch = zipName.match(/Gesamtdatenexport_(\d{4})(\d{2})(\d{2})_/);
+  if (!dateMatch) {
+    throw new Error(`Could not extract date from zip name: ${zipName}`);
+  }
+  const [_, year, month, day] = dateMatch;
+  const targetPath = `mastr/${year}-${month}-${day}`;
+  await uploadToS3(runner, parquetDir, targetPath);
 
   // 7. Clean up scratch
   await runner.removeDir(SCRATCH_DIR);
