@@ -422,15 +422,15 @@ async function main() {
   console.log("Extraction complete.");
 
   // 5. Create ClickHouse tables + atomic swap
-  console.log("Creating ClickHouse tables...");
-  await initClickHouse(
-    parquetDir,
-    CLICKHOUSE_PATH,
-    zipName,
-    CLICKHOUSE_URL,
-    CLICKHOUSE_DB,
-  );
-  console.log("ClickHouse database ready.");
+  // console.log("Creating ClickHouse tables...");
+  // await initClickHouse(
+  //   parquetDir,
+  //   CLICKHOUSE_PATH,
+  //   zipName,
+  //   CLICKHOUSE_URL,
+  //   CLICKHOUSE_DB,
+  // );
+  // console.log("ClickHouse database ready.");
 
   // 6. Upload to S3
   // Extract date from zipName (Gesamtdatenexport_YYYYMMDD_xxxxx.x.x.zip)
