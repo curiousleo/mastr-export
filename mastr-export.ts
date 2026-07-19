@@ -362,7 +362,7 @@ env_auth = false
 access_key_id = ${Deno.env.get('AWS_ACCESS_KEY_ID')}
 secret_access_key = ${Deno.env.get('AWS_SECRET_ACCESS_KEY')}
 region = garage
-endpoint = http://localhost:3900`;
+endpoint = http://garage:3900`;
 
   const configPath = join(SCRATCH_DIR, "rclone.conf");
   await runner.writeText(configPath, rcloneConfig);
